@@ -1,0 +1,352 @@
+<Window x:Class="Enjaz.Views.LoginWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Enjaz.Views"
+        xmlns:vm="clr-namespace:Enjaz.ViewModels"
+        xmlns:helpers="clr-namespace:Enjaz.Helpers"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        mc:Ignorable="d"
+        Title="تسجيل الدخول - منظومة إنجاز الرقمية" Height="730" Width="430"
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        FontFamily="Segoe UI"
+        FlowDirection="RightToLeft"
+        Icon="/Assets/enjaz_3d_icon_transparent.png"
+        MouseDown="Window_MouseDown">
+
+    <Window.Resources>
+        <helpers:BooleanToVisibilityConverter x:Key="BoolToVisConverter"/>
+        <helpers:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVisConverter"/>
+        
+        <!-- UNIFIED DESIGN STYLES -->
+        <Style x:Key="WindowBackgroundStyle" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource WindowBackgroundBrush}"/>
+        </Style>
+
+        <Style x:Key="LoginCardStyle" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource SurfaceBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="16"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect BlurRadius="30" ShadowDepth="4" Color="Black" Opacity="0.05" />
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="LoginTitleText" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
+        </Style>
+
+        <Style x:Key="LoginSubtitleText" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}"/>
+        </Style>
+
+        <Style x:Key="InputLabelText" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
+        </Style>
+
+        <Style x:Key="LoginInputBorderStyle" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource InputBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="12"/>
+        </Style>
+
+        <Style x:Key="LoginTextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}">
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
+            <Setter Property="CaretBrush" Value="{DynamicResource SecondaryBrush}"/>
+        </Style>
+
+        <Style x:Key="LoginPasswordBoxStyle" TargetType="PasswordBox" BasedOn="{StaticResource MaterialDesignPasswordBox}">
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
+            <Setter Property="CaretBrush" Value="{DynamicResource SecondaryBrush}"/>
+        </Style>
+
+        <Style x:Key="PrimaryButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Background" Value="{DynamicResource SuccessBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="12"/>
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
+        
+        <Style x:Key="LoginCheckBoxStyle" TargetType="CheckBox" BasedOn="{StaticResource MaterialDesignCheckBox}">
+            <Setter Property="Foreground" Value="{DynamicResource SecondaryBrush}"/>
+        </Style>
+
+        <!-- Window Control Button Colors -->
+        <Style x:Key="WindowControlButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="46"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#454652"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontFamily" Value="Segoe MDL2 Assets"/>
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#1A000000"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsDarkMode}" Value="True">
+                    <Setter Property="Foreground" Value="#94A3B8"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="border" Background="{TemplateBinding Background}">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="border" Property="Background" Value="#1AFFFFFF"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Close Button (Red on hover) -->
+        <Style x:Key="CloseButtonStyle" TargetType="Button" BasedOn="{StaticResource WindowControlButtonStyle}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#E81123"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <materialDesign:DialogHost IsOpen="{Binding IsNotificationDialogOpen, Mode=TwoWay}"
+                               CloseOnClickAway="True"
+                               Identifier="LoginDialogHost"
+                               FlowDirection="RightToLeft">
+        <materialDesign:DialogHost.DialogContent>
+            <!-- Same Dialog Design -->
+            <Border Background="#1E293B" CornerRadius="16" Width="380" Padding="0" BorderBrush="#334155" BorderThickness="1">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    
+                    <Border Grid.Row="0" Background="#059669" Height="80" CornerRadius="16,16,0,0">
+                        <materialDesign:PackIcon Kind="{Binding NotificationIcon}" Foreground="White" Width="40" Height="40" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    
+                    <Border Grid.Row="1" Padding="20">
+                        <StackPanel>
+                            <TextBlock Text="{Binding NotificationTitle}" FontSize="18" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+                            <TextBlock Text="{Binding NotificationMessage}" FontSize="14" Foreground="#94A3B8" TextWrapping="Wrap" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    
+                    <Button Grid.Row="2" Content="موافق" Command="{Binding CloseNotificationCommand}" Margin="20" Background="#059669" Foreground="White" BorderThickness="0" Height="40" materialDesign:ButtonAssist.CornerRadius="8"/>
+                </Grid>
+            </Border>
+        </materialDesign:DialogHost.DialogContent>
+
+        <!-- Main Window Container (Floating Card) -->
+        <Border Style="{StaticResource LoginCardStyle}" Margin="20">
+            <Grid>
+                <!-- Window Controls (Floating Top) -->
+                <Border Height="40" VerticalAlignment="Top" Panel.ZIndex="100" Background="Transparent">
+                    <Grid>
+                        <!-- Controls -->
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" FlowDirection="LeftToRight">
+                            <Button Style="{StaticResource WindowControlButtonStyle}" Click="MinimizeButton_Click" Content="&#xE921;"/>
+                            <Button Style="{StaticResource CloseButtonStyle}" Click="CloseButton_Click" Content="&#xE8BB;" materialDesign:ButtonAssist.CornerRadius="0,16,0,0"/>
+                        </StackPanel>
+
+                        <!-- Theme Toggle -->
+                        <Button HorizontalAlignment="Right" Margin="0,0,10,0"
+                                Command="{Binding ToggleThemeCommand}"
+                                ToolTip="تبديل الوضع الليلي/الفاتح">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignFlatButton}">
+                                    <Setter Property="Foreground" Value="#059669"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsDarkMode}" Value="False">
+                                            <Setter Property="Foreground" Value="#059669"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                            <materialDesign:PackIcon Width="24" Height="24">
+                                <materialDesign:PackIcon.Style>
+                                    <Style TargetType="materialDesign:PackIcon">
+                                        <Setter Property="Kind" Value="ThemeLightDark"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsDarkMode}" Value="True">
+                                                <Setter Property="Kind" Value="Brightness7"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding IsDarkMode}" Value="False">
+                                                <Setter Property="Kind" Value="Brightness4"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </materialDesign:PackIcon.Style>
+                            </materialDesign:PackIcon>
+                        </Button>
+                    </Grid>
+                </Border>
+
+                <!-- Login Content directly filling the card -->
+                <Grid Margin="40,35,40,20">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0">
+                        <!-- Prominent Logo -->
+                        <Image Source="/Assets/enjaz_3d_icon_transparent.png" Height="140" Stretch="Uniform" Margin="0,0,0,16" RenderOptions.BitmapScalingMode="HighQuality"/>
+                        
+                        <!-- Headers -->
+                        <TextBlock Text="تسجيل الدخول" FontFamily="Custom/Manrope" Style="{StaticResource LoginTitleText}" FontSize="24" FontWeight="ExtraBold" HorizontalAlignment="Center" Margin="0,0,0,6"/>
+                        <TextBlock Text="يرجى ادخال بياناتك للدخول الى منظومة انجاز" Style="{StaticResource LoginSubtitleText}" FontSize="13" HorizontalAlignment="Center" Margin="0,0,0,22"/>
+
+                        <!-- Username Field -->
+                        <StackPanel Margin="0,0,0,16">
+                            <TextBlock Text="اسم المستخدم" Style="{StaticResource InputLabelText}" FontSize="13" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                            <Border Style="{StaticResource LoginInputBorderStyle}" Height="50">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <materialDesign:PackIcon Kind="PersonOutline" Width="20" Height="20" Foreground="#94A3B8" VerticalAlignment="Center" Margin="14,0,10,0"/>
+                                    <TextBox Grid.Column="1" 
+                                             Text="{Binding Username}" 
+                                             Style="{StaticResource LoginTextBoxStyle}" 
+                                             FontSize="15" Background="Transparent" BorderThickness="0" 
+                                             VerticalContentAlignment="Center" 
+                                             materialDesign:HintAssist.Hint="مثال: 102938"
+                                             materialDesign:TextFieldAssist.DecorationVisibility="Collapsed"
+                                             Margin="0,0,14,0"/>
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+
+                        <!-- Password Field -->
+                        <StackPanel Margin="0,0,0,20">
+                            <!-- Password Label & Reset link -->
+                            <Grid Margin="0,0,0,8">
+                                <TextBlock Text="كلمة المرور" Style="{StaticResource InputLabelText}" FontSize="13" FontWeight="SemiBold" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                <TextBlock Text="نسيت كلمة المرور؟" Foreground="#059669" FontSize="12" FontWeight="SemiBold" HorizontalAlignment="Right" VerticalAlignment="Center" Cursor="Hand"/>
+                            </Grid>
+                            <Border Style="{StaticResource LoginInputBorderStyle}" Height="50">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <materialDesign:PackIcon Kind="LockOutline" Width="20" Height="20" Foreground="#94A3B8" VerticalAlignment="Center" Margin="14,0,10,0"/>
+                                    
+                                    <!-- MVP Password Fields -->
+                                    <Grid Grid.Column="1">
+                                        <PasswordBox x:Name="HiddenPasswordBox"
+                                                     Style="{StaticResource LoginPasswordBoxStyle}"
+                                                     helpers:PasswordBoxHelper.Attach="True" 
+                                                     helpers:PasswordBoxHelper.Password="{Binding Password, Mode=TwoWay}" 
+                                                     Background="Transparent" BorderThickness="0" FontSize="15" 
+                                                     VerticalContentAlignment="Center"
+                                                     materialDesign:HintAssist.Hint="••••••••"
+                                                     Visibility="{Binding IsPasswordVisible, Converter={StaticResource InverseBoolToVisConverter}}"
+                                                     Margin="0,0,14,0"/>
+                                        <TextBox x:Name="VisiblePasswordBox"
+                                                 Text="{Binding Password, UpdateSourceTrigger=PropertyChanged}"
+                                                 Style="{StaticResource LoginTextBoxStyle}"
+                                                 Background="Transparent" BorderThickness="0" FontSize="15" 
+                                                 VerticalContentAlignment="Center"
+                                                 materialDesign:HintAssist.Hint="••••••••"
+                                                 materialDesign:TextFieldAssist.DecorationVisibility="Collapsed"
+                                                 Visibility="{Binding IsPasswordVisible, Converter={StaticResource BoolToVisConverter}}"
+                                                 Margin="0,0,14,0"/>
+                                    </Grid>
+
+                                    <!-- Visibility Toggle -->
+                                    <Button Grid.Column="2" 
+                                            Command="{Binding TogglePasswordVisibilityCommand}"
+                                            Style="{StaticResource MaterialDesignFlatButton}"
+                                            Width="40" Height="40" Padding="0" Margin="4,0"
+                                            VerticalAlignment="Center">
+                                        <materialDesign:PackIcon Width="20" Height="20" Foreground="#94A3B8">
+                                            <materialDesign:PackIcon.Style>
+                                                <Style TargetType="materialDesign:PackIcon">
+                                                    <Setter Property="Kind" Value="EyeOutline"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsPasswordVisible}" Value="True">
+                                                            <Setter Property="Kind" Value="EyeOffOutline"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </materialDesign:PackIcon.Style>
+                                        </materialDesign:PackIcon>
+                                    </Button>
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+
+                        <!-- Remember Me Toggle -->
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,0,0,16">
+                            <CheckBox IsChecked="{Binding RememberMe}" Style="{StaticResource LoginCheckBoxStyle}" VerticalAlignment="Center"/>
+                            <TextBlock Text="تذكرني على هذا الجهاز" Style="{StaticResource LoginSubtitleText}" FontSize="13" VerticalAlignment="Center" Margin="6,0,0,0"/>
+                        </StackPanel>
+
+                        <!-- Login Button -->
+                        <Button Command="{Binding LoginCommand}" 
+                                Style="{StaticResource PrimaryButtonStyle}" 
+                                Height="52" 
+                                IsDefault="True"
+                                Cursor="Hand">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="تسجيل الدخول" FontSize="15" FontWeight="Bold" Margin="0,0,10,0"/>
+                                <materialDesign:PackIcon Kind="LoginVariant" Width="20" Height="20"/>
+                            </StackPanel>
+                        </Button>
+
+                        <!-- تصميم و تنفيذ -->
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,14,0,0">
+                            <TextBlock FontSize="12" FontWeight="SemiBold" 
+                                       VerticalAlignment="Center" FontFamily="Manrope">
+                                <Run Text="تصميم و تنفيذ" Foreground="#64748B"/>
+                                <Run Text=" م. ادريس فتح الله الهرى" Foreground="#059669" FontWeight="Bold"/>
+                            </TextBlock>
+                        </StackPanel>
+                        
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </Border>
+    </materialDesign:DialogHost>
+</Window>

@@ -1,0 +1,378 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+                    xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
+                    xmlns:helpers="clr-namespace:Enjaz.Helpers"
+                    xmlns:vm="clr-namespace:Enjaz.ViewModels">
+
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="/Themes/Styles.xaml"/>
+        <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesign3.Defaults.xaml"/>
+    </ResourceDictionary.MergedDictionaries>
+
+    <!-- Converters -->
+    <helpers:RoleToVisibilityConverter x:Key="RoleToVisibilityConverter"/>
+    <helpers:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVisConverter"/>
+    <helpers:MultiEqualityConverter x:Key="MultiEqualityConverter"/>
+    <helpers:EqualityConverter x:Key="EqualityConverter"/>
+    <BooleanToVisibilityConverter x:Key="BoolToVisConverter"/>
+    <helpers:InverseBooleanConverter x:Key="InverseBoolConverter"/>
+    <helpers:FirstLetterConverter x:Key="FirstLetterConverter"/>
+
+    <Style x:Key="SidebarTabStyle" TargetType="Button">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}"/>
+        <Setter Property="FontSize" Value="{DynamicResource FontSizeNormal}"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Height" Value="50"/>
+        <Setter Property="Padding" Value="15,0"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="HorizontalContentAlignment" Value="Left"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="border" 
+                            Background="{TemplateBinding Background}" 
+                            CornerRadius="0"
+                            Padding="{TemplateBinding Padding}">
+                        <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" 
+                                         VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="{DynamicResource PrimaryBrush}"/>
+                            <Setter TargetName="border" Property="Opacity" Value="0.1"/>
+                            <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
+                        </Trigger>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Value="True">
+                                    <Condition.Binding>
+                                        <MultiBinding Converter="{StaticResource MultiEqualityConverter}">
+                                            <Binding Path="SettingsVM.SelectedTab"/>
+                                            <Binding RelativeSource="{RelativeSource Self}" Path="CommandParameter"/>
+                                        </MultiBinding>
+                                    </Condition.Binding>
+                                </Condition>
+                            </MultiDataTrigger.Conditions>
+                            <Setter TargetName="border" Property="Background" Value="{DynamicResource PrimaryBrush}"/>
+                            <Setter Property="Foreground" Value="White"/>
+                        </MultiDataTrigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style x:Key="QuickActionCardStyle" TargetType="Button">
+        <Setter Property="Background" Value="{DynamicResource SurfaceBrush}"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Margin" Value="0,0,15,0"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="border" 
+                            Background="{TemplateBinding Background}" 
+                            CornerRadius="0"
+                            Padding="15">
+                        <Border.Effect>
+                            <DropShadowEffect ShadowDepth="0" BlurRadius="0" Opacity="0" Color="Transparent"/>
+                        </Border.Effect>
+                        <Grid>
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Grid>
+                    </Border>
+                        <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="border" Property="RenderTransform">
+                                <Setter.Value>
+                                    <TranslateTransform Y="-2"/>
+                                </Setter.Value>
+                            </Setter>
+                            <Setter TargetName="border" Property="Effect">
+                                <Setter.Value>
+                                    <DropShadowEffect ShadowDepth="0" BlurRadius="0" Opacity="0" Color="Transparent"/>
+                                </Setter.Value>
+                            </Setter>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+
+    <Style x:Key="FormComboBoxStyle" TargetType="ComboBox" BasedOn="{StaticResource MaterialDesignOutlinedComboBox}">
+        <Setter Property="FontSize" Value="{DynamicResource FontSizeNormal}"/>
+        <Setter Property="Padding" Value="12,8"/>
+        <Setter Property="Height" Value="40"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="Background" Value="{DynamicResource InputBackgroundBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource InputBorderBrush}"/>
+        <Setter Property="materialDesign:TextFieldAssist.UnderlineBrush" Value="{DynamicResource PrimaryBrush}"/>
+        <Setter Property="materialDesign:TextFieldAssist.HasOutlinedTextField" Value="True"/>
+        <Setter Property="materialDesign:ComboBoxAssist.ShowSelectedItem" Value="True"/>
+    </Style>
+
+    <!-- DatePicker القديم تم استبداله بـ controls:CustomDatePicker -->
+    
+    <Style TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
+        <Setter Property="FontSize" Value="{DynamicResource FontSizeNormal}"/>
+    </Style>
+
+
+    <!-- أنماط جدول البيانات -->
+    <Style TargetType="DataGrid">
+        <Setter Property="Background" Value="{DynamicResource SurfaceBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="GridLinesVisibility" Value="Horizontal"/>
+        <Setter Property="HorizontalGridLinesBrush" Value="{DynamicResource BorderBrush}"/>
+        <Setter Property="RowBackground" Value="{DynamicResource SurfaceBrush}"/>
+        <Setter Property="AlternatingRowBackground" Value="{DynamicResource DataGridAltRowBrush}"/>
+        <Setter Property="HeadersVisibility" Value="Column"/>
+        <Setter Property="SelectionMode" Value="Single"/>
+        <Setter Property="SelectionUnit" Value="FullRow"/>
+        <Setter Property="AutoGenerateColumns" Value="False"/>
+        <Setter Property="CanUserAddRows" Value="False"/>
+        <Setter Property="CanUserDeleteRows" Value="False"/>
+        <Setter Property="IsReadOnly" Value="True"/>
+    </Style>
+
+    <Style x:Key="DataGridTextWrappingStyle" TargetType="TextBlock">
+        <Setter Property="TextWrapping" Value="Wrap"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="Padding" Value="5,8"/>
+    </Style>
+
+    <Style x:Key="CenterAlignmentStyle" TargetType="TextBlock">
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="TextAlignment" Value="Center"/>
+        <Setter Property="FontSize" Value="13"/>
+    </Style>
+
+    <Style x:Key="RightAlignmentStyle" TargetType="TextBlock">
+        <Setter Property="HorizontalAlignment" Value="Right"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="Margin" Value="0,0,10,0"/>
+    </Style>
+
+    <Style TargetType="DataGridColumnHeader">
+        <Setter Property="Background" Value="{DynamicResource DataGridHeaderBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Padding" Value="12,10"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+        <Setter Property="BorderThickness" Value="0,0,0,1"/>
+    </Style>
+
+    <Style TargetType="DataGridCell">
+        <Setter Property="Padding" Value="12,8"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="BorderThickness" Value="0"/>
+
+        <Style.Triggers>
+            <Trigger Property="IsSelected" Value="True">
+                <Setter Property="Background" Value="{DynamicResource SelectionBrush}"/>
+                <Setter Property="Foreground" Value="{DynamicResource SelectionTextBrush}"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style TargetType="DataGridRow">
+        <Style.Triggers>
+            <Trigger Property="IsSelected" Value="True">
+                <Setter Property="Background" Value="{DynamicResource SelectionBrush}"/>
+            </Trigger>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{DynamicResource DataGridAltRowBrush}"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- Dashboard Widget Templates -->
+    <DataTemplate DataType="{x:Type vm:PieWidgetViewModel}">
+        <Border Style="{DynamicResource DashboardCardStyle}" Height="350" Margin="10">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <TextBlock Text="{Binding Title}" FontSize="18" FontWeight="Bold" Margin="0,0,0,15" HorizontalAlignment="Center" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                <lvc:PieChart Grid.Row="1" Series="{Binding Series}" LegendLocation="Right" InnerRadius="40">
+                        <lvc:PieChart.ChartLegend>
+                        <lvc:DefaultLegend BulletSize="15" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                    </lvc:PieChart.ChartLegend>
+                </lvc:PieChart>
+            </Grid>
+        </Border>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vm:ColumnWidgetViewModel}">
+        <Border Style="{DynamicResource DashboardCardStyle}" Height="350" Margin="10">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <TextBlock Text="{Binding Title}" FontSize="18" FontWeight="Bold" Margin="0,0,0,15" HorizontalAlignment="Center" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                <lvc:CartesianChart Grid.Row="1" Series="{Binding Series}" LegendLocation="None">
+                    <lvc:CartesianChart.AxisX>
+                        <lvc:Axis Labels="{Binding Labels}" Foreground="{DynamicResource SecondaryTextBrush}">
+                            <lvc:Axis.Separator>
+                                <lvc:Separator Step="1" StrokeThickness="0"/>
+                            </lvc:Axis.Separator>
+                        </lvc:Axis>
+                    </lvc:CartesianChart.AxisX>
+                    <lvc:CartesianChart.AxisY>
+                        <lvc:Axis LabelFormatter="{Binding Formatter}" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                    </lvc:CartesianChart.AxisY>
+                </lvc:CartesianChart>
+            </Grid>
+        </Border>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vm:RowWidgetViewModel}">
+        <Border Style="{DynamicResource DashboardCardStyle}" Height="350" Margin="10">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <TextBlock Text="{Binding Title}" FontSize="18" FontWeight="Bold" Margin="0,0,0,15" HorizontalAlignment="Center" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                <lvc:CartesianChart Grid.Row="1" Series="{Binding Series}" LegendLocation="None">
+                    <lvc:CartesianChart.AxisY>
+                        <lvc:Axis Labels="{Binding Labels}" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                    </lvc:CartesianChart.AxisY>
+                    <lvc:CartesianChart.AxisX>
+                        <lvc:Axis LabelFormatter="{Binding Formatter}" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                    </lvc:CartesianChart.AxisX>
+                </lvc:CartesianChart>
+            </Grid>
+        </Border>
+    </DataTemplate>
+
+    <!-- Notification Dialog Template -->
+    <DataTemplate x:Key="UnifiedNotificationTemplate">
+        <Border Background="{DynamicResource SurfaceBrush}" 
+                CornerRadius="16" 
+                Width="420" 
+                Padding="0"
+                BorderBrush="{DynamicResource BorderBrush}"
+                BorderThickness="1">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="5" ShadowDepth="0" Opacity="0.1" Color="Black"/>
+            </Border.Effect>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Top Accent or Image Section -->
+                <Border Grid.Row="0" Height="10" CornerRadius="16,16,0,0" Background="{Binding NotificationColor}"/>
+                
+                <StackPanel Grid.Row="1" Margin="30,25,30,20">
+                    <!-- Image Support (e.g. Welcome Logo) -->
+                    <Border x:Name="ImageBorder" Visibility="Collapsed" Margin="0,10,0,25" HorizontalAlignment="Center">
+                        <Image Source="{Binding NotificationImagePath}" Width="140" Height="140" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality"/>
+                    </Border>
+
+                    <!-- Icon -->
+                    <materialDesign:PackIcon x:Name="NotificationIconElement"
+                                           Kind="{Binding NotificationIcon}" 
+                                           Width="42" Height="42" 
+                                           Foreground="{Binding NotificationColor}" 
+                                           HorizontalAlignment="Center" Margin="0,0,0,15"/>
+
+                    <TextBlock Text="{Binding NotificationTitle}" 
+                             FontSize="20" FontWeight="Bold" 
+                             HorizontalAlignment="Center" 
+                             TextAlignment="Center"
+                             Foreground="{DynamicResource PrimaryTextBrush}" 
+                             Margin="0,0,0,12"/>
+
+                    <TextBlock Text="{Binding NotificationMessage}" 
+                             FontSize="15" 
+                             HorizontalAlignment="Center" 
+                             TextAlignment="Center"
+                             TextWrapping="Wrap"
+                             LineHeight="22"
+                             Foreground="{DynamicResource SecondaryTextBrush}"/>
+                </StackPanel>
+
+                <!-- Actions -->
+                <Border Grid.Row="2" Padding="25,0,25,25">
+                    <Grid>
+                        <!-- Standard Notification Mode -->
+                        <Button x:Name="OkButton"
+                                IsDefault="True"
+                                Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}"
+                                Style="{StaticResource ActionButtonStyle}"
+                                Background="{Binding NotificationColor}"
+                                Foreground="{Binding NotificationForeground}"
+                                Height="45"
+                                HorizontalAlignment="Stretch"
+                                Cursor="Hand"
+                                BorderThickness="0"
+                                Visibility="Visible">
+                            <TextBlock Text="موافق" FontWeight="Bold" FontSize="15" Foreground="{Binding NotificationForeground}" />
+                        </Button>
+
+                        <!-- Confirmation Mode -->
+                        <Grid x:Name="ConfirmButtons" Visibility="Collapsed">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="15"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <Button Grid.Column="2"
+                                    IsDefault="True"
+                                    Command="{Binding DataContext.ConfirmCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                    Style="{StaticResource ActionButtonStyle}"
+                                    Background="{Binding NotificationColor}"
+                                    Foreground="{Binding NotificationForeground}"
+                                    Height="45"
+                                    Cursor="Hand"
+                                    BorderThickness="0">
+                                <TextBlock Text="نعم" FontWeight="Bold" FontSize="15" Foreground="{Binding NotificationForeground}" />
+                            </Button>
+
+                            <Button Grid.Column="0"
+                                    IsCancel="True"
+                                    Command="{Binding DataContext.CancelCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                    Style="{StaticResource ActionButtonStyle}"
+                                    Background="{DynamicResource BorderBrush}"
+                                    Foreground="{DynamicResource PrimaryTextBrush}"
+                                    Height="45"
+                                    Cursor="Hand"
+                                    BorderThickness="0">
+                                <TextBlock Text="لا" FontWeight="Bold" FontSize="15" Foreground="{DynamicResource PrimaryTextBrush}" />
+                            </Button>
+                        </Grid>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Border>
+        <DataTemplate.Triggers>
+            <DataTrigger Binding="{Binding IsNotificationImage}" Value="True">
+                <Setter TargetName="ImageBorder" Property="Visibility" Value="Visible"/>
+                <Setter TargetName="NotificationIconElement" Property="Visibility" Value="Collapsed"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding IsConfirmMode}" Value="True">
+                <Setter TargetName="OkButton" Property="Visibility" Value="Collapsed"/>
+                <Setter TargetName="ConfirmButtons" Property="Visibility" Value="Visible"/>
+            </DataTrigger>
+        </DataTemplate.Triggers>
+    </DataTemplate>
+
+</ResourceDictionary>

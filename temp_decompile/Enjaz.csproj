@@ -1,0 +1,109 @@
+<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+  <PropertyGroup>
+    <AssemblyName>Enjaz</AssemblyName>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <OutputType>WinExe</OutputType>
+    <UseWPF>True</UseWPF>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup>
+    <LangVersion>12.0</LangVersion>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>app.ico</ApplicationIcon>
+    <RootNamespace />
+  </PropertyGroup>
+  <ItemGroup>
+    <None Remove="themes\styles.baml" />
+    <None Remove="themes\lighttheme.baml" />
+    <None Remove="views\usersview.baml" />
+    <None Remove="views\samplereceptionsview.baml" />
+    <None Remove="controls\customdatepicker.baml" />
+    <None Remove="views\receptionsearchwindow.baml" />
+    <None Remove="views\aboutview.baml" />
+    <None Remove="views\mainwindow.baml" />
+    <None Remove="assets\new_logo_3d_cropped.png" />
+    <None Remove="views\certificateslistview.baml" />
+    <None Remove="views\dashboardwindow.baml" />
+    <None Remove="assets\designer_logo.png" />
+    <None Remove="views\certificateformview.baml" />
+    <None Remove="views\helpview.baml" />
+    <None Remove="views\lockscreenwindow.baml" />
+    <None Remove="views\settingsview.baml" />
+    <None Remove="views\dashboardview.baml" />
+    <None Remove="themes\windows10theme.baml" />
+    <None Remove="themes\darktheme.baml" />
+    <None Remove="assets\enjaz_3d_icon_transparent.png" />
+    <None Remove="themes\mainuiresources.baml" />
+    <None Remove="views\reportsview.baml" />
+    <None Remove="views\errordialogwindow.baml" />
+    <None Remove="views\loginwindow.baml" />
+    <None Remove="app.baml" />
+    <None Remove="views\adminproceduresview.baml" />
+    <EmbeddedResource Include="themes\styles.baml" LogicalName="themes/styles.baml" />
+    <EmbeddedResource Include="themes\lighttheme.baml" LogicalName="themes/lighttheme.baml" />
+    <EmbeddedResource Include="views\usersview.baml" LogicalName="views/usersview.baml" />
+    <EmbeddedResource Include="views\samplereceptionsview.baml" LogicalName="views/samplereceptionsview.baml" />
+    <EmbeddedResource Include="controls\customdatepicker.baml" LogicalName="controls/customdatepicker.baml" />
+    <EmbeddedResource Include="views\receptionsearchwindow.baml" LogicalName="views/receptionsearchwindow.baml" />
+    <EmbeddedResource Include="views\aboutview.baml" LogicalName="views/aboutview.baml" />
+    <EmbeddedResource Include="views\mainwindow.baml" LogicalName="views/mainwindow.baml" />
+    <EmbeddedResource Include="assets\new_logo_3d_cropped.png" LogicalName="assets/new_logo_3d_cropped.png" />
+    <EmbeddedResource Include="views\certificateslistview.baml" LogicalName="views/certificateslistview.baml" />
+    <EmbeddedResource Include="views\dashboardwindow.baml" LogicalName="views/dashboardwindow.baml" />
+    <EmbeddedResource Include="assets\designer_logo.png" LogicalName="assets/designer_logo.png" />
+    <EmbeddedResource Include="views\certificateformview.baml" LogicalName="views/certificateformview.baml" />
+    <EmbeddedResource Include="views\helpview.baml" LogicalName="views/helpview.baml" />
+    <EmbeddedResource Include="views\lockscreenwindow.baml" LogicalName="views/lockscreenwindow.baml" />
+    <EmbeddedResource Include="views\settingsview.baml" LogicalName="views/settingsview.baml" />
+    <EmbeddedResource Include="views\dashboardview.baml" LogicalName="views/dashboardview.baml" />
+    <EmbeddedResource Include="themes\windows10theme.baml" LogicalName="themes/windows10theme.baml" />
+    <EmbeddedResource Include="themes\darktheme.baml" LogicalName="themes/darktheme.baml" />
+    <EmbeddedResource Include="assets\enjaz_3d_icon_transparent.png" LogicalName="assets/enjaz_3d_icon_transparent.png" />
+    <EmbeddedResource Include="themes\mainuiresources.baml" LogicalName="themes/mainuiresources.baml" />
+    <EmbeddedResource Include="views\reportsview.baml" LogicalName="views/reportsview.baml" />
+    <EmbeddedResource Include="views\errordialogwindow.baml" LogicalName="views/errordialogwindow.baml" />
+    <EmbeddedResource Include="views\loginwindow.baml" LogicalName="views/loginwindow.baml" />
+    <EmbeddedResource Include="app.baml" LogicalName="app.baml" />
+    <EmbeddedResource Include="views\adminproceduresview.baml" LogicalName="views/adminproceduresview.baml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.Extensions.DependencyInjection.Abstractions">
+      <HintPath>../bin/Debug/net8.0-windows/Microsoft.Extensions.DependencyInjection.Abstractions.dll</HintPath>
+    </Reference>
+    <Reference Include="MaterialDesignThemes.Wpf">
+      <HintPath>../bin/Debug/net8.0-windows/MaterialDesignThemes.Wpf.dll</HintPath>
+    </Reference>
+    <Reference Include="LiveCharts">
+      <HintPath>../bin/Debug/net8.0-windows/LiveCharts.dll</HintPath>
+    </Reference>
+    <Reference Include="ClosedXML">
+      <HintPath>../bin/Debug/net8.0-windows/ClosedXML.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Data.Sqlite">
+      <HintPath>../bin/Debug/net8.0-windows/Microsoft.Data.Sqlite.dll</HintPath>
+    </Reference>
+    <Reference Include="LiveCharts.Wpf">
+      <HintPath>../bin/Debug/net8.0-windows/LiveCharts.Wpf.dll</HintPath>
+    </Reference>
+    <Reference Include="QuestPDF">
+      <HintPath>../bin/Debug/net8.0-windows/QuestPDF.dll</HintPath>
+    </Reference>
+    <Reference Include="zxing">
+      <HintPath>../bin/Debug/net8.0-windows/zxing.dll</HintPath>
+    </Reference>
+    <Reference Include="QRCoder">
+      <HintPath>../bin/Debug/net8.0-windows/QRCoder.dll</HintPath>
+    </Reference>
+    <Reference Include="MaterialDesignColors">
+      <HintPath>../bin/Debug/net8.0-windows/MaterialDesignColors.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.DependencyInjection">
+      <HintPath>../bin/Debug/net8.0-windows/Microsoft.Extensions.DependencyInjection.dll</HintPath>
+    </Reference>
+    <Reference Include="ZXing.Windows.Compatibility">
+      <HintPath>../bin/Debug/net8.0-windows/ZXing.Windows.Compatibility.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+</Project>

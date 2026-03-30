@@ -1,0 +1,79 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    
+    <!-- ═══ Enjaz Dark Theme Color Palette ═══ -->
+    <Color x:Key="PrimaryColor">#059669</Color> <!-- Emerald Green as Primary in Dark Mode -->
+    <Color x:Key="PrimaryLightColor">#10B981</Color> 
+    <Color x:Key="SecondaryColor">#3B82F6</Color> <!-- Blue as secondary -->
+
+    <!-- Backgrounds -->
+    <Color x:Key="WindowBackgroundColor">#0B1120</Color> <!-- Very Dark Blue -->
+    <Color x:Key="SurfaceColor">#1E293B</Color> <!-- Slate 800 -->
+    <Color x:Key="SidebarColor">#0B1120</Color>
+    <Color x:Key="SidebarHoverColor">#1E293B</Color>
+    
+    <!-- Text -->
+    <Color x:Key="PrimaryTextColor">#F8FAFC</Color> <!-- Slate 50 -->
+    <Color x:Key="SecondaryTextColor">#94A3B8</Color> <!-- Slate 400 -->
+    <Color x:Key="SidebarTextColor">#F8FAFC</Color> <!-- Slate 50 -->
+    <Color x:Key="SidebarMutedColor">#94A3B8</Color>
+    
+    <!-- UI Elements -->
+    <Color x:Key="BorderColor">#334155</Color> <!-- Slate 700 -->
+    <Color x:Key="DividerColor">#334155</Color>
+    <Color x:Key="InputBackgroundColor">#0F172A</Color> <!-- Slate 900 -->
+    <Color x:Key="InputBorderColor">#334155</Color>
+    <Color x:Key="SelectionColor">#1e3a8a</Color> <!-- Darker blue -->
+
+    <!-- Actions -->
+    <Color x:Key="SuccessColor">#059669</Color>
+    <Color x:Key="WarningColor">#F59E0B</Color>
+    <Color x:Key="DangerColor">#EF4444</Color>
+
+    <!-- ═══ Brushes ═══ -->
+    <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource PrimaryColor}"/>
+    <SolidColorBrush x:Key="PrimaryActionBrush" Color="{StaticResource PrimaryColor}"/>
+    <SolidColorBrush x:Key="PrimaryLightBrush" Color="{StaticResource PrimaryLightColor}"/>
+    <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource SecondaryColor}"/>
+    
+    <SolidColorBrush x:Key="WindowBackgroundBrush" Color="{StaticResource WindowBackgroundColor}"/>
+    <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource SurfaceColor}"/>
+    <SolidColorBrush x:Key="SidebarBrush" Color="{StaticResource SidebarColor}"/>
+    <SolidColorBrush x:Key="SidebarHoverBrush" Color="{StaticResource SidebarHoverColor}"/>
+    
+    <SolidColorBrush x:Key="PrimaryTextBrush" Color="{StaticResource PrimaryTextColor}"/>
+    <SolidColorBrush x:Key="SecondaryTextBrush" Color="{StaticResource SecondaryTextColor}"/>
+    <SolidColorBrush x:Key="SidebarTextBrush" Color="{StaticResource SidebarTextColor}"/>
+    <SolidColorBrush x:Key="SidebarMutedBrush" Color="{StaticResource SidebarMutedColor}"/>
+    
+    <SolidColorBrush x:Key="BorderBrush" Color="{StaticResource BorderColor}"/>
+    <SolidColorBrush x:Key="DividerBrush" Color="{StaticResource DividerColor}"/>
+    
+    <SolidColorBrush x:Key="InputBackgroundBrush" Color="{StaticResource InputBackgroundColor}"/>
+    <SolidColorBrush x:Key="InputBorderBrush" Color="{StaticResource InputBorderColor}"/>
+    <SolidColorBrush x:Key="InputFocusBrush" Color="{StaticResource PrimaryColor}"/>
+    
+    <SolidColorBrush x:Key="SuccessBrush" Color="{StaticResource SuccessColor}"/>
+    <SolidColorBrush x:Key="WarningBrush" Color="{StaticResource WarningColor}"/>
+    <SolidColorBrush x:Key="DangerBrush" Color="{StaticResource DangerColor}"/>
+    
+    <SolidColorBrush x:Key="SelectionBrush" Color="{StaticResource SelectionColor}"/>
+    
+    <!-- Button Brushes -->
+    <SolidColorBrush x:Key="SecondaryButtonBrush" Color="#3B82F6"/> <!-- Blue -->
+    <SolidColorBrush x:Key="TertiaryButtonBrush" Color="#F59E0B"/> <!-- Amber -->
+    
+    <!-- Sidebar Selected -->
+    <SolidColorBrush x:Key="SidebarSelectedBackgroundBrush" Color="#334155"/>
+    <SolidColorBrush x:Key="SidebarSelectedForegroundBrush" Color="#FFFFFF"/>
+
+    <!-- DataGrid -->
+    <SolidColorBrush x:Key="DataGridHeaderBrush" Color="#0F172A"/>
+    <!-- Glassmorphism Brushes -->
+    <SolidColorBrush x:Key="GlassBackgroundBrush" Color="#1AFFFFFF"/>
+    <SolidColorBrush x:Key="GlassBorderBrush" Color="#33FFFFFF"/>
+    <SolidColorBrush x:Key="GlassInputBackgroundBrush" Color="#0DFFFFFF"/>
+    <SolidColorBrush x:Key="GlassTextBrush" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="GlassMutedTextBrush" Color="#88FFFFFF"/>
+
+</ResourceDictionary>

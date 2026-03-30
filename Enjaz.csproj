@@ -1,0 +1,52 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <ApplicationIcon>Assets\enjaz_3d_icon_transparent.ico</ApplicationIcon>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
+    <!-- Suppress compatibility warnings for LiveCharts (Framework lib) & CA1416 (Platform specific) -->
+    <NoWarn>$(NoWarn);NU1701;CA1416</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Enjaz.Tests\**" />
+    <None Remove="Enjaz.Tests\**" />
+    <Compile Remove="testsprite_tests\**" />
+    <Compile Remove="temp_decompile\**" />
+    <Compile Remove="PerformanceTests\**" />
+    <Compile Remove="QA_Simulation\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ClosedXML" Version="0.104.2" />
+    <PackageReference Include="LiveCharts.Wpf" Version="0.9.7">
+        <NoWarn>NU1701</NoWarn>
+    </PackageReference>
+    <PackageReference Include="MaterialDesignThemes" Version="5.3.0" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="8.0.0" />
+    <PackageReference Include="QRCoder" Version="1.6.0" />
+    <PackageReference Include="QuestPDF" Version="2024.12.1" />
+    <PackageReference Include="System.Drawing.Common" Version="8.0.0" />
+    <PackageReference Include="ZXing.Net" Version="0.16.9" />
+    <PackageReference Include="ZXing.Net.Bindings.Windows.Compatibility" Version="0.16.12" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\designer_logo.png" />
+    <Resource Include="Assets\enjaz_3d_icon_transparent.png" />
+    <Resource Include="Assets\new_logo_3d_cropped.png" />
+    <None Update="Assets\logo_center.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Assets\logo_libya.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

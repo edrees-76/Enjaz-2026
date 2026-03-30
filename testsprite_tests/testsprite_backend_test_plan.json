@@ -1,0 +1,52 @@
+[
+  {
+    "id": "TC001",
+    "title": "user login with valid credentials",
+    "description": "Test the user login API endpoint with valid username and password to ensure successful authentication and correct role-based access control."
+  },
+  {
+    "id": "TC002",
+    "title": "create new certificate",
+    "description": "Test the certificate creation API endpoint to verify that a new certificate can be created with valid data and is persisted correctly in the SQLite database."
+  },
+  {
+    "id": "TC003",
+    "title": "edit existing certificate",
+    "description": "Test the certificate editing API endpoint to ensure that existing certificate details can be updated and changes are saved in the database."
+  },
+  {
+    "id": "TC004",
+    "title": "delete certificate",
+    "description": "Test the certificate deletion API endpoint to confirm that a certificate can be deleted and is removed from the database."
+  },
+  {
+    "id": "TC005",
+    "title": "search certificates",
+    "description": "Test the certificate search API endpoint to verify that certificates can be searched based on various criteria and correct results are returned."
+  },
+  {
+    "id": "TC006",
+    "title": "validate certificate",
+    "description": "Test the certificate validation API endpoint to ensure that certificates are validated correctly according to business rules."
+  },
+  {
+    "id": "TC007",
+    "title": "view reporting dashboard",
+    "description": "Test the reporting dashboard API endpoint to verify that all 6 interactive charts display accurate data."
+  },
+  {
+    "id": "TC008",
+    "title": "export reports to pdf and excel",
+    "description": "Test the report export API endpoints to ensure reports can be exported successfully to PDF and Excel formats with correct content."
+  },
+  {
+    "id": "TC009",
+    "title": "update application settings",
+    "description": "Test the settings update API endpoint to verify that changes to theme, font scaling, and database backup settings are applied and persisted correctly."
+  },
+  {
+    "id": "TC010",
+    "title": "database backup functionality",
+    "description": "Test the database backup API endpoint to confirm that the database backup process completes successfully without data loss."
+  }
+]

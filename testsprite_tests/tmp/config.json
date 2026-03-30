@@ -1,0 +1,19 @@
+{
+  "status": "commited",
+  "type": "backend",
+  "scope": "codebase",
+  "localEndpoint": "http://localhost:8080",
+  "backendAuthType": "basic token",
+  "backendUsername": "admin",
+  "backendPassword": "12345",
+  "executionArgs": {
+    "projectName": "منظومة شهادات جديدة 2026 جديدة",
+    "projectPath": "d:\\منظومة شهادات جديدة 2026 جديدة",
+    "testIds": [],
+    "additionalInstruction": "Generate C# NUnit/XUnit tests for the CertificateService. Focus on CRUD operations.",
+    "envs": {
+      "API_KEY": "sk-user-IUDahKYFjj2aGHHMZfreMIq9XhcyJ6csA8epd74o4Z97UVUJvr19S6wfe0hLfrUbsmgakEiPb2ktQz2T0JE_CXXtJEXk-RBidRkPfVnM-Qo2hSEDlRQdLi2mfMg9_xzO6G0"
+    }
+  },
+  "proxy": "http://3578c4db-5847-4fb4-8e4b-52fa1926f17e:EPnD06iqmf1ACSK6mBNpFHjOHDNv24N3@tun.testsprite.com:8080"
+}

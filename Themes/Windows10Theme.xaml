@@ -1,0 +1,91 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    
+    <!-- ═══ Enjaz Modern Enterprise Color Palette ═══ -->
+    <Color x:Key="PrimaryColor">#0B193C</Color> <!-- Navy Blue -->
+    <Color x:Key="PrimaryLightColor">#222E52</Color> 
+    <Color x:Key="PrimaryDarkColor">#0b1a3d</Color>
+    <Color x:Key="AccentColor">#0B193C</Color>
+    
+    <Color x:Key="SecondaryColor">#006c47</Color> <!-- Emerald Green -->
+    <Color x:Key="SecondaryLightColor">#8af5be</Color>
+    
+    <!-- ═══ Background Colors (Light Theme) ═══ -->
+    <Color x:Key="WindowBackgroundColor">#f7fafc</Color> <!-- App Background -->
+    <Color x:Key="SurfaceColor">#ffffff</Color> <!-- Cards / Dialogs -->
+    <Color x:Key="SidebarColor">#ffffff</Color> <!-- Or Slate 50: #f8fafc -->
+    <Color x:Key="SidebarHoverColor">#e5e9eb</Color>
+    
+    <!-- ═══ Text Colors ═══ -->
+    <Color x:Key="PrimaryTextColor">#181c1e</Color> <!-- Almost Black -->
+    <Color x:Key="SecondaryTextColor">#454652</Color> <!-- Muted Gray -->
+    <Color x:Key="SidebarTextColor">#454652</Color>
+    
+    <!-- ═══ UI Element Colors ═══ -->
+    <Color x:Key="BorderColor">#e0e3e5</Color> <!-- Surface Variant -->
+    <Color x:Key="InputBackgroundColor">#f1f4f6</Color> <!-- Surface Container Low -->
+    <Color x:Key="InputBorderColor">#e0e3e5</Color>
+    
+    <!-- ═══ Action Colors ═══ -->
+    <Color x:Key="SuccessColor">#006c47</Color> <!-- Emerald -->
+    <Color x:Key="WarningColor">#F59E0B</Color> <!-- Amber -->
+    <Color x:Key="DangerColor">#ba1a1a</Color> <!-- Red Error -->
+    
+    <!-- ═══ Brushes ═══ -->
+    <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource PrimaryColor}"/>
+    <SolidColorBrush x:Key="PrimaryLightBrush" Color="{StaticResource PrimaryLightColor}"/>
+    <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}"/>
+    <SolidColorBrush x:Key="SecondaryButtonBrush" Color="{StaticResource SecondaryColor}"/>
+    
+    <SolidColorBrush x:Key="WindowBackgroundBrush" Color="{StaticResource WindowBackgroundColor}"/>
+    <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource SurfaceColor}"/>
+    <SolidColorBrush x:Key="SidebarBrush" Color="#f8fafc"/> <!-- Slate 50 -->
+    <SolidColorBrush x:Key="SidebarHoverBrush" Color="{StaticResource SidebarHoverColor}"/>
+    
+    <SolidColorBrush x:Key="PrimaryTextBrush" Color="{StaticResource PrimaryTextColor}"/>
+    <SolidColorBrush x:Key="SecondaryTextBrush" Color="{StaticResource SecondaryTextColor}"/>
+    <SolidColorBrush x:Key="SidebarMutedBrush" Color="#64748b"/> <!-- Slate 500 -->
+    <SolidColorBrush x:Key="SidebarTextBrush" Color="{StaticResource SidebarTextColor}"/>
+    <SolidColorBrush x:Key="BorderBrush" Color="{StaticResource BorderColor}"/>
+    <SolidColorBrush x:Key="DividerBrush" Color="{StaticResource BorderColor}"/>
+    
+    <SolidColorBrush x:Key="InputBackgroundBrush" Color="{StaticResource InputBackgroundColor}"/>
+    <SolidColorBrush x:Key="InputBorderBrush" Color="{StaticResource InputBorderColor}"/>
+    <SolidColorBrush x:Key="InputFocusBrush" Color="{StaticResource PrimaryColor}"/>
+    
+    <SolidColorBrush x:Key="SuccessBrush" Color="{StaticResource SuccessColor}"/>
+    <SolidColorBrush x:Key="WarningBrush" Color="{StaticResource WarningColor}"/>
+    <SolidColorBrush x:Key="DangerBrush" Color="{StaticResource DangerColor}"/>
+    
+    <SolidColorBrush x:Key="PrimaryActionBrush" Color="{StaticResource PrimaryColor}"/>
+    <SolidColorBrush x:Key="PrimaryActionForegroundBrush" Color="#ffffff"/>
+    
+    <!-- Sidebar Specific Brushes -->
+    <SolidColorBrush x:Key="SidebarSelectedBackgroundBrush" Color="#ffffff"/> <!-- White card -->
+    <SolidColorBrush x:Key="SidebarSelectedForegroundBrush" Color="#0b193c"/> <!-- Navy -->
+
+    <!-- DataGrid Colors -->
+    <SolidColorBrush x:Key="DataGridHeaderBrush" Color="#f1f4f6"/> <!-- Low surface -->
+    <SolidColorBrush x:Key="DataGridAltRowBrush" Color="#fafbfc"/> <!-- Very light -->
+    <SolidColorBrush x:Key="SelectionBrush" Color="#ebf0fe"/> <!-- Primary 50 -->
+    <SolidColorBrush x:Key="SelectionTextBrush" Color="{StaticResource PrimaryColor}"/>
+
+    <!-- MaterialDesign Overrides (Map Light Theme colors) -->
+    <SolidColorBrush x:Key="MaterialDesignPaper" Color="{StaticResource WindowBackgroundColor}"/>
+    <SolidColorBrush x:Key="MaterialDesignCardBackground" Color="{StaticResource SurfaceColor}"/>
+    <SolidColorBrush x:Key="MaterialDesignBody" Color="{StaticResource PrimaryTextColor}"/>
+    <SolidColorBrush x:Key="MaterialDesignBodyLight" Color="{StaticResource SecondaryTextColor}"/>
+    <SolidColorBrush x:Key="MaterialDesignDivider" Color="{StaticResource BorderColor}"/>
+    <SolidColorBrush x:Key="MaterialDesignSelection" Color="{StaticResource SelectionBrush}"/>
+    <SolidColorBrush x:Key="MaterialDesignInputCursor" Color="{StaticResource PrimaryColor}"/>
+
+    <Color x:Key="PrimaryHueLight">#222E52</Color>
+    <Color x:Key="PrimaryHueMid">#0B193C</Color>
+    <Color x:Key="PrimaryHueDark">#0b1a3d</Color>
+
+    <SolidColorBrush x:Key="PrimaryHueLightBrush" Color="{StaticResource PrimaryHueLight}"/>
+    <SolidColorBrush x:Key="PrimaryHueMidBrush" Color="{StaticResource PrimaryHueMid}"/>
+    <SolidColorBrush x:Key="PrimaryHueDarkBrush" Color="{StaticResource PrimaryHueDark}"/>
+    <SolidColorBrush x:Key="PrimaryHueMidForegroundBrush" Color="#FFFFFF"/>
+
+</ResourceDictionary>

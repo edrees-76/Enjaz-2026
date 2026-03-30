@@ -1,0 +1,177 @@
+<UserControl x:Class="Enjaz.Views.HelpView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:local="clr-namespace:Enjaz.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="800" d:DesignWidth="900">
+    <Grid Margin="15">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="320"/> <!-- Sidebar: Search & Topics -->
+            <ColumnDefinition Width="*"/>   <!-- Content Area -->
+        </Grid.ColumnDefinitions>
+
+        <!-- Sidebar (Master) -->
+        <Border Grid.Column="0" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="20,0,0,20" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1,1,0,1">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/> <!-- Enjaz Header/Search -->
+                    <RowDefinition Height="Auto"/> <!-- Categories -->
+                    <RowDefinition Height="*"/>    <!-- Topic List -->
+                </Grid.RowDefinitions>
+
+                <!-- Search Section with Enjaz Gradient -->
+                <Border Grid.Row="0" CornerRadius="20,0,0,0" Padding="25">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="{DynamicResource PrimaryColor}" Offset="0"/>
+                            <GradientStop Color="{DynamicResource PrimaryLightColor}" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+                    <StackPanel>
+                        <TextBlock Text="مركز المساعدة والدعم" FontSize="20" FontWeight="ExtraBold" Foreground="White" Margin="0,0,0,18"/>
+                        
+                        <!-- Search Box (Glassmorphism) -->
+                        <Border Background="{DynamicResource GlassBackgroundBrush}" CornerRadius="10" Padding="8,4" BorderBrush="{DynamicResource GlassBorderBrush}" BorderThickness="1">
+                            <Grid>
+                                <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                                         Style="{StaticResource MaterialDesignTextBox}"
+                                         BorderThickness="0" Background="Transparent"
+                                         Foreground="White" CaretBrush="White"
+                                         materialDesign:HintAssist.Hint="ابحث عن حلول ذكية..."
+                                         materialDesign:HintAssist.Foreground="#AAFFFFFF"
+                                         FontSize="13" Height="36" VerticalContentAlignment="Center"
+                                         Padding="35,0,0,0"/>
+                                <materialDesign:PackIcon Kind="Magnify" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0" Width="20" Height="20" Foreground="#AAFFFFFF" />
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+                </Border>
+
+                <!-- Categories Filter (Horizontal Scroll with Chips) -->
+                <ListBox Grid.Row="1" ItemsSource="{Binding Categories}" 
+                         SelectedItem="{Binding SelectedCategory}"
+                         Style="{StaticResource MaterialDesignFilterChipPrimaryListBox}"
+                         Margin="15,20,15,10">
+                    <ListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel Orientation="Horizontal" HorizontalAlignment="Right"/>
+                        </ItemsPanelTemplate>
+                    </ListBox.ItemsPanel>
+                </ListBox>
+
+                <!-- Topics List (Sidebar Selection) -->
+                <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" Margin="0,5,0,15">
+                    <ListBox ItemsSource="{Binding Topics}" 
+                             SelectedItem="{Binding SelectedTopic}"
+                             Background="Transparent" BorderThickness="0">
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem" BasedOn="{StaticResource MaterialDesignListBoxItem}">
+                                <Setter Property="Padding" Value="18,14"/>
+                                <Setter Property="Margin" Value="12,4"/>
+                                <Setter Property="BorderThickness" Value="4,0,0,0"/> <!-- Left accent like MyDose -->
+                                <Setter Property="BorderBrush" Value="Transparent"/>
+                                <Style.Triggers>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBrush}"/>
+                                        <Setter Property="Background" Value="{DynamicResource SelectionBrush}"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <materialDesign:PackIcon Kind="{Binding IconKind}" Width="22" Height="22" Foreground="{DynamicResource PrimaryBrush}" VerticalAlignment="Center" Margin="0,0,15,0"/>
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Title}" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                        <TextBlock Text="{Binding Category}" FontSize="10.5" Foreground="{DynamicResource SecondaryTextBrush}" Opacity="0.7" Margin="0,2,0,0"/>
+                                    </StackPanel>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </ScrollViewer>
+            </Grid>
+        </Border>
+
+        <!-- Content Area (Detail) -->
+        <Border Grid.Column="1" Background="{DynamicResource SurfaceBrush}" CornerRadius="0,20,20,0" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,1,1">
+            <Grid>
+                <!-- Empty Selection Content (Lottie-like placeholder) -->
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"
+                            Visibility="{Binding HasSelectedTopic, Converter={StaticResource InverseBoolToVisConverter}}">
+                    <Border Background="{DynamicResource SelectionBrush}" Width="120" Height="120" CornerRadius="60" Margin="0,0,0,30">
+                        <materialDesign:PackIcon Kind="HelpCircleOutline" Width="60" Height="60" Foreground="{DynamicResource PrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <TextBlock Text="يرجى اختيار موضوع تعليمي للبدء" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" HorizontalAlignment="Center"/>
+                    <TextBlock Text="أدلة الذكاء الرقمي لمنظومة إنجاز 2026" FontSize="13" Foreground="{DynamicResource SecondaryTextBrush}" HorizontalAlignment="Center" Margin="0,8,0,0"/>
+                </StackPanel>
+
+                <!-- Detailed View -->
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="50,45"
+                              Visibility="{Binding HasSelectedTopic, Converter={StaticResource BoolToVisConverter}}">
+                    <StackPanel>
+                        <!-- Content Top Section -->
+                        <Grid Margin="0,0,0,35">
+                            <StackPanel>
+                                <Border Background="{DynamicResource PrimaryBrush}" CornerRadius="6" Padding="12,5" HorizontalAlignment="Left" Margin="0,0,0,15">
+                                    <TextBlock Text="{Binding SelectedTopic.Category}" FontSize="12" FontWeight="Black" Foreground="White" TextTrimming="CharacterEllipsis"/>
+                                </Border>
+                                <TextBlock Text="{Binding SelectedTopic.Title}" FontSize="36" FontWeight="Black" Foreground="{DynamicResource PrimaryTextBrush}" TextWrapping="Wrap" LineHeight="48" FontFamily="Segoe UI Semibold, Tahoma"/>
+                                <Border Height="4" Background="{DynamicResource PrimaryBrush}" Width="100" HorizontalAlignment="Left" Margin="0,20,0,0" CornerRadius="2" Opacity="0.8"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Abstract Highlight -->
+                        <Border Background="{DynamicResource CardBackgroundBrush}" CornerRadius="16" Padding="25" Margin="0,0,0,35" BorderBrush="{DynamicResource PrimaryBrush}" BorderThickness="3,0,0,0">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <materialDesign:PackIcon Kind="Information" Width="26" Height="26" Foreground="{DynamicResource PrimaryBrush}" Margin="0,0,20,0" VerticalAlignment="Top"/>
+                                <TextBlock Grid.Column="1" Text="{Binding SelectedTopic.Abstract}" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" TextWrapping="Wrap" LineHeight="26" FontFamily="Segoe UI, Tahoma"/>
+                            </Grid>
+                        </Border>
+
+                        <!-- Guide Content -->
+                        <TextBlock Text="{Binding SelectedTopic.ContentSimple}" 
+                                   FontSize="16.5" 
+                                   LineHeight="34" 
+                                   Foreground="{DynamicResource PrimaryTextBrush}" 
+                                   TextWrapping="Wrap" 
+                                   FontFamily="Segoe UI, Tahoma"/>
+                        
+                        <!-- Page Footer -->
+                        <Border Height="1" Background="{DynamicResource DividerBrush}" Margin="0,50,0,25"/>
+                        <Grid>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                <Button Style="{StaticResource MaterialDesignOutlinedButton}" 
+                                        Content="تمت القراءة والموافقة" 
+                                        BorderBrush="{DynamicResource SuccessBrush}" 
+                                        Foreground="{DynamicResource SuccessBrush}"
+                                        Command="{Binding ClearSelectionCommand}" Height="40" Padding="25,0">
+                                    <Button.Background>
+                                        <SolidColorBrush Color="{DynamicResource SuccessColor}" Opacity="0.05"/>
+                                    </Button.Background>
+                                </Button>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                <TextBlock Text="مركز دعم إنجاز الرقمي" FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}" Opacity="0.6"/>
+                                <materialDesign:PackIcon Kind="ShieldCheck" Width="18" Height="18" Foreground="{DynamicResource SuccessBrush}" Margin="8,0,0,0" Opacity="0.6"/>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </ScrollViewer>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

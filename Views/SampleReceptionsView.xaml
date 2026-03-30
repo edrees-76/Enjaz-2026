@@ -1,0 +1,721 @@
+<UserControl x:Class="Enjaz.Views.SampleReceptionsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Enjaz.Views"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:models="clr-namespace:Enjaz.Models"
+             mc:Ignorable="d" 
+             d:DesignHeight="700" d:DesignWidth="1000">
+    <UserControl.Resources>
+        <!-- Resources moved to MainUIResources.xaml -->
+    </UserControl.Resources>
+    <Grid>
+        <!-- الرئيسية لعرض الجداول (نفس طريقة صفحة الشهادات) -->
+        <Grid>
+            <Grid.Style>
+                <Style TargetType="Grid">
+                    <Setter Property="Visibility" Value="Visible"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsEditing}" Value="True">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding IsSelectingType}" Value="True">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Style>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Page Header (Only "New Shipment" Button) -->
+            <Grid Grid.Row="0" Margin="0,0,0,15">
+                <StackPanel HorizontalAlignment="Left" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="متابعة استلام العينات:" VerticalAlignment="Center" Margin="0,0,10,0" FontFamily="Inter" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                    <ComboBox Width="200" 
+                              ItemsSource="{Binding CertificateStatusFilters}"
+                              SelectedItem="{Binding SelectedCertificateStatusFilter, UpdateSourceTrigger=PropertyChanged}"
+                              Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                              BorderThickness="1"
+                              Padding="8,4"/>
+                </StackPanel>
+                
+                <Button HorizontalAlignment="Right" Command="{Binding AddReceptionCommand}" 
+                        Style="{StaticResource PrimaryButtonStyle}" Height="42" Padding="20,0"
+                        Foreground="White">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="Plus" Width="20" Height="20" Margin="0,0,8,0" VerticalAlignment="Center" Foreground="White"/>
+                        <TextBlock Text="إضافة عينات جديدة" FontFamily="Inter" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White"/>
+                    </StackPanel>
+                </Button>
+            </Grid>
+
+
+
+            <!-- جدول الاستلامات -->
+            <Border Grid.Row="1" Background="{DynamicResource SurfaceBrush}" CornerRadius="12" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                <DataGrid ItemsSource="{Binding PagedReceptions}"
+                          SelectedItem="{Binding SelectedReception}"
+                          AutoGenerateColumns="False"
+                          ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                          MinRowHeight="55" RowHeight="55"
+                          EnableRowVirtualization="True"
+                          VirtualizingStackPanel.IsVirtualizing="True"
+                          VirtualizingStackPanel.VirtualizationMode="Recycling"
+                          Background="Transparent"
+                          BorderThickness="0"
+                          FontSize="13"
+                          GridLinesVisibility="None">
+                    <DataGrid.Resources>
+                        <!-- Styles moved to UserControl.Resources -->
+                    </DataGrid.Resources>
+                    <DataGrid.ColumnHeaderStyle>
+                        <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource {x:Type DataGridColumnHeader}}">
+                            <Setter Property="Background" Value="{DynamicResource CardBackgroundBrush}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}"/>
+                            <Setter Property="FontSize" Value="13"/>
+                            <Setter Property="Padding" Value="15,12"/>
+                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                        </Style>
+                    </DataGrid.ColumnHeaderStyle>
+                    <DataGrid.CellStyle>
+                        <Style TargetType="DataGridCell" BasedOn="{StaticResource {x:Type DataGridCell}}">
+                            <Setter Property="BorderThickness" Value="0"/>
+                            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=DataGridRow}}" Value="True">
+                                    <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
+                                    <Setter Property="Background" Value="Transparent"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=DataGridRow}}" Value="True">
+                                    <Setter Property="Foreground" Value="White"/>
+                                    <Setter Property="Background" Value="{DynamicResource PrimaryBrush}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGrid.CellStyle>
+                    <DataGrid.RowStyle>
+                        <Style TargetType="DataGridRow" BasedOn="{StaticResource {x:Type DataGridRow}}">
+                            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                            <Setter Property="BorderBrush" Value="{DynamicResource DividerBrush}"/>
+                            <Setter Property="Background" Value="Transparent"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#0A000000"/> 
+                                </Trigger>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter Property="FontWeight" Value="SemiBold"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGrid.RowStyle>
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="ت" Binding="{Binding Sequence}" Width="60" 
+                                            ElementStyle="{DynamicResource CenterAlignmentStyle}" FontWeight="Bold"/>
+                        
+                        <DataGridTemplateColumn Header="الجهة المرسلة" Width="4*" MinWidth="350">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Sender}" TextTrimming="CharacterEllipsis" TextAlignment="Center" VerticalAlignment="Center" Padding="15,2"
+                                               Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=DataGridCell}}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        
+                        <DataGridTextColumn Header="المورد" Binding="{Binding Supplier}" Width="2*" MinWidth="180" 
+                                            ElementStyle="{DynamicResource CenterAlignmentStyle}"/>
+ 
+                        <DataGridTextColumn Header="الإيصال المالي" Binding="{Binding FinancialReceiptNumber}" Width="120"
+                                            ElementStyle="{DynamicResource CenterAlignmentStyle}"/>
+                        
+                        <DataGridTextColumn Header="رقم الإخطار" Binding="{Binding NotificationNumber}" Width="120"
+                                            ElementStyle="{DynamicResource CenterAlignmentStyle}"/>
+                        
+                        <DataGridTextColumn Header="تاريخ الاستلام" Binding="{Binding Date, StringFormat=yyyy/MM/dd}" Width="130"
+                                            ElementStyle="{DynamicResource CenterAlignmentStyle}"/>
+                        
+                        <DataGridTextColumn Header="النوع" Binding="{Binding CertificateType}" Width="130"
+                                            ElementStyle="{DynamicResource CenterAlignmentStyle}"/>
+                        
+                        <DataGridTextColumn Header="الحالة" Binding="{Binding Status}" Width="150"
+                                            ElementStyle="{DynamicResource CenterAlignmentStyle}"/>
+                        
+                        <DataGridTextColumn Header="عدد العينات" Binding="{Binding SampleCount}" Width="110"
+                                            ElementStyle="{DynamicResource CenterAlignmentStyle}" FontWeight="SemiBold"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Border>
+
+            <!-- Spacing -->
+            <Grid Grid.Row="1" Height="20"/>
+
+
+            <!-- Totals Footer Bar -->
+            <Border Grid.Row="3" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="12" Padding="20" Margin="0,20,0,0" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/> <!-- Pagination -->
+                        <ColumnDefinition Width="Auto"/> <!-- Actions -->
+                        <ColumnDefinition Width="*"/>    <!-- Spacer -->
+                        <ColumnDefinition Width="Auto"/> <!-- Totals -->
+                    </Grid.ColumnDefinitions>
+                    
+                    <!-- Pagination (Left) -->
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,20,0">
+                        <Button Command="{Binding PreviousPageCommand}" Style="{StaticResource MaterialDesignIconButton}" Width="32" Height="32">
+                            <materialDesign:PackIcon Kind="ChevronLeft" />
+                        </Button>
+                        <TextBlock VerticalAlignment="Center" Margin="10,0" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}">
+                            <Run Text="صفحة " />
+                            <Run Text="{Binding CurrentPage, Mode=OneWay}" />
+                            <Run Text=" / " />
+                            <Run Text="{Binding TotalPages, Mode=OneWay}" />
+                        </TextBlock>
+                        <Button Command="{Binding NextPageCommand}" Style="{StaticResource MaterialDesignIconButton}" Width="32" Height="32">
+                            <materialDesign:PackIcon Kind="ChevronRight" />
+                        </Button>
+                    </StackPanel>
+
+                    <!-- Action Buttons (Middle-Left) -->
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Button Content="👁️ عرض التفاصيل" 
+                                Style="{StaticResource ActionButtonStyle}"
+                                Height="35" FontSize="13"
+                                Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                                Foreground="{DynamicResource PrimaryBrush}"
+                                Command="{Binding ViewDetailsCommand}" Margin="0,0,10,0"/> 
+                        <Button Content="✏️ تعديل العينات" 
+                                Style="{StaticResource ActionButtonStyle}"
+                                Height="35" FontSize="13"
+                                Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                                Foreground="{DynamicResource PrimaryBrush}"
+                                Command="{Binding EditReceptionCommand}"/>
+                    </StackPanel>
+
+                    <!-- Totals (Right) -->
+                    <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" Margin="0,0,30,0">
+                            <TextBlock Text="إجمالي العينات :" FontSize="14" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding TotalSamplesSum}" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}" Margin="8,0,0,0" VerticalAlignment="Center"/>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,0,30,0">
+                            <TextBlock Text="استهلاكية :" FontSize="14" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding TotalConsumableSamples}" FontSize="16" FontWeight="Bold" Foreground="#3b82f6" Margin="8,0,0,0" VerticalAlignment="Center"/>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="بيئية :" FontSize="14" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding TotalEnvironmentalSamples}" FontSize="16" FontWeight="Bold" Foreground="#10b981" Margin="8,0,0,0" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </Border>
+            
+            <!-- نافذة التفاصيل (مخفية حتى يتم الاستدعاء) -->
+            <Grid Visibility="{Binding IsViewingDetails, Converter={StaticResource BoolToVisConverter}}" 
+                  Panel.ZIndex="100" Grid.RowSpan="5">
+                  <Border Background="Black" Opacity="0.5">
+                      <Border.InputBindings>
+                          <MouseBinding MouseAction="LeftClick" Command="{Binding CloseDetailsCommand}"/>
+                      </Border.InputBindings>
+                  </Border>
+                  
+                  <Border Background="{DynamicResource WindowBackgroundBrush}" 
+                          CornerRadius="16" 
+                          Margin="80,40" 
+                          MaxWidth="1000" 
+                          MaxHeight="750"
+                          VerticalAlignment="Center">
+                      <Border.Effect>
+                          <DropShadowEffect ShadowDepth="4" BlurRadius="20" Opacity="0.3"/>
+                      </Border.Effect>
+
+                      <Grid>
+                          <Grid.RowDefinitions>
+                              <RowDefinition Height="Auto"/> <!-- Header -->
+                              <RowDefinition Height="*"/>    <!-- Scrollable Content -->
+                          </Grid.RowDefinitions>
+
+                          <!-- Header -->
+                          <Border Background="{DynamicResource PrimaryBrush}" CornerRadius="16,16,0,0" Padding="20">
+                              <Grid>
+                                  <TextBlock Text="تفاصيل استلام العينات" 
+                                             Foreground="White" 
+                                             FontSize="22" 
+                                             FontWeight="Bold" 
+                                             VerticalAlignment="Center"/>
+                              </Grid>
+                          </Border>
+
+                          <!-- Content -->
+                          <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="30">
+                              <StackPanel DataContext="{Binding SelectedReception}">
+                                  
+                                  <!-- معلومات الشحنة -->
+                                  <Border Background="{DynamicResource SurfaceBrush}" CornerRadius="12" Padding="20" Margin="0,0,0,20">
+                                      <Border.Effect>
+                                          <DropShadowEffect ShadowDepth="1" BlurRadius="5" Opacity="0.1" Color="Black"/>
+                                      </Border.Effect>
+                                      <StackPanel>
+                                          <TextBlock Text="معلومات الشحنة" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,15"/>
+                                          
+                                          <Grid>
+                                              <Grid.ColumnDefinitions>
+                                                  <ColumnDefinition Width="*"/>
+                                                  <ColumnDefinition Width="*"/>
+                                                  <ColumnDefinition Width="*"/>
+                                              </Grid.ColumnDefinitions>
+                                              <Grid.RowDefinitions>
+                                                  <RowDefinition Height="Auto"/>
+                                                  <RowDefinition Height="Auto"/>
+                                                  <RowDefinition Height="Auto"/>
+                                                  <RowDefinition Height="Auto"/>
+                                              </Grid.RowDefinitions>
+
+                                              <!-- Row 0 -->
+                                              <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,15,15">
+                                                  <TextBlock Text="رقم طلب التحليل" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="13" Margin="0,0,0,4"/>
+                                                  <TextBlock Text="{Binding AnalysisRequestNumber}" FontWeight="SemiBold" FontSize="15" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                              </StackPanel>
+                                              <StackPanel Grid.Row="0" Grid.Column="1" Margin="0,0,15,15">
+                                                  <TextBlock Text="تاريخ الاستلام" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="13" Margin="0,0,0,4"/>
+                                                  <TextBlock Text="{Binding Date, StringFormat=yyyy/MM/dd}" FontWeight="SemiBold" FontSize="15" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                              </StackPanel>
+                                              <StackPanel Grid.Row="0" Grid.Column="2" Margin="0,0,15,15">
+                                                  <TextBlock Text="النوع" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="13" Margin="0,0,0,4"/>
+                                                  <Border Background="{DynamicResource PrimaryLightBrush}" CornerRadius="4" Padding="8,4" HorizontalAlignment="Left">
+                                                      <TextBlock Text="{Binding CertificateType}" FontWeight="Bold" FontSize="13" Foreground="White" />
+                                                  </Border>
+                                              </StackPanel>
+                                              
+                                              <!-- Row 1 -->
+                                              <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,15,15">
+                                                  <TextBlock Text="الجهة المرسلة" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="13" Margin="0,0,0,4"/>
+                                                  <TextBlock Text="{Binding Sender}" FontWeight="SemiBold" FontSize="15" Foreground="{DynamicResource PrimaryTextBrush}" TextWrapping="Wrap"/>
+                                              </StackPanel>
+                                              <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,0,15,15">
+                                                  <TextBlock Text="المورد" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="13" Margin="0,0,0,4"/>
+                                                  <TextBlock Text="{Binding Supplier}" FontWeight="SemiBold" FontSize="15" Foreground="{DynamicResource PrimaryTextBrush}" TextWrapping="Wrap"/>
+                                              </StackPanel>
+                                              <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,0,15,15">
+                                                  <TextBlock Text="المنشأ" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="13" Margin="0,0,0,4"/>
+                                                  <TextBlock Text="{Binding Origin}" FontWeight="SemiBold" FontSize="15" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                              </StackPanel>
+
+                                              <!-- Row 2 -->
+                                              <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,15,0">
+                                                  <TextBlock Text="الإيصال المالي" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="13" Margin="0,0,0,4"/>
+                                                  <TextBlock Text="{Binding FinancialReceiptNumber}" FontWeight="SemiBold" FontSize="15" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                              </StackPanel>
+                                              <StackPanel Grid.Row="2" Grid.Column="1" Margin="0,0,15,0">
+                                                  <TextBlock Text="رقم الإخطار" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="13" Margin="0,0,0,4"/>
+                                                  <TextBlock Text="{Binding NotificationNumber}" FontWeight="SemiBold" FontSize="15" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                              </StackPanel>
+                                              <StackPanel Grid.Row="2" Grid.Column="2" Margin="0,0,15,0">
+                                                  <TextBlock Text="رقم الإقرار الجمركي" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="13" Margin="0,0,0,4"/>
+                                                  <TextBlock Text="{Binding DeclarationNumber}" FontWeight="SemiBold" FontSize="15" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                              </StackPanel>
+
+                                              <!-- Row 3: Audit Info -->
+                                              <StackPanel Grid.Row="3" Grid.Column="0" Margin="0,15,15,0">
+                                                  <TextBlock Text="الموظف المسؤول" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="13" Margin="0,0,0,4"/>
+                                                  <StackPanel Orientation="Horizontal">
+                                                      <materialDesign:PackIcon Kind="AccountTie" Foreground="{DynamicResource PrimaryActionBrush}" Width="16" Height="16" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                                      <TextBlock Text="{Binding CreatedByName}" FontWeight="Bold" FontSize="15" Foreground="{DynamicResource PrimaryTextBrush}" VerticalAlignment="Center"/>
+                                                  </StackPanel>
+                                              </StackPanel>
+                                              <StackPanel Grid.Row="3" Grid.Column="1" Margin="0,15,15,0">
+                                                  <TextBlock Text="تاريخ ووقت الإدخال (النظام)" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="13" Margin="0,0,0,4"/>
+                                                  <StackPanel Orientation="Horizontal">
+                                                      <materialDesign:PackIcon Kind="ClockOutline" Foreground="{DynamicResource PrimaryActionBrush}" Width="16" Height="16" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                                      <TextBlock Text="{Binding CreatedAt, StringFormat=yyyy/MM/dd HH:mm}" FontWeight="Bold" FontSize="15" Foreground="{DynamicResource PrimaryTextBrush}" VerticalAlignment="Center"/>
+                                                  </StackPanel>
+                                              </StackPanel>
+                                          </Grid>
+                                      </StackPanel>
+                                  </Border>
+
+                                  <!-- جدول العينات -->
+                                  <Border Background="{DynamicResource SurfaceBrush}" CornerRadius="12" Padding="20">
+                                      <Border.Effect>
+                                          <DropShadowEffect ShadowDepth="1" BlurRadius="5" Opacity="0.1" Color="Black"/>
+                                      </Border.Effect>
+                                      <StackPanel>
+                                          <TextBlock Text="العينات المرفقة" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,15"/>
+                                          
+                                          <DataGrid ItemsSource="{Binding Samples}" 
+                                                    AutoGenerateColumns="False" 
+                                                    CanUserAddRows="False" 
+                                                    CanUserDeleteRows="False"
+                                                    IsReadOnly="True"
+                                                    HeadersVisibility="Column"
+                                                    BorderThickness="1"
+                                                    BorderBrush="{DynamicResource DividerBrush}"
+                                                    Background="{DynamicResource SurfaceBrush}"
+                                                    MaxHeight="350"
+                                                    ScrollViewer.VerticalScrollBarVisibility="Auto">
+                                              <DataGrid.ColumnHeaderStyle>
+                                                  <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource {x:Type DataGridColumnHeader}}">
+                                                      <Setter Property="Background" Value="{DynamicResource CardBackgroundBrush}"/>
+                                                      <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}"/>
+                                                      <Setter Property="FontSize" Value="11"/>
+                                                      <Setter Property="FontWeight" Value="Bold"/>
+                                                      <Setter Property="Padding" Value="15,12"/>
+                                                      <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                                                      <Setter Property="BorderBrush" Value="{DynamicResource DividerBrush}"/>
+                                                      <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                                  </Style>
+                                              </DataGrid.ColumnHeaderStyle>
+                                              <DataGrid.CellStyle>
+                                                  <Style TargetType="DataGridCell" BasedOn="{StaticResource {x:Type DataGridCell}}">
+                                                      <Setter Property="BorderThickness" Value="0"/>
+                                                      <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                                                      <Style.Triggers>
+                                                          <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=DataGridRow}}" Value="True">
+                                                              <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
+                                                              <Setter Property="Background" Value="Transparent"/>
+                                                          </DataTrigger>
+                                                          <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=DataGridRow}}" Value="True">
+                                                              <Setter Property="Foreground" Value="White"/>
+                                                              <Setter Property="Background" Value="{DynamicResource PrimaryBrush}"/>
+                                                          </DataTrigger>
+                                                      </Style.Triggers>
+                                                  </Style>
+                                              </DataGrid.CellStyle>
+                                              
+                                              <DataGrid.RowStyle>
+                                                  <Style TargetType="DataGridRow" BasedOn="{StaticResource {x:Type DataGridRow}}">
+                                                      <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                                                      <Setter Property="BorderBrush" Value="{DynamicResource DividerBrush}"/>
+                                                      <Setter Property="Background" Value="Transparent"/>
+                                                      <Style.Triggers>
+                                                          <Trigger Property="IsMouseOver" Value="True">
+                                                              <Setter Property="Background" Value="#0A000000"/> 
+                                                          </Trigger>
+                                                          <Trigger Property="IsSelected" Value="True">
+                                                              <Setter Property="FontWeight" Value="SemiBold"/>
+                                                          </Trigger>
+                                                      </Style.Triggers>
+                                                  </Style>
+                                              </DataGrid.RowStyle>
+
+                                              <DataGrid.Columns>
+                                                  <DataGridTextColumn Header="ت" Binding="{Binding Root}" Width="60" ElementStyle="{StaticResource CenterAlignmentStyle}"/>
+                                                  <DataGridTextColumn Header="رقم العينة" Binding="{Binding SampleNumber}" Width="150" ElementStyle="{StaticResource CenterAlignmentStyle}"/>
+                                                  <DataGridTextColumn Header="وصف العينة" Binding="{Binding Description}" Width="*" ElementStyle="{StaticResource CenterAlignmentStyle}"/>
+                                              </DataGrid.Columns>
+                                          </DataGrid>
+                                          
+                                          <!-- Buttons Footer -->
+                                          <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,30,0,0">
+                                              <!-- إغلاق -->
+                                              <Button Content="إغلاق" 
+                                                      Command="{Binding DataContext.CloseDetailsCommand, RelativeSource={RelativeSource AncestorType=Grid, AncestorLevel=2}}" 
+                                                      Style="{StaticResource MaterialDesignOutlinedButton}" 
+                                                      Height="40"
+                                                      Padding="30,0" />
+                                          </StackPanel>
+                                      </StackPanel>
+                                  </Border>
+
+                              </StackPanel>
+                          </ScrollViewer>
+                      </Grid>
+                  </Border>
+            </Grid>
+        </Grid>
+
+        <!-- نافذة اختيار نوع العينات (الخطوة الأولى) -->
+        <Grid>
+            <Grid.Style>
+                <Style TargetType="Grid">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsSelectingType}" Value="True">
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Style>
+            <Border Background="{DynamicResource SurfaceBrush}" CornerRadius="16" Padding="40"
+                    HorizontalAlignment="Center" VerticalAlignment="Center"
+                    MinWidth="450" MinHeight="280"
+                    BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="25" Opacity="0.15" ShadowDepth="5"/>
+                </Border.Effect>
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <!-- أيقونة ونص العنوان -->
+                    <TextBlock Text="🧪" FontSize="48" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+                    <TextBlock Text="اختيار نوع العينات" FontSize="22" FontWeight="Bold" 
+                               Foreground="{DynamicResource PrimaryTextBrush}" HorizontalAlignment="Center" Margin="0,0,0,5"/>
+                    <TextBlock Text="يرجى تحديد نوع العينات المراد استلامها" FontSize="13" 
+                               Foreground="{DynamicResource SecondaryTextBrush}" HorizontalAlignment="Center" Margin="0,0,0,25"/>
+                    <Border Style="{StaticResource WindowsAccentLineStyle}" Width="120" HorizontalAlignment="Center" Margin="0,0,0,25"/>
+
+                    <!-- القائمة المنسدلة -->
+                    <TextBlock Text="نوع العينات *" FontSize="13" FontWeight="SemiBold" 
+                               Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,8"/>
+                    <ComboBox SelectedItem="{Binding SelectedCertificateType, UpdateSourceTrigger=PropertyChanged}" 
+                              Style="{StaticResource FormComboBoxStyle}"
+                              materialDesign:HintAssist.Hint="-- اختر من القائمة --"
+                              FontSize="16" Height="45" MinWidth="320" Margin="0,0,0,30">
+                        <ComboBox.ItemsSource>
+                            <x:Array Type="{x:Type sys:String}" xmlns:sys="clr-namespace:System;assembly=mscorlib">
+                                <sys:String>عينات استهلاكية</sys:String>
+                                <sys:String>عينات بيئية</sys:String>
+                            </x:Array>
+                        </ComboBox.ItemsSource>
+                    </ComboBox>
+
+                    <!-- أزرار التأكيد والإلغاء -->
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <Button Content="✅ تأكيد والمتابعة" 
+                                Command="{Binding ConfirmTypeCommand}" 
+                                Style="{StaticResource SuccessButtonStyle}" 
+                                Height="42" Padding="30,0" FontSize="15" FontWeight="Bold"/>
+                        <Button Content="إلغاء" 
+                                Command="{Binding CancelEditCommand}" 
+                                Style="{StaticResource DangerButtonStyle}" 
+                                Height="42" Padding="20,0" FontSize="14" Margin="10,0,0,0"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- نافذة إضافة وتعديل استلام (النموذج) -->
+        <Grid>
+            <Grid.Style>
+                <Style TargetType="Grid">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsEditing}" Value="True">
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Style>
+            <Border Background="{DynamicResource SurfaceBrush}" CornerRadius="12" Padding="25">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" Margin="0,0,0,20" Orientation="Horizontal">
+                        <TextBlock FontSize="22" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" VerticalAlignment="Center">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+                                    <Setter Property="Text" Value="تعديل عينات"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding EditingReception.Id}" Value="0">
+                                            <Setter Property="Text" Value="نموذج استلام العينات"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                        
+                        <!-- نوع العينات الواضح -->
+                        <Border Background="{DynamicResource PrimaryBrush}" CornerRadius="15" Padding="12,4" Margin="15,0,0,0" VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="📝 النوع: " FontSize="13" Foreground="White" Opacity="0.9"/>
+                                <TextBlock Text="{Binding EditingReception.CertificateType}" FontSize="14" FontWeight="Bold" Foreground="White"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                    <Border Grid.Row="0" Style="{StaticResource WindowsAccentLineStyle}" Width="200" HorizontalAlignment="Left" Margin="0,35,0,10"/>
+
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                        <StackPanel Margin="0,0,15,0">
+                            <!-- Basic & Logistic Infos -->
+                            <UniformGrid Columns="2" Margin="0,0,0,20">
+                                <!-- Group 1 -->
+                                <Border Background="{DynamicResource CardBackgroundBrush}" CornerRadius="12" Padding="20" Margin="0,0,10,0" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                                    <StackPanel>
+                                        <TextBlock Text="البيانات الأساسية" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,15"/>
+                                        
+                                        <TextBox Text="{Binding EditingReception.AnalysisRequestNumber, UpdateSourceTrigger=PropertyChanged}" 
+                                                 materialDesign:HintAssist.Hint="رقم طلب التحليل *" 
+                                                 Style="{StaticResource MaterialDesignFloatingHintTextBox}" 
+                                                 Foreground="{DynamicResource PrimaryTextBrush}"
+                                                 Margin="0,0,0,15"/>
+                                        
+                                        <!-- الجهة المرسلة (بنفس تنسيق وتصميم شاشة الشهادات والتقارير) -->
+                                        <TextBlock Text="الجهة المرسلة *" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,5" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                        <ComboBox Text="{Binding EditingReception.Sender, UpdateSourceTrigger=PropertyChanged}" 
+                                                  ItemsSource="{Binding SendersList}"
+                                                  IsEditable="True" IsTextSearchEnabled="True"
+                                                  materialDesign:HintAssist.Hint="اختر أو اكتب الجهة المرسلة..." 
+                                                  Style="{StaticResource FormComboBoxStyle}" 
+                                                  Margin="0,0,0,15"/>
+                                                  
+                                        <TextBox Text="{Binding EditingReception.Supplier, UpdateSourceTrigger=PropertyChanged}" 
+                                                 materialDesign:HintAssist.Hint="المورد" 
+                                                 Style="{StaticResource MaterialDesignFloatingHintTextBox}" 
+                                                 Foreground="{DynamicResource PrimaryTextBrush}"
+                                                 Margin="0,0,0,15"/>
+                                        <TextBox Text="{Binding EditingReception.Origin, UpdateSourceTrigger=PropertyChanged}" 
+                                                 materialDesign:HintAssist.Hint="بلد المنشأ" 
+                                                 Style="{StaticResource MaterialDesignFloatingHintTextBox}" 
+                                                 Foreground="{DynamicResource PrimaryTextBrush}"
+                                                 Margin="0,0,0,15"/>
+                                    </StackPanel>
+                                </Border>
+                                
+                                <!-- Group 2 -->
+                                <Border Background="{DynamicResource CardBackgroundBrush}" CornerRadius="12" Padding="20" Margin="10,0,0,0" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                                    <StackPanel>
+                                        <TextBlock Text="البيانات الجمركية والمالية" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,15"/>
+                                        
+                                        <TextBox Text="{Binding EditingReception.DeclarationNumber, UpdateSourceTrigger=PropertyChanged}" 
+                                                 materialDesign:HintAssist.Hint="رقم الإقرار الجمركي" 
+                                                 Style="{StaticResource MaterialDesignFloatingHintTextBox}" 
+                                                 Foreground="{DynamicResource PrimaryTextBrush}"
+                                                 Margin="0,0,0,15"/>
+                                        <TextBox Text="{Binding EditingReception.NotificationNumber, UpdateSourceTrigger=PropertyChanged}" 
+                                                 materialDesign:HintAssist.Hint="رقم الإخطار" 
+                                                 Style="{StaticResource MaterialDesignFloatingHintTextBox}" 
+                                                 Foreground="{DynamicResource PrimaryTextBrush}"
+                                                 Margin="0,0,0,15"/>
+                                        <TextBox Text="{Binding EditingReception.PolicyNumber, UpdateSourceTrigger=PropertyChanged}" 
+                                                 materialDesign:HintAssist.Hint="رقم البوليصة" 
+                                                 Style="{StaticResource MaterialDesignFloatingHintTextBox}" 
+                                                 Foreground="{DynamicResource PrimaryTextBrush}"
+                                                 Margin="0,0,0,15"/>
+                                        <TextBox Text="{Binding EditingReception.FinancialReceiptNumber, UpdateSourceTrigger=PropertyChanged}" 
+                                                 materialDesign:HintAssist.Hint="الإيصال المالي" 
+                                                 Style="{StaticResource MaterialDesignFloatingHintTextBox}" 
+                                                 Foreground="{DynamicResource PrimaryTextBrush}"
+                                                 Margin="0,0,0,15"/>
+                                    </StackPanel>
+                                </Border>
+                            </UniformGrid>
+                            
+
+
+                            <!-- Samples DataGrid -->
+                            <Border Background="{DynamicResource CardBackgroundBrush}" CornerRadius="12" Padding="20" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+                                        <TextBlock Text="قائمة العينات المستلمة" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" VerticalAlignment="Center" Margin="0,0,20,0"/>
+
+                                        <!-- إضافة العينات بتصميم أكثر سهولة -->
+                                        <TextBox Text="{Binding NewSampleNumber, UpdateSourceTrigger=PropertyChanged}" 
+                                                 materialDesign:HintAssist.Hint="رقم العينة" Width="120" Margin="0,0,10,0"
+                                                 Foreground="{DynamicResource PrimaryTextBrush}"
+                                                 Style="{StaticResource MaterialDesignFloatingHintTextBox}"/>
+                                        
+                                        <TextBox Text="{Binding NewSampleDescription, UpdateSourceTrigger=PropertyChanged}" 
+                                                 materialDesign:HintAssist.Hint="وصف العينة" Width="220" Margin="0,0,10,0"
+                                                 Foreground="{DynamicResource PrimaryTextBrush}"
+                                                 Style="{StaticResource MaterialDesignFloatingHintTextBox}"/>
+
+                                        <Button Content="➕ إضافة" Command="{Binding AddSampleCommand}" 
+                                                Style="{StaticResource SuccessButtonStyle}" 
+                                                Padding="15,0" Height="38" VerticalAlignment="Bottom"/>
+                                    </StackPanel>
+                                    
+                                    <DataGrid ItemsSource="{Binding EditingReception.Samples}" AutoGenerateColumns="False" CanUserAddRows="False"
+                                              Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                                              HeadersVisibility="Column" RowHeight="45" IsReadOnly="False">
+                                        <!-- Column Headers Style -->
+                                        <DataGrid.ColumnHeaderStyle>
+                                            <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource {x:Type DataGridColumnHeader}}">
+                                                <Setter Property="Background" Value="{DynamicResource CardBackgroundBrush}"/>
+                                                <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}"/>
+                                                <Setter Property="FontSize" Value="13"/>
+                                                <Setter Property="Padding" Value="10"/>
+                                                <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                            </Style>
+                                        </DataGrid.ColumnHeaderStyle>
+                                        
+                                        <DataGrid.CellStyle>
+                                            <Style TargetType="DataGridCell" BasedOn="{StaticResource {x:Type DataGridCell}}">
+                                                <Setter Property="BorderThickness" Value="0"/>
+                                                <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=DataGridRow}}" Value="True">
+                                                        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
+                                                        <Setter Property="Background" Value="Transparent"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=DataGridRow}}" Value="True">
+                                                        <Setter Property="Foreground" Value="White"/>
+                                                        <Setter Property="Background" Value="{DynamicResource PrimaryBrush}"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </DataGrid.CellStyle>
+                                        
+                                        <DataGrid.RowStyle>
+                                            <Style TargetType="DataGridRow" BasedOn="{StaticResource {x:Type DataGridRow}}">
+                                                <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                                                <Setter Property="BorderBrush" Value="{DynamicResource DividerBrush}"/>
+                                                <Setter Property="Background" Value="Transparent"/>
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="Background" Value="#0A000000"/> 
+                                                    </Trigger>
+                                                    <Trigger Property="IsSelected" Value="True">
+                                                        <Setter Property="FontWeight" Value="SemiBold"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </DataGrid.RowStyle>
+                                        
+                                        <DataGrid.Columns>
+                                            <DataGridTextColumn Header="م" Binding="{Binding Root}" Width="60" 
+                                                                ElementStyle="{DynamicResource CenterAlignmentStyle}"/>
+                                            <DataGridTextColumn Header="رقم العينة" Binding="{Binding SampleNumber, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                                                Width="150" FontWeight="Bold" 
+                                                                ElementStyle="{DynamicResource CenterAlignmentStyle}"/>
+                                            <DataGridTextColumn Header="الوصف" Binding="{Binding Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                                                Width="*" 
+                                                                ElementStyle="{DynamicResource CenterAlignmentStyle}"/>
+                                            <DataGridTemplateColumn Header="إجراء">
+                                                <DataGridTemplateColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <Button Command="{Binding DataContext.RemoveSampleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                                                CommandParameter="{Binding}"
+                                                                Style="{StaticResource DangerButtonStyle}" 
+                                                                Padding="5,0" Height="25" Content="🗑️"
+                                                                HorizontalAlignment="Center"/>
+                                                    </DataTemplate>
+                                                </DataGridTemplateColumn.CellTemplate>
+                                            </DataGridTemplateColumn>
+                                        </DataGrid.Columns>
+                                    </DataGrid>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+                        <Button Command="{Binding SaveReceptionCommand}" Height="45" Padding="30,0">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource SuccessButtonStyle}">
+                                    <Setter Property="Content" Value="✅ حفظ"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding EditingReception.Id}" Value="0">
+                                            <Setter Property="Content" Value="✅ حفظ الاستلام"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                        <Button Content="الغاء" Command="{Binding CancelEditCommand}" Style="{StaticResource DangerButtonStyle}" Margin="10,0,0,0" Height="45" Padding="20,0"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

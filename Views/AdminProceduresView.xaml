@@ -1,0 +1,403 @@
+<UserControl x:Class="Enjaz.Views.AdminProceduresView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:helpers="clr-namespace:Enjaz.Helpers"
+             xmlns:controls="clr-namespace:Enjaz.Controls"
+             mc:Ignorable="d" 
+             d:DesignHeight="750" d:DesignWidth="1000"
+             FlowDirection="RightToLeft">
+
+    <UserControl.Resources>
+        <helpers:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <helpers:StepToVisibilityConverter x:Key="StepToVisibilityConverter"/>
+    </UserControl.Resources>
+
+    <Border Background="{DynamicResource BackgroundBrush}" Padding="10">
+        <TabControl SelectedIndex="{Binding SelectedTab, Mode=TwoWay}">
+            
+            <!-- Tab 1: Create Referral Letter -->
+            <TabItem>
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="FilePlusOutline" Width="22" Height="22" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        <TextBlock Text="إنشاء رسالة إحالة" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </TabItem.Header>
+                
+                <Grid Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Header & Progress Tracker -->
+                    <Border Padding="20" Margin="0,0,0,20" Background="{DynamicResource SurfaceBrush}" CornerRadius="16" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                        <Border.Effect>
+                            <DropShadowEffect BlurRadius="20" ShadowDepth="2" Opacity="0.06" Color="#0B193C"/>
+                        </Border.Effect>
+                        <Grid>
+                            <TextBlock Text="إنشاء رسالة إحالة الشهادات" FontSize="18" FontWeight="Bold" FontFamily="Manrope"
+                                       Foreground="{DynamicResource PrimaryBrush}" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                            
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                <!-- Step 1 Indicator -->
+                                <materialDesign:PackIcon Kind="Numeric1Circle" Width="28" Height="28">
+                                    <materialDesign:PackIcon.Style>
+                                        <Style TargetType="materialDesign:PackIcon">
+                                            <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}"/>
+                                            <Setter Property="Opacity" Value="0.5"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding CurrentStep}" Value="1">
+                                                    <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
+                                                    <Setter Property="Opacity" Value="1"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding CurrentStep, Converter={StaticResource StepToVisibilityConverter}, ConverterParameter='2|AtLeast'}" Value="Visible">
+                                                    <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
+                                                    <Setter Property="Opacity" Value="1"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </materialDesign:PackIcon.Style>
+                                </materialDesign:PackIcon>
+                                <Rectangle Width="15" Height="1" Fill="{DynamicResource BorderBrush}" Margin="5,0"/>
+                                
+                                <!-- Step 2 Indicator -->
+                                <materialDesign:PackIcon Kind="Numeric2Circle" Width="28" Height="28">
+                                    <materialDesign:PackIcon.Style>
+                                        <Style TargetType="materialDesign:PackIcon">
+                                            <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}"/>
+                                            <Setter Property="Opacity" Value="0.5"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding CurrentStep}" Value="2">
+                                                    <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
+                                                    <Setter Property="Opacity" Value="1"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding CurrentStep, Converter={StaticResource StepToVisibilityConverter}, ConverterParameter='3|AtLeast'}" Value="Visible">
+                                                    <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
+                                                    <Setter Property="Opacity" Value="1"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </materialDesign:PackIcon.Style>
+                                </materialDesign:PackIcon>
+                                <Rectangle Width="15" Height="1" Fill="{DynamicResource BorderBrush}" Margin="5,0"/>
+
+                                <!-- Step 3 Indicator -->
+                                <materialDesign:PackIcon Kind="Numeric3Circle" Width="28" Height="28">
+                                    <materialDesign:PackIcon.Style>
+                                        <Style TargetType="materialDesign:PackIcon">
+                                            <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}"/>
+                                            <Setter Property="Opacity" Value="0.5"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding CurrentStep}" Value="3">
+                                                    <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
+                                                    <Setter Property="Opacity" Value="1"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </materialDesign:PackIcon.Style>
+                                </materialDesign:PackIcon>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- Wizard Steps Content -->
+                    <Border Grid.Row="1" Background="{DynamicResource SurfaceBrush}" CornerRadius="16" Padding="30" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                        <Border.Effect>
+                            <DropShadowEffect BlurRadius="20" ShadowDepth="2" Opacity="0.06" Color="#0B193C"/>
+                        </Border.Effect>
+                        <Grid>
+                            <!-- Stage 1: Scope Selector -->
+                            <StackPanel x:Name="Stage1" Visibility="{Binding CurrentStep, Converter={StaticResource StepToVisibilityConverter}, ConverterParameter=1}">
+                                <TextBlock Text="المرحلة (1): تحديد نطاق البحث" FontSize="18" FontWeight="Bold" FontFamily="Manrope" Margin="0,0,0,20" Foreground="{DynamicResource PrimaryBrush}"/>
+                                
+                                <TextBlock Text="الفترة الزمنية:" FontWeight="SemiBold" Margin="0,0,0,8" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                <Grid Margin="0,0,0,20">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="20"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Text="من تاريخ" FontSize="12" Margin="0,0,0,5" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                        <controls:CustomDatePicker SelectedDate="{Binding StartDate}" 
+                                                    Height="50"
+                                                    Foreground="{DynamicResource PrimaryTextBrush}"
+                                                    Background="{DynamicResource InputBackgroundBrush}"
+                                                    Padding="10"
+                                                    FontSize="14"/>
+                                    </StackPanel>
+                                    
+                                    <StackPanel Grid.Column="2">
+                                        <TextBlock Text="إلى تاريخ" FontSize="12" Margin="0,0,0,5" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                        <controls:CustomDatePicker SelectedDate="{Binding EndDate}" 
+                                                    Height="50"
+                                                    Foreground="{DynamicResource PrimaryTextBrush}"
+                                                    Background="{DynamicResource InputBackgroundBrush}"
+                                                    Padding="10"
+                                                    FontSize="14"/>
+                                    </StackPanel>
+                                </Grid>
+
+                                <TextBlock Text="الجهة المرسلة:" FontWeight="SemiBold" Margin="0,0,0,8" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                <ComboBox ItemsSource="{Binding Senders}" 
+                                          SelectedItem="{Binding SelectedSender}"
+                                          Style="{StaticResource FormComboBoxStyle}"
+                                          Margin="0,0,0,20"/>
+                            </StackPanel>
+
+                            <!-- Stage 2: Customization Tools -->
+                            <StackPanel x:Name="Stage2" Visibility="{Binding CurrentStep, Converter={StaticResource StepToVisibilityConverter}, ConverterParameter=2}">
+                                <TextBlock Text="المرحلة (2): أدوات التخصيص" FontSize="18" FontWeight="Bold" FontFamily="Manrope" Margin="0,0,0,20" Foreground="{DynamicResource PrimaryBrush}"/>
+                                <TextBlock Text="اختر الأعمدة التي ستظهر في رسالة الإحالة:" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,15"/>
+                                
+                                <StackPanel Margin="20,0,0,0">
+                                    <CheckBox Content="رقم الشهادة" IsChecked="{Binding IncludeCertNum}" Margin="0,8" Style="{StaticResource MaterialDesignCheckBox}" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                    <CheckBox Content="اسم المورد" IsChecked="{Binding IncludeSupplier}" Margin="0,8" Style="{StaticResource MaterialDesignCheckBox}" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                    <CheckBox Content="أرقام العينات" IsChecked="{Binding IncludeSamples}" Margin="0,8" Style="{StaticResource MaterialDesignCheckBox}" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                    <CheckBox Content="رقم الإخطار" IsChecked="{Binding IncludeNotification}" Margin="0,8" Style="{StaticResource MaterialDesignCheckBox}" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <!-- Stage 3: Generation -->
+                            <StackPanel x:Name="Stage3" Visibility="{Binding CurrentStep, Converter={StaticResource StepToVisibilityConverter}, ConverterParameter=3}">
+                                <TextBlock Text="المرحلة (3): الإنشاء والمراجعة" FontSize="18" FontWeight="Bold" FontFamily="Manrope" Margin="0,0,0,20" Foreground="{DynamicResource PrimaryBrush}"/>
+                                
+                                <Border Padding="18" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="12" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                                    <StackPanel>
+                                        <TextBlock Text="ملخص المعايير:" FontWeight="Bold" Margin="0,0,0,8" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                        <StackPanel Orientation="Horizontal" Margin="0,4">
+                                            <TextBlock Text="الفترة:" Width="80" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                            <TextBlock Text="{Binding StartDate, StringFormat=yyyy-MM-dd}" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                            <TextBlock Text=" إلى " Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                            <TextBlock Text="{Binding EndDate, StringFormat=yyyy-MM-dd}" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" Margin="0,4">
+                                            <TextBlock Text="الجهة المرسلة:" Width="110" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                            <TextBlock Text="{Binding SelectedSender}" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" Margin="0,4">
+                                            <TextBlock Text="الأعمدة المشمولة:" Width="110" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                            <ItemsControl ItemsSource="{Binding SummaryColumns}">
+                                                <ItemsControl.ItemsPanel>
+                                                    <ItemsPanelTemplate>
+                                                        <StackPanel Orientation="Horizontal"/>
+                                                    </ItemsPanelTemplate>
+                                                </ItemsControl.ItemsPanel>
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Border Background="{DynamicResource PrimaryBrush}" CornerRadius="12" Padding="8,2" Margin="0,0,5,0">
+                                                            <TextBlock Text="{Binding}" Foreground="White" FontSize="10"/>
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Border>
+
+                                <TextBlock Text="عند النقر على 'إنشاء'، سيقوم النظام بالاستعلام من قاعدة البيانات وتوليد ملف PDF مباشرة." 
+                                           Margin="0,25,0,10" TextAlignment="Center" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- Navigation Footer -->
+                    <Border Grid.Row="2" Padding="10" Margin="0,15,0,0">
+                        <Grid>
+                            <Button Content="السابق" HorizontalAlignment="Left" 
+                                    Command="{Binding PreviousStepCommand}"
+                                    Style="{StaticResource MaterialDesignOutlinedButton}"
+                                    Width="100"
+                                    Visibility="{Binding CurrentStep, Converter={StaticResource StepToVisibilityConverter}, ConverterParameter='1|Invert'}"/>
+
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                <Button Command="{Binding NextStepCommand}" 
+                                        Width="120"
+                                        Style="{StaticResource PrimaryButtonStyle}"
+                                        Visibility="{Binding CurrentStep, Converter={StaticResource StepToVisibilityConverter}, ConverterParameter='3|Invert'}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="التالي" FontFamily="Inter" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White"/>
+                                    </StackPanel>
+                                </Button>
+                                
+                                <Button Command="{Binding GenerateLetterCommand}" 
+                                        Width="260" Margin="10,0,0,0"
+                                        Visibility="{Binding CurrentStep, Converter={StaticResource StepToVisibilityConverter}, ConverterParameter=3}">
+                                    <Button.Style>
+                                        <Style TargetType="Button" BasedOn="{StaticResource PrimaryButtonStyle}">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsBusy}" Value="True">
+                                                    <Setter Property="IsEnabled" Value="False"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                    <StackPanel Orientation="Horizontal">
+                                        <materialDesign:PackIcon Kind="ContentSaveOutline" Width="18" Height="18" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="White" />
+                                        <TextBlock Text="حفظ البيانات وإصدار رسالة إحالة" FontFamily="Inter" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White"/>
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </TabItem>
+
+            <!-- Tab 2: Referral Letters -->
+            <TabItem>
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="ClipboardListOutline" Width="22" Height="22" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        <TextBlock Text="رسائل الإحالة" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </TabItem.Header>
+                
+                <Grid Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Text="سجل رسائل الإحالة الصادرة" FontSize="20" FontWeight="Bold" FontFamily="Manrope" Margin="0,0,0,15" Foreground="{DynamicResource PrimaryBrush}"/>
+
+                    <Border Grid.Row="1" Style="{StaticResource DashboardCardStyle}" Padding="0" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                        <DataGrid ItemsSource="{Binding ReferralHistoryView}"
+                                  SelectedItem="{Binding SelectedReferral, Mode=TwoWay}"
+                                  AutoGenerateColumns="False"
+                                  IsReadOnly="True"
+                                  SelectionMode="Single"
+                                  CanUserAddRows="False"
+                                  CanUserResizeColumns="False"
+                                  CanUserReorderColumns="False"
+                                  CanUserSortColumns="False"
+                                  Background="Transparent"
+                                  BorderThickness="0"
+                                  GridLinesVisibility="None">
+                            <DataGrid.ColumnHeaderStyle>
+                                <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource {x:Type DataGridColumnHeader}}">
+                                    <Setter Property="Background" Value="{DynamicResource CardBackgroundBrush}"/>
+                                    <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}"/>
+                                    <Setter Property="FontSize" Value="13"/>
+                                    <Setter Property="FontWeight" Value="Bold"/>
+                                    <Setter Property="Padding" Value="15,12"/>
+                                    <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                                    <Setter Property="BorderBrush" Value="{DynamicResource DividerBrush}"/>
+                                    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                </Style>
+                            </DataGrid.ColumnHeaderStyle>
+                            <DataGrid.CellStyle>
+                                <Style TargetType="DataGridCell" BasedOn="{StaticResource {x:Type DataGridCell}}">
+                                    <Setter Property="BorderThickness" Value="0"/>
+                                    <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=DataGridRow}}" Value="True">
+                                            <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
+                                            <Setter Property="Background" Value="Transparent"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=DataGridRow}}" Value="True">
+                                            <Setter Property="Foreground" Value="White"/>
+                                            <Setter Property="Background" Value="{DynamicResource PrimaryBrush}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </DataGrid.CellStyle>
+                            <DataGrid.RowStyle>
+                                <Style TargetType="DataGridRow" BasedOn="{StaticResource {x:Type DataGridRow}}">
+                                    <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                                    <Setter Property="BorderBrush" Value="{DynamicResource DividerBrush}"/>
+                                    <Setter Property="Background" Value="Transparent"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#0A000000"/> 
+                                        </Trigger>
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter Property="FontWeight" Value="SemiBold"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </DataGrid.RowStyle>
+                            <DataGrid.Resources>
+                                <Style x:Key="CenterWrapStyle" TargetType="TextBlock" BasedOn="{StaticResource DataGridTextWrappingStyle}">
+                                    <Setter Property="TextAlignment" Value="Center"/>
+                                    <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                                </Style>
+                            </DataGrid.Resources>
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="تسلسل" Binding="{Binding Sequence}" Width="80" ElementStyle="{StaticResource CenterWrapStyle}"/>
+                                <DataGridTextColumn Header="التاريخ" Binding="{Binding GeneratedAt, StringFormat=yyyy-MM-dd HH:mm}" Width="170" ElementStyle="{StaticResource CenterWrapStyle}"/>
+                                <DataGridTextColumn Header="الجهة المرسلة" Binding="{Binding SenderName}" Width="*" ElementStyle="{StaticResource CenterWrapStyle}"/>
+                                <DataGridTextColumn Header="عدد الشهادات" Binding="{Binding CertificateCount}" Width="130" ElementStyle="{StaticResource CenterWrapStyle}"/>
+                                <DataGridTextColumn Header="عدد العينات" Binding="{Binding SampleCount}" Width="130" ElementStyle="{StaticResource CenterWrapStyle}"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Border>
+
+                    <!-- Row 2: Action Buttons Footer -->
+                    <Grid Grid.Row="2" Margin="0,15,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Left side: Filter -->
+                        <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
+                            <TextBlock Text="تصفية الجهة المرسلة:" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                            <ComboBox ItemsSource="{Binding FilterSenders}" 
+                                      SelectedItem="{Binding SelectedFilterSender, Mode=TwoWay}"
+                                      Style="{StaticResource FormComboBoxStyle}"
+                                      Width="250" Margin="0,0,10,0"/>
+                        </StackPanel>
+
+                        <!-- Right side: Actions -->
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Command="{Binding ViewLetterCommand}"
+                                CommandParameter="{Binding SelectedReferral}"
+                                Width="180" Height="45" Margin="0,0,10,0">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource PrimaryButtonStyle}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SelectedReferral}" Value="{x:Null}">
+                                            <Setter Property="IsEnabled" Value="False"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="EyeOutline" Width="18" Height="18" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="White" />
+                                <TextBlock Text="مشاهدة الرسالة" FontFamily="Inter" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White"/>
+                            </StackPanel>
+                        </Button>
+
+                        <Button Command="{Binding PrintLetterCommand}"
+                                CommandParameter="{Binding SelectedReferral}"
+                                Width="180" Height="45">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource ActionButtonStyle}">
+                                    <Setter Property="Background" Value="{DynamicResource SuccessBrush}"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SelectedReferral}" Value="{x:Null}">
+                                            <Setter Property="IsEnabled" Value="False"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="PrinterOutline" Width="18" Height="18" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="White" />
+                                <TextBlock Text="طباعة الرسالة" FontFamily="Inter" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White"/>
+                            </StackPanel>
+                        </Button>
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+            </TabItem>
+            
+        </TabControl>
+    </Border>
+</UserControl>

@@ -1,0 +1,254 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+                    xmlns:local="clr-namespace:Enjaz"
+                    xmlns:helpers="clr-namespace:Enjaz.Helpers">
+    
+    <!-- الموارد تم نقلها لـ MainUIResources.xaml لتجنب التكرار -->
+    
+    <!-- Windows 10 Section Header Style -->
+    <Style x:Key="WindowsSectionHeaderStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="{DynamicResource FontSizeHeader}"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
+        <Setter Property="Margin" Value="0,0,0,15"/>
+    </Style>
+
+    <!-- Windows 10 Title Line (Accent) -->
+    <Style x:Key="WindowsAccentLineStyle" TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource SecondaryBrush}"/>
+        <Setter Property="Height" Value="2"/>
+        <Setter Property="HorizontalAlignment" Value="Left"/>
+        <Setter Property="Margin" Value="0,-12,0,25"/>
+    </Style>
+
+    <!-- Sidebar Button Style -->
+    <Style x:Key="SidebarButtonStyle" TargetType="Button">
+        <Style.Resources>
+            <Style TargetType="TextBlock">
+                <Setter Property="Foreground" Value="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}"/>
+            </Style>
+            <Style TargetType="materialDesign:PackIcon">
+                <Setter Property="Foreground" Value="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}"/>
+            </Style>
+        </Style.Resources>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="{DynamicResource SidebarMutedBrush}"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="FontFamily" Value="Manrope"/>
+        <Setter Property="FontWeight" Value="Medium"/>
+        <Setter Property="Padding" Value="16,12"/>
+        <Setter Property="Margin" Value="10,4"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="HorizontalContentAlignment" Value="Right"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="border" 
+                            Background="{TemplateBinding Background}" 
+                            Padding="{TemplateBinding Padding}"
+                            CornerRadius="12">
+                        <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" 
+                                          VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="{DynamicResource SidebarHoverBrush}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource SidebarTextBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.5"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Action Button Style (Emerald/Primary Action) -->
+    <Style x:Key="ActionButtonStyle" TargetType="Button">
+        <Style.Resources>
+            <Style TargetType="TextBlock">
+                <Setter Property="Foreground" Value="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}"/>
+            </Style>
+            <Style TargetType="materialDesign:PackIcon">
+                <Setter Property="Foreground" Value="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}"/>
+            </Style>
+        </Style.Resources>
+        <Setter Property="Background" Value="{DynamicResource SecondaryBrush}"/>
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="FontFamily" Value="Inter"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Height" Value="46"/>
+        <Setter Property="Padding" Value="24,0"/>
+        <Setter Property="Margin" Value="5,0"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="border" 
+                            Background="{TemplateBinding Background}" 
+                            CornerRadius="12"
+                            Padding="{TemplateBinding Padding}"
+                            TextElement.Foreground="{TemplateBinding Foreground}">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="border" Property="Opacity" Value="0.9"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="border" Property="Opacity" Value="0.8"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.5"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Primary Button (Navy in Light, Emerald in Dark) -->
+    <Style x:Key="PrimaryButtonStyle" TargetType="Button" BasedOn="{StaticResource ActionButtonStyle}">
+        <Setter Property="Background" Value="{DynamicResource PrimaryBrush}"/>
+        <Setter Property="Foreground" Value="White"/>
+    </Style>
+
+    <Style x:Key="DangerButtonStyle" TargetType="Button" BasedOn="{StaticResource ActionButtonStyle}">
+        <Setter Property="Background" Value="{DynamicResource DangerBrush}"/>
+    </Style>
+
+    <Style x:Key="SuccessButtonStyle" TargetType="Button" BasedOn="{StaticResource ActionButtonStyle}">
+        <Setter Property="Background" Value="{DynamicResource SuccessBrush}"/>
+    </Style>
+
+    <Style x:Key="SecondaryButtonStyle" TargetType="Button" BasedOn="{StaticResource ActionButtonStyle}">
+        <Setter Property="Background" Value="{DynamicResource BorderBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
+    </Style>
+
+    <!-- Form Input Styles -->
+    <Style x:Key="FormTextBoxStyle" TargetType="TextBox">
+        <Setter Property="Height" Value="46"/>
+        <Setter Property="Padding" Value="14,0"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="Background" Value="{DynamicResource InputBackgroundBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="TextBox">
+                    <Border x:Name="border"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="12">
+                        <ScrollViewer x:Name="PART_ContentHost" Margin="2,0"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsFocused" Value="True">
+                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource SecondaryBrush}"/>
+                            <Setter TargetName="border" Property="BorderThickness" Value="1.5"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Card Styles -->
+    <Style x:Key="DashboardCardStyle" TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource SurfaceBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="16"/>
+        <Setter Property="Padding" Value="24"/>
+        <Setter Property="Margin" Value="0,0,16,16"/>
+        <Setter Property="Effect">
+            <Setter.Value>
+                <DropShadowEffect BlurRadius="30" ShadowDepth="4" Color="Black" Opacity="0.03" />
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="StatCardStyle" TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource SurfaceBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="16"/>
+        <Setter Property="Padding" Value="24"/>
+        <Setter Property="Margin" Value="0,0,16,0"/>
+        <Setter Property="Effect">
+            <Setter.Value>
+                <DropShadowEffect BlurRadius="30" ShadowDepth="4" Color="Black" Opacity="0.03" />
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="BorderBrush" Value="{DynamicResource SecondaryBrush}"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- Login Card Style -->
+    <Style x:Key="LoginCardStyle" TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource CardBackgroundBrush}"/>
+        <Setter Property="CornerRadius" Value="0"/>
+        <Setter Property="Padding" Value="40"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+    </Style>
+
+    <!-- Glassmorphism Card Style -->
+    <Style x:Key="EnjazSmartHelpGlassCardStyle" TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource GlassBackgroundBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource GlassBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="20"/>
+        <Setter Property="Padding" Value="20"/>
+        <Setter Property="Effect">
+            <Setter.Value>
+                <DropShadowEffect BlurRadius="40" Opacity="0.1" ShadowDepth="2" Color="Black"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Modern Search Box Style -->
+    <Style x:Key="ModernSearchBoxStyle" TargetType="TextBox" BasedOn="{StaticResource FormTextBoxStyle}">
+        <Setter Property="Background" Value="{DynamicResource GlassInputBackgroundBrush}"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="materialDesign:HintAssist.Foreground" Value="{DynamicResource GlassMutedTextBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource GlassTextBrush}"/>
+        <Setter Property="CaretBrush" Value="{DynamicResource GlassTextBrush}"/>
+    </Style>
+
+    <!-- Form DatePicker Style -->
+    <Style x:Key="FormDatePickerStyle" TargetType="DatePicker">
+        <Setter Property="Height" Value="46"/>
+        <Setter Property="Padding" Value="14,0"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="Background" Value="{DynamicResource InputBackgroundBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
+        <Setter Property="FontSize" Value="14"/>
+    </Style>
+
+    <!-- Form ComboBox Style -->
+    <Style x:Key="FormComboBoxStyle" TargetType="ComboBox">
+        <Setter Property="Height" Value="46"/>
+        <Setter Property="Padding" Value="14,0"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="Background" Value="{DynamicResource InputBackgroundBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
+        <Setter Property="FontSize" Value="14"/>
+    </Style>
+
+</ResourceDictionary>

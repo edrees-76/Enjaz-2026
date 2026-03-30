@@ -1,0 +1,335 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="2e453634-8344-44f3-8610-e39959f79b52" name="DELL@EDREES76-NEW 2026-03-28 22:57:20" runUser="EDREES76-NEW\DELL" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-03-28T22:57:20.6048546+02:00" queuing="2026-03-28T22:57:20.6048553+02:00" start="2026-03-28T22:57:19.3006646+02:00" finish="2026-03-28T22:58:00.6740929+02:00" />
+  <TestSettings name="default" id="d1dc5740-711c-46da-8ba2-5baefd06cbf1">
+    <Deployment runDeploymentRoot="DELL_EDREES76-NEW_2026-03-28_22_57_20" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="adfc0d24-7d6c-4ad1-969c-5c6075ac4a72" testId="743a6788-149b-c6eb-0571-7a82400ddd2c" testName="CertificatesViewModel_Initialization_SetsDefaultValues" computerName="EDREES76-NEW" duration="00:00:00.0195770" startTime="2026-03-28T22:57:20.4605529+02:00" endTime="2026-03-28T22:57:20.4801297+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="adfc0d24-7d6c-4ad1-969c-5c6075ac4a72" />
+    <UnitTestResult executionId="227890bf-699d-4f80-ac9a-11e01ea92836" testId="083f7942-8004-4299-d648-101ef2d064ef" testName="ArchiveOldLogsAsync_ShouldMoveOldLogsToArchiveDb" computerName="EDREES76-NEW" duration="00:00:00.0211020" startTime="2026-03-28T22:57:20.2079836+02:00" endTime="2026-03-28T22:57:20.2290854+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="227890bf-699d-4f80-ac9a-11e01ea92836">
+      <Output>
+        <ErrorInfo>
+          <Message>OneTimeSetUp: System.ArgumentException : Format of the initialization string does not conform to specification starting at index 0.</Message>
+          <StackTrace>   at System.Data.Common.DbConnectionOptions.GetKeyValuePair(String connectionString, Int32 currentPosition, StringBuilder buffer, Boolean useOdbcRules, String&amp; keyname, String&amp; keyvalue)&#xD;
+   at System.Data.Common.DbConnectionOptions.ParseInternal(Dictionary`2 parsetable, String connectionString, Boolean buildChain, Dictionary`2 synonyms, Boolean firstKey)&#xD;
+   at System.Data.Common.DbConnectionOptions..ctor(String connectionString, Dictionary`2 synonyms, Boolean useOdbcRules)&#xD;
+   at System.Data.Common.DbConnectionStringBuilder.set_ConnectionString(String value)&#xD;
+   at Microsoft.Data.Sqlite.SqliteConnectionStringBuilder..ctor(String connectionString)&#xD;
+   at Microsoft.Data.Sqlite.SqliteConnectionFactory.GetPoolGroup(String connectionString)&#xD;
+   at Microsoft.Data.Sqlite.SqliteConnection.set_ConnectionString(String value)&#xD;
+   at Microsoft.Data.Sqlite.SqliteConnection..ctor(String connectionString)&#xD;
+   at Enjaz.Services.DatabaseService.InitializeDatabase() in D:\منظومة انجاز 2026\Services\DatabaseService.cs:line 296&#xD;
+   at Enjaz.Services.DatabaseService..ctor(String connectionString) in D:\منظومة انجاز 2026\Services\DatabaseService.cs:line 29&#xD;
+   at Enjaz.Tests.ArchiveServiceTests.Setup() in D:\منظومة انجاز 2026\Enjaz.Tests\ArchiveServiceTests.cs:line 28&#xD;
+   at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)&#xD;
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="84e2ac14-b779-4895-9488-a034b88f0c2c" testId="99a97c97-2dd2-a169-f46e-8193ddf16845" testName="AddCertificateCommand_SetsIsEditingTrue" computerName="EDREES76-NEW" duration="00:00:00.2163730" startTime="2026-03-28T22:57:20.2429727+02:00" endTime="2026-03-28T22:57:20.4593450+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="84e2ac14-b779-4895-9488-a034b88f0c2c">
+      <Output>
+        <ErrorInfo>
+          <Message>  Expected: True&#xD;
+  But was:  False&#xD;
+</Message>
+          <StackTrace>   at Enjaz.Tests.CertificateViewModelTests.AddCertificateCommand_SetsIsEditingTrue() in D:\منظومة انجاز 2026\Enjaz.Tests\CertificateViewModelTests.cs:line 47&#xD;
+
+1)    at Enjaz.Tests.CertificateViewModelTests.AddCertificateCommand_SetsIsEditingTrue() in D:\منظومة انجاز 2026\Enjaz.Tests\CertificateViewModelTests.cs:line 47&#xD;
+
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="910e654c-ed35-4dd4-abeb-a34c0943436b" testId="7124d338-3622-3ea8-521a-525f421167c8" testName="LoadSimulation_SearchPerformance" computerName="EDREES76-NEW" duration="00:00:00.8021300" startTime="2026-03-28T22:57:39.5061209+02:00" endTime="2026-03-28T22:57:40.3082503+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="910e654c-ed35-4dd4-abeb-a34c0943436b">
+      <Output>
+        <StdOut>=== Testing Search Performance on Large Dataset (Pagination) ===&#xD;
+Search for specific record in 100k+ DB took: 789ms&#xD;
+Deep Pagination (Page 1000) took: 7ms</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="16d46da0-36e2-472d-bba2-c6fb4cecea0e" testId="0093e7cf-a43b-54a4-71c7-15042eed84ea" testName="ConfirmTypeCommand_InitializesEditing_WhenTypeIsSelected" computerName="EDREES76-NEW" duration="00:00:00.0015800" startTime="2026-03-28T22:57:20.4890161+02:00" endTime="2026-03-28T22:57:20.4905967+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="16d46da0-36e2-472d-bba2-c6fb4cecea0e" />
+    <UnitTestResult executionId="e910942f-9f74-44a3-aefc-fbd924a9f024" testId="355c9c55-f607-c9ec-5db7-d60f7267f4db" testName="FaultInjection_DatabaseLogicErrors" computerName="EDREES76-NEW" duration="00:00:00.0154770" startTime="2026-03-28T22:57:20.6490492+02:00" endTime="2026-03-28T22:57:20.6645264+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e910942f-9f74-44a3-aefc-fbd924a9f024">
+      <Output>
+        <StdOut>=== Starting Fault Injection (Logic Errors) ===&#xD;
+System successfully prevented data corruption by auto-generating Certificate Number.</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="63e89fb7-d3d5-4acd-a709-e0cf3594fc89" testId="bae4177c-b5fd-c4d6-d00d-294e835f4309" testName="SearchCertificatesAsync_ShouldFindMatchingCertificates" computerName="EDREES76-NEW" duration="00:00:00.0012560" startTime="2026-03-28T22:57:20.2404797+02:00" endTime="2026-03-28T22:57:20.2417354+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="63e89fb7-d3d5-4acd-a709-e0cf3594fc89">
+      <Output>
+        <ErrorInfo>
+          <Message>System.NullReferenceException : Object reference not set to an instance of an object.</Message>
+          <StackTrace>   at Enjaz.Tests.CertificateRepositoryTests.SearchCertificatesAsync_ShouldFindMatchingCertificates() in D:\منظومة انجاز 2026\Enjaz.Tests\CertificateRepositoryTests.cs:line 84&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.RunTestMethod(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.Execute(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.BeforeAndAfterTestCommand.&lt;&gt;c__DisplayClass1_0.&lt;Execute&gt;b__0()&#xD;
+   at NUnit.Framework.Internal.Commands.DelegatingTestCommand.RunTestMethodInThreadAbortSafeZone(TestExecutionContext context, Action action)
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="a570c1c2-761a-4ea5-86af-846ce70863e1" testId="3129492e-1af9-c5a2-dc8b-8b5f3ef6512e" testName="AddCertificateAsync_ShouldInsertAndReturnId" computerName="EDREES76-NEW" duration="00:00:00.0066200" startTime="2026-03-28T22:57:20.2321501+02:00" endTime="2026-03-28T22:57:20.2387698+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a570c1c2-761a-4ea5-86af-846ce70863e1">
+      <Output>
+        <ErrorInfo>
+          <Message>System.NullReferenceException : Object reference not set to an instance of an object.</Message>
+          <StackTrace>   at Enjaz.Tests.CertificateRepositoryTests.AddCertificateAsync_ShouldInsertAndReturnId() in D:\منظومة انجاز 2026\Enjaz.Tests\CertificateRepositoryTests.cs:line 68&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.RunTestMethod(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.Execute(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.BeforeAndAfterTestCommand.&lt;&gt;c__DisplayClass1_0.&lt;Execute&gt;b__0()&#xD;
+   at NUnit.Framework.Internal.Commands.DelegatingTestCommand.RunTestMethodInThreadAbortSafeZone(TestExecutionContext context, Action action)
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="17878e96-3188-414e-897a-d933c79e10ab" testId="f3cfd5a7-7a29-3677-7571-0f2b633970d1" testName="LoadSimulation_Heavy_100k_Seeding" computerName="EDREES76-NEW" duration="00:00:18.8401060" startTime="2026-03-28T22:57:20.6659832+02:00" endTime="2026-03-28T22:57:39.5060891+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="17878e96-3188-414e-897a-d933c79e10ab">
+      <Output>
+        <StdOut>=== Starting Heavy Load Simulation (100,000 Records Seeding) ===&#xD;
+Inserted 25000 records...&#xD;
+Inserted 50000 records...&#xD;
+Inserted 75000 records...&#xD;
+Successfully seeded 100000 certificates in 18.80s&#xD;
+Seeding Speed: 5320 records/sec</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="0eabef65-d4cc-409b-ace5-7b363eda0478" testId="3c9c5275-95e5-eeb8-e13d-0847a9046ef1" testName="AddReceptionCommand_ShowsTypeSelection" computerName="EDREES76-NEW" duration="00:00:00.0019060" startTime="2026-03-28T22:57:20.4848757+02:00" endTime="2026-03-28T22:57:20.4867817+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="0eabef65-d4cc-409b-ace5-7b363eda0478" />
+    <UnitTestResult executionId="5e6dee0e-8c5d-40b9-b65f-a7f68628bf32" testId="f9d9413c-6817-1708-a8bf-dab5de6d3ba2" testName="ArchiveOldLogsAsync_ShouldKeepRecentLogsInMainDb" computerName="EDREES76-NEW" duration="00:00:00.0210880" startTime="2026-03-28T22:57:20.2079836+02:00" endTime="2026-03-28T22:57:20.2290713+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="5e6dee0e-8c5d-40b9-b65f-a7f68628bf32">
+      <Output>
+        <ErrorInfo>
+          <Message>OneTimeSetUp: System.ArgumentException : Format of the initialization string does not conform to specification starting at index 0.</Message>
+          <StackTrace>   at System.Data.Common.DbConnectionOptions.GetKeyValuePair(String connectionString, Int32 currentPosition, StringBuilder buffer, Boolean useOdbcRules, String&amp; keyname, String&amp; keyvalue)&#xD;
+   at System.Data.Common.DbConnectionOptions.ParseInternal(Dictionary`2 parsetable, String connectionString, Boolean buildChain, Dictionary`2 synonyms, Boolean firstKey)&#xD;
+   at System.Data.Common.DbConnectionOptions..ctor(String connectionString, Dictionary`2 synonyms, Boolean useOdbcRules)&#xD;
+   at System.Data.Common.DbConnectionStringBuilder.set_ConnectionString(String value)&#xD;
+   at Microsoft.Data.Sqlite.SqliteConnectionStringBuilder..ctor(String connectionString)&#xD;
+   at Microsoft.Data.Sqlite.SqliteConnectionFactory.GetPoolGroup(String connectionString)&#xD;
+   at Microsoft.Data.Sqlite.SqliteConnection.set_ConnectionString(String value)&#xD;
+   at Microsoft.Data.Sqlite.SqliteConnection..ctor(String connectionString)&#xD;
+   at Enjaz.Services.DatabaseService.InitializeDatabase() in D:\منظومة انجاز 2026\Services\DatabaseService.cs:line 296&#xD;
+   at Enjaz.Services.DatabaseService..ctor(String connectionString) in D:\منظومة انجاز 2026\Services\DatabaseService.cs:line 29&#xD;
+   at Enjaz.Tests.ArchiveServiceTests.Setup() in D:\منظومة انجاز 2026\Enjaz.Tests\ArchiveServiceTests.cs:line 28&#xD;
+   at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)&#xD;
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="39e88304-3c50-4fc6-880b-e54587b02bb6" testId="ff851530-2722-f602-c3a6-c641e803d276" testName="Test1" computerName="EDREES76-NEW" duration="00:00:00.0001410" startTime="2026-03-28T22:58:00.5413496+02:00" endTime="2026-03-28T22:58:00.5414906+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="39e88304-3c50-4fc6-880b-e54587b02bb6" />
+    <UnitTestResult executionId="9da67375-7575-4777-8416-783919c911eb" testId="bba54592-ee2d-d3c5-0391-6e3d75cc35dd" testName="AddSampleAsync_ShouldLinkSampleToCertificate" computerName="EDREES76-NEW" duration="00:00:00.0016560" startTime="2026-03-28T22:57:20.2387984+02:00" endTime="2026-03-28T22:57:20.2404537+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9da67375-7575-4777-8416-783919c911eb">
+      <Output>
+        <ErrorInfo>
+          <Message>System.NullReferenceException : Object reference not set to an instance of an object.</Message>
+          <StackTrace>   at Enjaz.Tests.CertificateRepositoryTests.AddSampleAsync_ShouldLinkSampleToCertificate() in D:\منظومة انجاز 2026\Enjaz.Tests\CertificateRepositoryTests.cs:line 100&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.RunTestMethod(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.Execute(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.BeforeAndAfterTestCommand.&lt;&gt;c__DisplayClass1_0.&lt;Execute&gt;b__0()&#xD;
+   at NUnit.Framework.Internal.Commands.DelegatingTestCommand.RunTestMethodInThreadAbortSafeZone(TestExecutionContext context, Action action)
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="6dd343d8-8731-40a3-a5d1-1da19a146707" testId="efe68f47-3871-1532-0e81-f4ca86621162" testName="UI_MonkeySimulation_Chaos" computerName="EDREES76-NEW" duration="00:00:20.1913750" startTime="2026-03-28T22:57:40.3082822+02:00" endTime="2026-03-28T22:58:00.4996561+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="6dd343d8-8731-40a3-a5d1-1da19a146707">
+      <Output>
+        <StdOut>=== Starting UI Monkey Simulation (ViewModel Chaos) ===&#xD;
+Monkey Test completed 50 random concurrent actions with 0 critical failures.</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="916ac913-61c3-4bd5-9462-fe01add06278" testId="ee12b18a-b803-a14b-2e7d-368526d376f7" testName="Environment_Culture_DateFormats" computerName="EDREES76-NEW" duration="00:00:00.0823570" startTime="2026-03-28T22:57:20.5658968+02:00" endTime="2026-03-28T22:57:20.6482535+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="916ac913-61c3-4bd5-9462-fe01add06278">
+      <Output>
+        <StdOut>=== Starting Environment Simulation (Different Cultures) ===&#xD;
+Testing with Culture: en-US&#xD;
+   Success for en-US&#xD;
+Testing with Culture: ar-SA&#xD;
+   Success for ar-SA</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="d84728f3-c054-407e-9776-167259c821e8" testId="db9ea6d9-d3af-e92b-e3a5-53ac8d1735b1" testName="SampleReceptionsViewModel_Initialization_SetsDefaultValues" computerName="EDREES76-NEW" duration="00:00:00.0023850" startTime="2026-03-28T22:57:20.5087780+02:00" endTime="2026-03-28T22:57:20.5111637+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d84728f3-c054-407e-9776-167259c821e8" />
+    <UnitTestResult executionId="2684ddd0-fdd3-4141-8135-d9c0dd22d82e" testId="6cbb741a-5eca-d375-fe0b-676ee9cb7f78" testName="ArchiveOldLogsAsync_ShouldCreateArchiveDbIfMissing" computerName="EDREES76-NEW" duration="00:00:00.0199240" startTime="2026-03-28T22:57:20.2079836+02:00" endTime="2026-03-28T22:57:20.2278260+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="2684ddd0-fdd3-4141-8135-d9c0dd22d82e">
+      <Output>
+        <ErrorInfo>
+          <Message>OneTimeSetUp: System.ArgumentException : Format of the initialization string does not conform to specification starting at index 0.</Message>
+          <StackTrace>   at System.Data.Common.DbConnectionOptions.GetKeyValuePair(String connectionString, Int32 currentPosition, StringBuilder buffer, Boolean useOdbcRules, String&amp; keyname, String&amp; keyvalue)&#xD;
+   at System.Data.Common.DbConnectionOptions.ParseInternal(Dictionary`2 parsetable, String connectionString, Boolean buildChain, Dictionary`2 synonyms, Boolean firstKey)&#xD;
+   at System.Data.Common.DbConnectionOptions..ctor(String connectionString, Dictionary`2 synonyms, Boolean useOdbcRules)&#xD;
+   at System.Data.Common.DbConnectionStringBuilder.set_ConnectionString(String value)&#xD;
+   at Microsoft.Data.Sqlite.SqliteConnectionStringBuilder..ctor(String connectionString)&#xD;
+   at Microsoft.Data.Sqlite.SqliteConnectionFactory.GetPoolGroup(String connectionString)&#xD;
+   at Microsoft.Data.Sqlite.SqliteConnection.set_ConnectionString(String value)&#xD;
+   at Microsoft.Data.Sqlite.SqliteConnection..ctor(String connectionString)&#xD;
+   at Enjaz.Services.DatabaseService.InitializeDatabase() in D:\منظومة انجاز 2026\Services\DatabaseService.cs:line 296&#xD;
+   at Enjaz.Services.DatabaseService..ctor(String connectionString) in D:\منظومة انجاز 2026\Services\DatabaseService.cs:line 29&#xD;
+   at Enjaz.Tests.ArchiveServiceTests.Setup() in D:\منظومة انجاز 2026\Enjaz.Tests\ArchiveServiceTests.cs:line 28&#xD;
+   at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)&#xD;
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="SearchCertificatesAsync_ShouldFindMatchingCertificates" storage="d:\منظومة انجاز 2026\enjaz.tests\bin\debug\net8.0-windows\enjaz.tests.dll" id="bae4177c-b5fd-c4d6-d00d-294e835f4309">
+      <Execution id="63e89fb7-d3d5-4acd-a709-e0cf3594fc89" />
+      <TestMethod codeBase="D:\منظومة انجاز 2026\Enjaz.Tests\bin\Debug\net8.0-windows\Enjaz.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Enjaz.Tests.CertificateRepositoryTests" name="SearchCertificatesAsync_ShouldFindMatchingCertificates" />
+    </UnitTest>
+    <UnitTest name="ArchiveOldLogsAsync_ShouldKeepRecentLogsInMainDb" storage="d:\منظومة انجاز 2026\enjaz.tests\bin\debug\net8.0-windows\enjaz.tests.dll" id="f9d9413c-6817-1708-a8bf-dab5de6d3ba2">
+      <Execution id="5e6dee0e-8c5d-40b9-b65f-a7f68628bf32" />
+      <TestMethod codeBase="D:\منظومة انجاز 2026\Enjaz.Tests\bin\Debug\net8.0-windows\Enjaz.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Enjaz.Tests.ArchiveServiceTests" name="ArchiveOldLogsAsync_ShouldKeepRecentLogsInMainDb" />
+    </UnitTest>
+    <UnitTest name="ArchiveOldLogsAsync_ShouldCreateArchiveDbIfMissing" storage="d:\منظومة انجاز 2026\enjaz.tests\bin\debug\net8.0-windows\enjaz.tests.dll" id="6cbb741a-5eca-d375-fe0b-676ee9cb7f78">
+      <Execution id="2684ddd0-fdd3-4141-8135-d9c0dd22d82e" />
+      <TestMethod codeBase="D:\منظومة انجاز 2026\Enjaz.Tests\bin\Debug\net8.0-windows\Enjaz.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Enjaz.Tests.ArchiveServiceTests" name="ArchiveOldLogsAsync_ShouldCreateArchiveDbIfMissing" />
+    </UnitTest>
+    <UnitTest name="AddReceptionCommand_ShowsTypeSelection" storage="d:\منظومة انجاز 2026\enjaz.tests\bin\debug\net8.0-windows\enjaz.tests.dll" id="3c9c5275-95e5-eeb8-e13d-0847a9046ef1">
+      <Execution id="0eabef65-d4cc-409b-ace5-7b363eda0478" />
+      <TestMethod codeBase="D:\منظومة انجاز 2026\Enjaz.Tests\bin\Debug\net8.0-windows\Enjaz.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Enjaz.Tests.SampleReceptionViewModelTests" name="AddReceptionCommand_ShowsTypeSelection" />
+    </UnitTest>
+    <UnitTest name="LoadSimulation_SearchPerformance" storage="d:\منظومة انجاز 2026\enjaz.tests\bin\debug\net8.0-windows\enjaz.tests.dll" id="7124d338-3622-3ea8-521a-525f421167c8">
+      <Execution id="910e654c-ed35-4dd4-abeb-a34c0943436b" />
+      <TestMethod codeBase="D:\منظومة انجاز 2026\Enjaz.Tests\bin\Debug\net8.0-windows\Enjaz.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Enjaz.Tests.SystemSimulationTests" name="LoadSimulation_SearchPerformance" />
+    </UnitTest>
+    <UnitTest name="AddCertificateAsync_ShouldInsertAndReturnId" storage="d:\منظومة انجاز 2026\enjaz.tests\bin\debug\net8.0-windows\enjaz.tests.dll" id="3129492e-1af9-c5a2-dc8b-8b5f3ef6512e">
+      <Execution id="a570c1c2-761a-4ea5-86af-846ce70863e1" />
+      <TestMethod codeBase="D:\منظومة انجاز 2026\Enjaz.Tests\bin\Debug\net8.0-windows\Enjaz.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Enjaz.Tests.CertificateRepositoryTests" name="AddCertificateAsync_ShouldInsertAndReturnId" />
+    </UnitTest>
+    <UnitTest name="CertificatesViewModel_Initialization_SetsDefaultValues" storage="d:\منظومة انجاز 2026\enjaz.tests\bin\debug\net8.0-windows\enjaz.tests.dll" id="743a6788-149b-c6eb-0571-7a82400ddd2c">
+      <Execution id="adfc0d24-7d6c-4ad1-969c-5c6075ac4a72" />
+      <TestMethod codeBase="D:\منظومة انجاز 2026\Enjaz.Tests\bin\Debug\net8.0-windows\Enjaz.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Enjaz.Tests.CertificateViewModelTests" name="CertificatesViewModel_Initialization_SetsDefaultValues" />
+    </UnitTest>
+    <UnitTest name="UI_MonkeySimulation_Chaos" storage="d:\منظومة انجاز 2026\enjaz.tests\bin\debug\net8.0-windows\enjaz.tests.dll" id="efe68f47-3871-1532-0e81-f4ca86621162">
+      <Execution id="6dd343d8-8731-40a3-a5d1-1da19a146707" />
+      <TestMethod codeBase="D:\منظومة انجاز 2026\Enjaz.Tests\bin\Debug\net8.0-windows\Enjaz.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Enjaz.Tests.SystemSimulationTests" name="UI_MonkeySimulation_Chaos" />
+    </UnitTest>
+    <UnitTest name="ArchiveOldLogsAsync_ShouldMoveOldLogsToArchiveDb" storage="d:\منظومة انجاز 2026\enjaz.tests\bin\debug\net8.0-windows\enjaz.tests.dll" id="083f7942-8004-4299-d648-101ef2d064ef">
+      <Execution id="227890bf-699d-4f80-ac9a-11e01ea92836" />
+      <TestMethod codeBase="D:\منظومة انجاز 2026\Enjaz.Tests\bin\Debug\net8.0-windows\Enjaz.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Enjaz.Tests.ArchiveServiceTests" name="ArchiveOldLogsAsync_ShouldMoveOldLogsToArchiveDb" />
+    </UnitTest>
+    <UnitTest name="Environment_Culture_DateFormats" storage="d:\منظومة انجاز 2026\enjaz.tests\bin\debug\net8.0-windows\enjaz.tests.dll" id="ee12b18a-b803-a14b-2e7d-368526d376f7">
+      <Execution id="916ac913-61c3-4bd5-9462-fe01add06278" />
+      <TestMethod codeBase="D:\منظومة انجاز 2026\Enjaz.Tests\bin\Debug\net8.0-windows\Enjaz.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Enjaz.Tests.SystemSimulationTests" name="Environment_Culture_DateFormats" />
+    </UnitTest>
+    <UnitTest name="AddCertificateCommand_SetsIsEditingTrue" storage="d:\منظومة انجاز 2026\enjaz.tests\bin\debug\net8.0-windows\enjaz.tests.dll" id="99a97c97-2dd2-a169-f46e-8193ddf16845">
+      <Execution id="84e2ac14-b779-4895-9488-a034b88f0c2c" />
+      <TestMethod codeBase="D:\منظومة انجاز 2026\Enjaz.Tests\bin\Debug\net8.0-windows\Enjaz.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Enjaz.Tests.CertificateViewModelTests" name="AddCertificateCommand_SetsIsEditingTrue" />
+    </UnitTest>
+    <UnitTest name="SampleReceptionsViewModel_Initialization_SetsDefaultValues" storage="d:\منظومة انجاز 2026\enjaz.tests\bin\debug\net8.0-windows\enjaz.tests.dll" id="db9ea6d9-d3af-e92b-e3a5-53ac8d1735b1">
+      <Execution id="d84728f3-c054-407e-9776-167259c821e8" />
+      <TestMethod codeBase="D:\منظومة انجاز 2026\Enjaz.Tests\bin\Debug\net8.0-windows\Enjaz.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Enjaz.Tests.SampleReceptionViewModelTests" name="SampleReceptionsViewModel_Initialization_SetsDefaultValues" />
+    </UnitTest>
+    <UnitTest name="AddSampleAsync_ShouldLinkSampleToCertificate" storage="d:\منظومة انجاز 2026\enjaz.tests\bin\debug\net8.0-windows\enjaz.tests.dll" id="bba54592-ee2d-d3c5-0391-6e3d75cc35dd">
+      <Execution id="9da67375-7575-4777-8416-783919c911eb" />
+      <TestMethod codeBase="D:\منظومة انجاز 2026\Enjaz.Tests\bin\Debug\net8.0-windows\Enjaz.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Enjaz.Tests.CertificateRepositoryTests" name="AddSampleAsync_ShouldLinkSampleToCertificate" />
+    </UnitTest>
+    <UnitTest name="FaultInjection_DatabaseLogicErrors" storage="d:\منظومة انجاز 2026\enjaz.tests\bin\debug\net8.0-windows\enjaz.tests.dll" id="355c9c55-f607-c9ec-5db7-d60f7267f4db">
+      <Execution id="e910942f-9f74-44a3-aefc-fbd924a9f024" />
+      <TestMethod codeBase="D:\منظومة انجاز 2026\Enjaz.Tests\bin\Debug\net8.0-windows\Enjaz.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Enjaz.Tests.SystemSimulationTests" name="FaultInjection_DatabaseLogicErrors" />
+    </UnitTest>
+    <UnitTest name="ConfirmTypeCommand_InitializesEditing_WhenTypeIsSelected" storage="d:\منظومة انجاز 2026\enjaz.tests\bin\debug\net8.0-windows\enjaz.tests.dll" id="0093e7cf-a43b-54a4-71c7-15042eed84ea">
+      <Execution id="16d46da0-36e2-472d-bba2-c6fb4cecea0e" />
+      <TestMethod codeBase="D:\منظومة انجاز 2026\Enjaz.Tests\bin\Debug\net8.0-windows\Enjaz.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Enjaz.Tests.SampleReceptionViewModelTests" name="ConfirmTypeCommand_InitializesEditing_WhenTypeIsSelected" />
+    </UnitTest>
+    <UnitTest name="Test1" storage="d:\منظومة انجاز 2026\enjaz.tests\bin\debug\net8.0-windows\enjaz.tests.dll" id="ff851530-2722-f602-c3a6-c641e803d276">
+      <Execution id="39e88304-3c50-4fc6-880b-e54587b02bb6" />
+      <TestMethod codeBase="D:\منظومة انجاز 2026\Enjaz.Tests\bin\Debug\net8.0-windows\Enjaz.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Enjaz.Tests.Tests" name="Test1" />
+    </UnitTest>
+    <UnitTest name="LoadSimulation_Heavy_100k_Seeding" storage="d:\منظومة انجاز 2026\enjaz.tests\bin\debug\net8.0-windows\enjaz.tests.dll" id="f3cfd5a7-7a29-3677-7571-0f2b633970d1">
+      <Execution id="17878e96-3188-414e-897a-d933c79e10ab" />
+      <TestMethod codeBase="D:\منظومة انجاز 2026\Enjaz.Tests\bin\Debug\net8.0-windows\Enjaz.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Enjaz.Tests.SystemSimulationTests" name="LoadSimulation_Heavy_100k_Seeding" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="743a6788-149b-c6eb-0571-7a82400ddd2c" executionId="adfc0d24-7d6c-4ad1-969c-5c6075ac4a72" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="083f7942-8004-4299-d648-101ef2d064ef" executionId="227890bf-699d-4f80-ac9a-11e01ea92836" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="99a97c97-2dd2-a169-f46e-8193ddf16845" executionId="84e2ac14-b779-4895-9488-a034b88f0c2c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="7124d338-3622-3ea8-521a-525f421167c8" executionId="910e654c-ed35-4dd4-abeb-a34c0943436b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="0093e7cf-a43b-54a4-71c7-15042eed84ea" executionId="16d46da0-36e2-472d-bba2-c6fb4cecea0e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="355c9c55-f607-c9ec-5db7-d60f7267f4db" executionId="e910942f-9f74-44a3-aefc-fbd924a9f024" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="bae4177c-b5fd-c4d6-d00d-294e835f4309" executionId="63e89fb7-d3d5-4acd-a709-e0cf3594fc89" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="3129492e-1af9-c5a2-dc8b-8b5f3ef6512e" executionId="a570c1c2-761a-4ea5-86af-846ce70863e1" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="f3cfd5a7-7a29-3677-7571-0f2b633970d1" executionId="17878e96-3188-414e-897a-d933c79e10ab" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="3c9c5275-95e5-eeb8-e13d-0847a9046ef1" executionId="0eabef65-d4cc-409b-ace5-7b363eda0478" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="f9d9413c-6817-1708-a8bf-dab5de6d3ba2" executionId="5e6dee0e-8c5d-40b9-b65f-a7f68628bf32" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ff851530-2722-f602-c3a6-c641e803d276" executionId="39e88304-3c50-4fc6-880b-e54587b02bb6" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="bba54592-ee2d-d3c5-0391-6e3d75cc35dd" executionId="9da67375-7575-4777-8416-783919c911eb" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="efe68f47-3871-1532-0e81-f4ca86621162" executionId="6dd343d8-8731-40a3-a5d1-1da19a146707" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ee12b18a-b803-a14b-2e7d-368526d376f7" executionId="916ac913-61c3-4bd5-9462-fe01add06278" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="db9ea6d9-d3af-e92b-e3a5-53ac8d1735b1" executionId="d84728f3-c054-407e-9776-167259c821e8" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="6cbb741a-5eca-d375-fe0b-676ee9cb7f78" executionId="2684ddd0-fdd3-4141-8135-d9c0dd22d82e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="17" executed="17" passed="10" failed="7" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>NUnit Adapter 4.5.0.0: Test execution started&#xD;
+Running all tests in D:\منظومة انجاز 2026\Enjaz.Tests\bin\Debug\net8.0-windows\Enjaz.Tests.dll&#xD;
+   NUnit3TestExecutor discovered 17 of 17 NUnit test cases using Current Discovery mode, Non-Explicit run&#xD;
+NUnit Adapter 4.5.0.0: Test execution complete&#xD;
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="EDREES76-NEW" outcome="Warning" timestamp="2026-03-28T22:57:20.2561503+02:00">
+        <Text>Setup failed for test fixture Enjaz.Tests.ArchiveServiceTests</Text>
+      </RunInfo>
+      <RunInfo computerName="EDREES76-NEW" outcome="Warning" timestamp="2026-03-28T22:57:20.2588560+02:00">
+        <Text>System.ArgumentException : Format of the initialization string does not conform to specification starting at index 0.
+StackTrace:    at System.Data.Common.DbConnectionOptions.GetKeyValuePair(String connectionString, Int32 currentPosition, StringBuilder buffer, Boolean useOdbcRules, String&amp; keyname, String&amp; keyvalue)&#xD;
+   at System.Data.Common.DbConnectionOptions.ParseInternal(Dictionary`2 parsetable, String connectionString, Boolean buildChain, Dictionary`2 synonyms, Boolean firstKey)&#xD;
+   at System.Data.Common.DbConnectionOptions..ctor(String connectionString, Dictionary`2 synonyms, Boolean useOdbcRules)&#xD;
+   at System.Data.Common.DbConnectionStringBuilder.set_ConnectionString(String value)&#xD;
+   at Microsoft.Data.Sqlite.SqliteConnectionStringBuilder..ctor(String connectionString)&#xD;
+   at Microsoft.Data.Sqlite.SqliteConnectionFactory.GetPoolGroup(String connectionString)&#xD;
+   at Microsoft.Data.Sqlite.SqliteConnection.set_ConnectionString(String value)&#xD;
+   at Microsoft.Data.Sqlite.SqliteConnection..ctor(String connectionString)&#xD;
+   at Enjaz.Services.DatabaseService.InitializeDatabase() in D:\منظومة انجاز 2026\Services\DatabaseService.cs:line 296&#xD;
+   at Enjaz.Services.DatabaseService..ctor(String connectionString) in D:\منظومة انجاز 2026\Services\DatabaseService.cs:line 29&#xD;
+   at Enjaz.Tests.ArchiveServiceTests.Setup() in D:\منظومة انجاز 2026\Enjaz.Tests\ArchiveServiceTests.cs:line 28&#xD;
+   at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)&#xD;
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)</Text>
+      </RunInfo>
+      <RunInfo computerName="EDREES76-NEW" outcome="Warning" timestamp="2026-03-28T22:57:20.6729193+02:00">
+        <Text>&#xD;
+=== Starting Environment Simulation (Different Cultures) ===&#xD;
+Testing with Culture: en-US&#xD;
+   Success for en-US&#xD;
+Testing with Culture: ar-SA&#xD;
+   Success for ar-SA&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="EDREES76-NEW" outcome="Warning" timestamp="2026-03-28T22:57:20.6736726+02:00">
+        <Text>&#xD;
+=== Starting Fault Injection (Logic Errors) ===&#xD;
+System successfully prevented data corruption by auto-generating Certificate Number.&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="EDREES76-NEW" outcome="Warning" timestamp="2026-03-28T22:57:39.5069171+02:00">
+        <Text>=== Starting Heavy Load Simulation (100,000 Records Seeding) ===&#xD;
+Inserted 25000 records...&#xD;
+Inserted 50000 records...&#xD;
+Inserted 75000 records...&#xD;
+Successfully seeded 100000 certificates in 18.80s&#xD;
+Seeding Speed: 5320 records/sec&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="EDREES76-NEW" outcome="Warning" timestamp="2026-03-28T22:57:40.3091529+02:00">
+        <Text>&#xD;
+=== Testing Search Performance on Large Dataset (Pagination) ===&#xD;
+Search for specific record in 100k+ DB took: 789ms&#xD;
+Deep Pagination (Page 1000) took: 7ms&#xD;
+</Text>
+      </RunInfo>
+      <RunInfo computerName="EDREES76-NEW" outcome="Warning" timestamp="2026-03-28T22:58:00.5005012+02:00">
+        <Text>&#xD;
+=== Starting UI Monkey Simulation (ViewModel Chaos) ===&#xD;
+Monkey Test completed 50 random concurrent actions with 0 critical failures.&#xD;
+</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+</TestRun>

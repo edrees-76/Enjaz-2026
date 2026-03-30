@@ -1,0 +1,58 @@
+{
+    "tech_stack": [
+        "C#",
+        "WPF",
+        ".NET 8",
+        "SQLite",
+        "QuestPDF",
+        "LiveCharts",
+        "MaterialDesignInXaml"
+    ],
+    "features": [
+        {
+            "name": "Authentication",
+            "description": "User login, user management, and role-based access control.",
+            "files": [
+                "ViewModels/LoginViewModel.cs",
+                "Services/UserService.cs",
+                "Models/User.cs"
+            ]
+        },
+        {
+            "name": "Certificate Management",
+            "description": "Code for managing certificate lifecycle: Creation, Editing, Deletion, Searching, and Validation.",
+            "files": [
+                "ViewModels/CertificateViewModel.cs",
+                "Services/CertificateService.cs",
+                "Models/Certificate.cs"
+            ]
+        },
+        {
+            "name": "Reporting & Dashboard",
+            "description": "Interactive dashboard with 6 charts and comprehensive PDF/Excel export functionality.",
+            "files": [
+                "ViewModels/ReportingViewModel.cs",
+                "Services/ReportingService.cs",
+                "Services/ReportPdfService.cs",
+                "Services/AdvancedExcelService.cs",
+                "Models/ReportSummary.cs"
+            ]
+        },
+        {
+            "name": "Settings & Theming",
+            "description": "Application settings including database backup, font scaling, and theme management.",
+            "files": [
+                "ViewModels/SettingsViewModel.cs",
+                "Services/ThemeService.cs",
+                "MainWindow.xaml.cs"
+            ]
+        },
+        {
+            "name": "Database",
+            "description": "SQLite database context and connection management.",
+            "files": [
+                "Data/ApplicationDbContext.cs"
+            ]
+        }
+    ]
+}

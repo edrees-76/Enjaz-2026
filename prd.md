@@ -1,0 +1,1 @@
+The Enjaz system is a comprehensive digital platform developed to automate the management, issuance, documentation, and archiving of certificates related to radiological analyses and measurements. The system aims to replace traditional paper-based procedures with a centralized digital system that ensures accuracy and ease of traceability.
