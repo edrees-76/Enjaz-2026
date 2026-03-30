@@ -150,7 +150,7 @@
                                FlowDirection="RightToLeft">
         <materialDesign:DialogHost.DialogContent>
             <!-- Same Dialog Design -->
-            <Border Background="#1E293B" CornerRadius="16" Width="380" Padding="0" BorderBrush="#334155" BorderThickness="1">
+            <Border Background="{DynamicResource SurfaceBrush}" CornerRadius="16" Width="380" Padding="0" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -164,8 +164,8 @@
                     
                     <Border Grid.Row="1" Padding="20">
                         <StackPanel>
-                            <TextBlock Text="{Binding NotificationTitle}" FontSize="18" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,10"/>
-                            <TextBlock Text="{Binding NotificationMessage}" FontSize="14" Foreground="#94A3B8" TextWrapping="Wrap" TextAlignment="Center"/>
+                            <TextBlock Text="{Binding NotificationTitle}" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+                            <TextBlock Text="{Binding NotificationMessage}" FontSize="14" Foreground="{DynamicResource SecondaryTextBrush}" TextWrapping="Wrap" TextAlignment="Center"/>
                         </StackPanel>
                     </Border>
                     
@@ -227,8 +227,61 @@
                     </Grid.RowDefinitions>
 
                     <StackPanel Grid.Row="0">
-                        <!-- Prominent Logo -->
-                        <Image Source="/Assets/enjaz_3d_icon_transparent.png" Height="140" Stretch="Uniform" Margin="0,0,0,16" RenderOptions.BitmapScalingMode="HighQuality"/>
+                        <!-- Prominent Logo with High-End Animations -->
+                        <Image Source="/Assets/enjaz_3d_icon_transparent.png" Height="140" Stretch="Uniform" Margin="0,0,0,16" 
+                               RenderOptions.BitmapScalingMode="HighQuality" RenderTransformOrigin="0.5,0.5">
+                            <Image.RenderTransform>
+                                <TransformGroup>
+                                    <ScaleTransform ScaleX="1" ScaleY="1" />
+                                    <TranslateTransform Y="0" />
+                                </TransformGroup>
+                            </Image.RenderTransform>
+                            <Image.Effect>
+                                <DropShadowEffect Color="#00BFFF" BlurRadius="15" ShadowDepth="0" Opacity="0.4"/>
+                            </Image.Effect>
+                            <Image.Triggers>
+                                <EventTrigger RoutedEvent="Loaded">
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <!-- Intro: 3D Flip-In (ScaleX from -1 to 1) -->
+                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)"
+                                                             From="-1" To="1" Duration="0:0:1.5" BeginTime="0:0:0">
+                                                <DoubleAnimation.EasingFunction>
+                                                    <BackEase EasingMode="EaseOut" Amplitude="0.6"/>
+                                                </DoubleAnimation.EasingFunction>
+                                            </DoubleAnimation>
+                                            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                             From="0" To="1" Duration="0:0:0.8" BeginTime="0:0:0"/>
+
+                                            <!-- Idle: Magnetic Hover (Starts after intro) -->
+                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.Y)"
+                                                             From="2" To="-8" Duration="0:0:3" AutoReverse="True" RepeatBehavior="Forever" BeginTime="0:0:1.5">
+                                                <DoubleAnimation.EasingFunction>
+                                                    <SineEase EasingMode="EaseInOut"/>
+                                                </DoubleAnimation.EasingFunction>
+                                            </DoubleAnimation>
+
+                                            <!-- Idle: Pulse Scale (Subtle breathing) -->
+                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)"
+                                                             From="1" To="1.04" Duration="0:0:2.5" AutoReverse="True" RepeatBehavior="Forever" BeginTime="0:0:1.5">
+                                                <DoubleAnimation.EasingFunction><SineEase EasingMode="EaseInOut"/></DoubleAnimation.EasingFunction>
+                                            </DoubleAnimation>
+                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)"
+                                                             From="1" To="1.04" Duration="0:0:2.5" AutoReverse="True" RepeatBehavior="Forever" BeginTime="0:0:1.5">
+                                                <DoubleAnimation.EasingFunction><SineEase EasingMode="EaseInOut"/></DoubleAnimation.EasingFunction>
+                                            </DoubleAnimation>
+
+                                            <!-- Pulse Glow (DropShadow Effect) -->
+                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.BlurRadius)"
+                                                             From="8" To="28" Duration="0:0:2.5" AutoReverse="True" RepeatBehavior="Forever" BeginTime="0:0:1.5">
+                                                <DoubleAnimation.EasingFunction>
+                                                    <SineEase EasingMode="EaseInOut"/></DoubleAnimation.EasingFunction>
+                                            </DoubleAnimation>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </EventTrigger>
+                            </Image.Triggers>
+                        </Image>
                         
                         <!-- Headers -->
                         <TextBlock Text="تسجيل الدخول" FontFamily="Custom/Manrope" Style="{StaticResource LoginTitleText}" FontSize="24" FontWeight="ExtraBold" HorizontalAlignment="Center" Margin="0,0,0,6"/>
@@ -323,24 +376,48 @@
                             <TextBlock Text="تذكرني على هذا الجهاز" Style="{StaticResource LoginSubtitleText}" FontSize="13" VerticalAlignment="Center" Margin="6,0,0,0"/>
                         </StackPanel>
 
-                        <!-- Login Button -->
+                        <!-- Login Button with Countdown Logic -->
                         <Button Command="{Binding LoginCommand}" 
-                                Style="{StaticResource PrimaryButtonStyle}" 
                                 Height="52" 
                                 IsDefault="True"
                                 Cursor="Hand">
-                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <TextBlock Text="تسجيل الدخول" FontSize="15" FontWeight="Bold" Margin="0,0,10,0"/>
-                                <materialDesign:PackIcon Kind="LoginVariant" Width="20" Height="20"/>
-                            </StackPanel>
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource PrimaryButtonStyle}">
+                                    <Setter Property="Content">
+                                        <Setter.Value>
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                <TextBlock Text="تسجيل الدخول" FontSize="15" FontWeight="Bold" Margin="0,0,10,0"/>
+                                                <materialDesign:PackIcon Kind="LoginVariant" Width="20" Height="20"/>
+                                            </StackPanel>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsLockedOut}" Value="True">
+                                            <!-- Force High Contrast Background for Lockout -->
+                                            <Setter Property="Background" Value="#1E293B"/>
+                                            <Setter Property="Foreground" Value="White"/>
+                                            <Setter Property="IsEnabled" Value="False"/>
+                                            <Setter Property="Content">
+                                                <Setter.Value>
+                                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                        <TextBlock Text="{Binding LockoutCountdown}" FontSize="15" FontWeight="Bold" Foreground="White" Margin="0,0,10,0"/>
+                                                        <materialDesign:PackIcon Kind="TimerSand" Width="20" Height="20" Foreground="White"/>
+                                                    </StackPanel>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
                         </Button>
 
                         <!-- وصف المنظومة -->
                         <TextBlock Text="منظومة إنجاز: نظام رقمي شامل يضمن كفاءة إدارة العينات وسلامة إصدار الشهادات"
+                                   LineHeight="20" LineStackingStrategy="BlockLineHeight"
                                    FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" 
-                                   HorizontalAlignment="Center" Margin="0,16,0,0" 
+                                   HorizontalAlignment="Center" Margin="0,24,0,0" 
                                    FontFamily="Manrope" TextWrapping="Wrap"
-                                   TextAlignment="Center"/>
+                                   TextAlignment="Center" Opacity="0.8"/>
 
                         <!-- تصميم و تنفيذ -->
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,0">

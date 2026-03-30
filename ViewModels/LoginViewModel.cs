@@ -33,6 +33,8 @@ namespace Enjaz.ViewModels
         private const int LockoutMinutes = 5;
         private int _failedAttempts = 0;
         private DateTime _lockoutEnd = DateTime.MinValue;
+        private string _lockoutCountdown = string.Empty;
+        private System.Windows.Threading.DispatcherTimer? _lockoutTimer;
 
         /// <summary>
         /// إنشاء مثيل جديد
@@ -129,6 +131,14 @@ namespace Enjaz.ViewModels
             get => _isDarkMode;
             set => SetProperty(ref _isDarkMode, value);
         }
+
+        public string LockoutCountdown
+        {
+            get => _lockoutCountdown;
+            private set => SetProperty(ref _lockoutCountdown, value);
+        }
+
+        public bool IsLockedOut => DateTime.Now < _lockoutEnd;
 
         public MaterialDesignThemes.Wpf.ISnackbarMessageQueue MessageQueue => _notificationService.MessageQueue;
 
@@ -249,6 +259,7 @@ namespace Enjaz.ViewModels
                         {
                             _lockoutEnd = DateTime.Now.AddMinutes(LockoutMinutes);
                             _failedAttempts = 0;
+                            StartLockoutTimer();
                             Services.LoggerService.LogWarning($"Login lockout triggered for user '{Username}' after {MaxFailedAttempts} failed attempts.");
                             SetNotification("تم القفل مؤقتاً", $"تم قفل تسجيل الدخول لمدة {LockoutMinutes} دقائق بسبب محاولات فاشلة متكررة.", NotificationType.Error, "LockOutline");
                         }
@@ -276,6 +287,37 @@ namespace Enjaz.ViewModels
                 // Only turn off busy if we didn't succeed (success closes the window)
                 if (IsNotificationDialogOpen) 
                     IsBusy = false;
+            }
+        }
+
+        private void StartLockoutTimer()
+        {
+            if (_lockoutTimer == null)
+            {
+                _lockoutTimer = new System.Windows.Threading.DispatcherTimer();
+                _lockoutTimer.Interval = TimeSpan.FromSeconds(1);
+                _lockoutTimer.Tick += (s, e) => UpdateLockoutProgress();
+            }
+            
+            UpdateLockoutProgress();
+            _lockoutTimer.Start();
+            OnPropertyChanged(nameof(IsLockedOut));
+            System.Windows.Input.CommandManager.InvalidateRequerySuggested();
+        }
+
+        private void UpdateLockoutProgress()
+        {
+            var remaining = _lockoutEnd - DateTime.Now;
+            if (remaining <= TimeSpan.Zero)
+            {
+                _lockoutTimer?.Stop();
+                LockoutCountdown = string.Empty;
+                OnPropertyChanged(nameof(IsLockedOut));
+                System.Windows.Input.CommandManager.InvalidateRequerySuggested();
+            }
+            else
+            {
+                LockoutCountdown = $"يرجى الانتظار {remaining.Minutes:D2}:{remaining.Seconds:D2}";
             }
         }
 
