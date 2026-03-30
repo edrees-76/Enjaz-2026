@@ -276,3 +276,5 @@ D:\منظومة انجاز 2026\obj\Debug\net8.0-windows\refint\Enjaz.dll
 D:\منظومة انجاز 2026\obj\Debug\net8.0-windows\Enjaz.pdb
 d:\منظومة انجاز 2026\obj\Debug\net8.0-windows\Enjaz.genruntimeconfig.cache
 d:\منظومة انجاز 2026\obj\Debug\net8.0-windows\ref\Enjaz.dll
+D:\منظومة انجاز 2026\obj\Debug\net8.0-windows\Enjaz.sourcelink.json
+D:\منظومة انجاز 2026\bin\Debug\net8.0-windows\Dapper.dll

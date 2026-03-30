@@ -50,6 +50,10 @@
               "target": "Package",
               "version": "[0.104.2, )"
             },
+            "Dapper": {
+              "target": "Package",
+              "version": "[2.1.72, )"
+            },
             "LiveCharts.Wpf": {
               "target": "Package",
               "version": "[0.9.7, )",

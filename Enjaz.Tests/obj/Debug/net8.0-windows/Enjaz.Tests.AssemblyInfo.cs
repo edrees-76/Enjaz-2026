@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Enjaz.Tests")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e5a1a9f800c73f1b0f75bc52004c44a5d695b547")]
 [assembly: System.Reflection.AssemblyProductAttribute("Enjaz.Tests")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Enjaz.Tests")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -632,6 +632,26 @@ namespace Enjaz.ViewModels
 
                 _timer?.Stop();
                 _sessionTimeoutService.Stop();
+                
+                try
+                {
+                    var currentUser = _userService.CurrentUser;
+                    if (currentUser != null)
+                    {
+                        var app = (App)Application.Current;
+                        var dbService = app.ServiceProvider.GetService(typeof(DatabaseService)) as DatabaseService;
+                        if (dbService != null)
+                        {
+                            string details = isAutomatic ? "تم تسجيل الخروج تلقائياً بسبب اكتمال وقت الجلسة." : "قام المستخدم بتسجيل الخروج من المنظومة.";
+                            await dbService.LogActionAsync(currentUser.Id, currentUser.Username, "تسجيل خروج", details);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Services.LoggerService.LogError("Audit Log Error (Logout)", ex);
+                }
+
                 _userService.Logout();
                 
                 // Re-apply Login Theme independently

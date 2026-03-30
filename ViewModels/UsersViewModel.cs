@@ -485,6 +485,7 @@ namespace Enjaz.ViewModels
         private void CancelUserEdit()
         {
             IsUserDialogOpen = false;
+            IsEditingUser = false;
             ClearUserForm();
             SelectedUser = null;
         }

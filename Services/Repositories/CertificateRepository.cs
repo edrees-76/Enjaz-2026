@@ -4,6 +4,8 @@ using System.IO;
 using Microsoft.Data.Sqlite;
 using Enjaz.Models;
 using Enjaz.Helpers;
+using Dapper;
+using System.Linq;
 
 namespace Enjaz.Services.Repositories
 {
@@ -505,133 +507,108 @@ namespace Enjaz.Services.Repositories
                                          @SpecialistName, @SectionHeadName, @ManagerName, @Notes, @ReceptionId);
                                  SELECT last_insert_rowid();";
 
-                    using var command = new SqliteCommand(query, connection, transaction);
-                    command.Parameters.AddWithValue("@CertificateNumber", "TEMP-" + Guid.NewGuid());
-                    command.Parameters.AddWithValue("@RecipientName", certificate.RecipientName);
-                    command.Parameters.AddWithValue("@CertificateType", certificate.CertificateType);
-                    command.Parameters.AddWithValue("@Description", certificate.Description ?? "");
-                    command.Parameters.AddWithValue("@IssueDate", certificate.IssueDate.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture));
-                    command.Parameters.AddWithValue("@ExpiryDate", certificate.ExpiryDate.HasValue ? certificate.ExpiryDate.Value.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture) : DBNull.Value);
-                    command.Parameters.AddWithValue("@IssuingAuthority", certificate.IssuingAuthority ?? "");
-                    
-                    // Validate CreatedBy
-                    var checkUserCmd = new SqliteCommand("SELECT COUNT(*) FROM Users WHERE Id = @Uid", connection, transaction);
-                    checkUserCmd.Parameters.AddWithValue("@Uid", certificate.CreatedBy);
-                    long userCount = (long)(await checkUserCmd.ExecuteScalarAsync() ?? 0);
-                    
                     int validUserId = certificate.CreatedBy;
+                    // Validate CreatedBy using Dapper
+                    var userCount = await connection.ExecuteScalarAsync<long>("SELECT COUNT(*) FROM Users WHERE Id = @Uid", new { Uid = certificate.CreatedBy }, transaction);
                     if (userCount == 0)
                     {
-                        var getAdminCmd = new SqliteCommand("SELECT Id FROM Users WHERE Role = 2 LIMIT 1", connection, transaction);
-                        object? adminId = await getAdminCmd.ExecuteScalarAsync();
-                        if (adminId != null)
-                        {
-                            validUserId = Convert.ToInt32(adminId);
-                        }
+                        var adminId = await connection.ExecuteScalarAsync<int?>("SELECT Id FROM Users WHERE Role = 2 LIMIT 1", null, transaction);
+                        if (adminId.HasValue)
+                            validUserId = adminId.Value;
                         else
                         {
-                             var getUserCmd = new SqliteCommand("SELECT Id FROM Users LIMIT 1", connection, transaction);
-                             object? anyId = await getUserCmd.ExecuteScalarAsync();
-                             validUserId = anyId != null ? Convert.ToInt32(anyId) : 1;
+                             var anyId = await connection.ExecuteScalarAsync<int?>("SELECT Id FROM Users LIMIT 1", null, transaction);
+                             validUserId = anyId ?? 1;
                         }
                     }
 
-                    command.Parameters.AddWithValue("@CreatedBy", validUserId);
-                    command.Parameters.AddWithValue("@CreatedByName", certificate.CreatedByName ?? "");
-                    
-                    command.Parameters.AddWithValue("@AnalysisType", certificate.AnalysisType ?? "");
-                    command.Parameters.AddWithValue("@Sender", certificate.Sender ?? "");
-                    command.Parameters.AddWithValue("@Supplier", certificate.Supplier ?? "");
-                    command.Parameters.AddWithValue("@Origin", certificate.Origin ?? "");
-                    command.Parameters.AddWithValue("@DeclarationNumber", certificate.DeclarationNumber ?? "");
-                    command.Parameters.AddWithValue("@PolicyNumber", certificate.PolicyNumber ?? "");
-                    command.Parameters.AddWithValue("@NotificationNumber", certificate.NotificationNumber ?? "");
-                    command.Parameters.AddWithValue("@FinancialReceiptNumber", certificate.FinancialReceiptNumber ?? "");
-                    command.Parameters.AddWithValue("@SpecialistName", certificate.SpecialistName ?? "");
-                    command.Parameters.AddWithValue("@SectionHeadName", certificate.SectionHeadName ?? "");
-                    command.Parameters.AddWithValue("@ManagerName", certificate.ManagerName ?? "");
-                    command.Parameters.AddWithValue("@Notes", certificate.Notes ?? "");
-                    command.Parameters.AddWithValue("@ReceptionId", (object?)certificate.ReceptionId ?? DBNull.Value);
+                    var parameters = new
+                    {
+                        CertificateNumber = "TEMP-" + Guid.NewGuid(),
+                        certificate.RecipientName,
+                        certificate.CertificateType,
+                        Description = certificate.Description ?? "",
+                        IssueDate = certificate.IssueDate.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture),
+                        ExpiryDate = certificate.ExpiryDate.HasValue ? certificate.ExpiryDate.Value.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture) : null,
+                        IssuingAuthority = certificate.IssuingAuthority ?? "",
+                        CreatedBy = validUserId,
+                        CreatedByName = certificate.CreatedByName ?? "",
+                        AnalysisType = certificate.AnalysisType ?? "",
+                        Sender = certificate.Sender ?? "",
+                        Supplier = certificate.Supplier ?? "",
+                        Origin = certificate.Origin ?? "",
+                        DeclarationNumber = certificate.DeclarationNumber ?? "",
+                        PolicyNumber = certificate.PolicyNumber ?? "",
+                        NotificationNumber = certificate.NotificationNumber ?? "",
+                        FinancialReceiptNumber = certificate.FinancialReceiptNumber ?? "",
+                        SpecialistName = certificate.SpecialistName ?? "",
+                        SectionHeadName = certificate.SectionHeadName ?? "",
+                        ManagerName = certificate.ManagerName ?? "",
+                        Notes = certificate.Notes ?? "",
+                        ReceptionId = certificate.ReceptionId
+                    };
 
-                    var idObj = await command.ExecuteScalarAsync();
-                    if (idObj == null) throw new Exception("Failed to retrieve ID");
-                    int newId = Convert.ToInt32(idObj);
+                    int newId = await connection.ExecuteScalarAsync<int>(query, parameters, transaction);
                     
                     // تحديث حالة الاستلام المرتبط (إن وجد) إلى "تم إصدار شهادة"
                     if (certificate.ReceptionId.HasValue)
                     {
-                        var updateReceptionQuery = "UPDATE SampleReceptions SET Status = 'تم إصدار شهادة' WHERE Id = @ReceptionId";
-                        using var statusUpdateCmd = new SqliteCommand(updateReceptionQuery, connection, transaction);
-                        statusUpdateCmd.Parameters.AddWithValue("@ReceptionId", certificate.ReceptionId.Value);
-                        await statusUpdateCmd.ExecuteNonQueryAsync();
+                        await connection.ExecuteAsync("UPDATE SampleReceptions SET Status = 'تم إصدار شهادة' WHERE Id = @ReceptionId", 
+                            new { ReceptionId = certificate.ReceptionId.Value }, transaction);
                     }
 
                     bool isEnvironmental = certificate.CertificateType.Contains("بيئية");
                     string typeCode = isEnvironmental ? "E" : "C";
                     string year = certificate.IssueDate.ToString("yy");
                     
-                    // البحث عن أعلى رقم متسلسل طµط¯ط± ظپظٹ ط§ظ„ط³ظ†ط© ط§ظ„ط­ط§ظ„ظٹط© ظپظٹ ط§ظ„ظ†ط¸ط§ظ… ظƒظƒظ„ (ظ„ط¶ظ…ط§ظ† طھطھط§ط¨ط¹ ط§ظ„ط¹ط¯ط§ط¯)
-                    // نفحص كافة الأنماط ط§ظ„ظ…ظ…ظƒظ†ط© ظ„ط¶ظ…ط§ظ† ط§ظ„ط­طµظˆظ„ ط¹ظ„ظ‰ ط§ظ„طھط³ظ„ط³ظ„ ط§ظ„طµط­ظٹط­
                     string patternE = $"RM-E-{year}-%";
                     string patternC = $"RM-C-{year}-%";
-                    string patternU = $"RM-{year}-%"; // للنمط الموحد ط§ظ„ط°ظٹ طھظ… طھط¬ط±ط¨طھظ‡ ط³ط§ط¨ظ‚ط§ظ‹
+                    string patternU = $"RM-{year}-%"; // للنمط الموحد القديم
                     
-                    var maxCmd = new SqliteCommand(
+                    var lastNumStr = await connection.ExecuteScalarAsync<string>(
                         "SELECT CertificateNumber FROM Certificates WHERE (CertificateNumber LIKE @PatE OR CertificateNumber LIKE @PatC OR CertificateNumber LIKE @PatU) AND Id != @CurrentId ORDER BY Id DESC LIMIT 1;", 
-                        connection, transaction);
-                    maxCmd.Parameters.AddWithValue("@PatE", patternE);
-                    maxCmd.Parameters.AddWithValue("@PatC", patternC);
-                    maxCmd.Parameters.AddWithValue("@PatU", patternU);
-                    maxCmd.Parameters.AddWithValue("@CurrentId", newId);
+                        new { PatE = patternE, PatC = patternC, PatU = patternU, CurrentId = newId }, transaction);
                     
-                    object? lastNumObj = await maxCmd.ExecuteScalarAsync();
                     int nextSequence = 1;
-                    
-                    if (lastNumObj != null && lastNumObj != DBNull.Value)
+                    if (!string.IsNullOrEmpty(lastNumStr))
                     {
-                        string lastNum = lastNumObj.ToString() ?? "";
-                        var parts = lastNum.Split('-');
-                        // الرقم المتسلسل هو ط§ظ„ط¬ط²ط، ط§ظ„ط£ط®ظٹط± ظپظٹ ط§ظ„طھظ†ط³ظٹظ‚ ط§ظ„ظ…ط¹طھظ…ط¯ (ط³ظˆط§ط، 3 ط£ظˆ 4 ط£ط¬ط²ط§ط،)
+                        var parts = lastNumStr.Split('-');
                         if (parts.Length >= 3 && int.TryParse(parts[parts.Length - 1], out int lastSeq))
                         {
                             nextSequence = lastSeq + 1;
                         }
                     }
                     
-                    int sequenceInYear = nextSequence;
-                    // التنسيق الهجين ط§ظ„ظ…ط¹طھظ…ط¯: RM-ط§ظ„ظ†ظˆط¹-ط§ظ„ط³ظ†ط©-ط§ظ„ط±ظ‚ظ… (4 ط®ط§ظ†ط§طھ)
-                    string finalNumber = $"RM-{typeCode}-{year}-{sequenceInYear:D4}";
+                    string finalNumber = $"RM-{typeCode}-{year}-{nextSequence:D4}";
 
-                    var updateCmd = new SqliteCommand("UPDATE Certificates SET CertificateNumber = @Num WHERE Id = @Id;", connection, transaction);
-                    updateCmd.Parameters.AddWithValue("@Num", finalNumber);
-                    updateCmd.Parameters.AddWithValue("@Id", newId);
-                    await updateCmd.ExecuteNonQueryAsync();
+                    await connection.ExecuteAsync("UPDATE Certificates SET CertificateNumber = @Num WHERE Id = @Id;", 
+                        new { Num = finalNumber, Id = newId }, transaction);
 
-                    if (certificate.Samples != null && certificate.Samples.Any())
+                    if (certificate.Samples != null && certificate.Samples.Count > 0)
                     {
                         int rootNumber = 1;
-                        foreach (var sample in certificate.Samples)
+                        var insertSampleQuery = @"INSERT INTO Samples 
+                            (CertificateId, Root, SampleNumber, Description, MeasurementDate, Result,
+                             IsotopeK40, IsotopeRa226, IsotopeTh232, IsotopeRa, IsotopeCs137)
+                            VALUES (@CertificateId, @Root, @SampleNumber, @Description, @MeasurementDate, @Result,
+                                    @IsotopeK40, @IsotopeRa226, @IsotopeTh232, @IsotopeRa, @IsotopeCs137)";
+                                    
+                        var sampleParams = certificate.Samples.Select(s => new
                         {
-                            var insertSampleQuery = @"INSERT INTO Samples 
-                                (CertificateId, Root, SampleNumber, Description, MeasurementDate, Result,
-                                 IsotopeK40, IsotopeRa226, IsotopeTh232, IsotopeRa, IsotopeCs137)
-                                VALUES (@CertificateId, @Root, @SampleNumber, @Description, @MeasurementDate, @Result,
-                                        @IsotopeK40, @IsotopeRa226, @IsotopeTh232, @IsotopeRa, @IsotopeCs137)";
-                            
-                            using var sampleCmd = new SqliteCommand(insertSampleQuery, connection, transaction);
-                            sampleCmd.Parameters.AddWithValue("@CertificateId", newId);
-                            sampleCmd.Parameters.AddWithValue("@Root", rootNumber++);
-                            sampleCmd.Parameters.AddWithValue("@SampleNumber", sample.SampleNumber ?? "");
-                            sampleCmd.Parameters.AddWithValue("@Description", sample.Description ?? "");
-                            sampleCmd.Parameters.AddWithValue("@MeasurementDate", sample.MeasurementDate.ToString("yyyy-MM-dd"));
-                            sampleCmd.Parameters.AddWithValue("@Result", sample.Result ?? "");
-                            sampleCmd.Parameters.AddWithValue("@IsotopeK40", sample.IsotopeK40 ?? "");
-                            sampleCmd.Parameters.AddWithValue("@IsotopeRa226", sample.IsotopeRa226 ?? "");
-                            sampleCmd.Parameters.AddWithValue("@IsotopeTh232", sample.IsotopeTh232 ?? "");
-                            sampleCmd.Parameters.AddWithValue("@IsotopeRa", sample.IsotopeRa ?? "");
-                            sampleCmd.Parameters.AddWithValue("@IsotopeCs137", sample.IsotopeCs137 ?? "");
-                            await sampleCmd.ExecuteNonQueryAsync();
-                        }
+                            CertificateId = newId,
+                            Root = rootNumber++,
+                            SampleNumber = s.SampleNumber ?? "",
+                            Description = s.Description ?? "",
+                            MeasurementDate = s.MeasurementDate.ToString("yyyy-MM-dd"),
+                            Result = s.Result ?? "",
+                            IsotopeK40 = s.IsotopeK40 ?? "",
+                            IsotopeRa226 = s.IsotopeRa226 ?? "",
+                            IsotopeTh232 = s.IsotopeTh232 ?? "",
+                            IsotopeRa = s.IsotopeRa ?? "",
+                            IsotopeCs137 = s.IsotopeCs137 ?? ""
+                        });
+                        
+                        await connection.ExecuteAsync(insertSampleQuery, sampleParams, transaction);
                     }
 
                     transaction.Commit();
@@ -659,7 +636,6 @@ namespace Enjaz.Services.Repositories
         {
             return _db.ExecuteWithRetryAsync(async () =>
             {
-                // Fetch old data for comparison
                 var oldCert = await GetCertificateByIdAsync(certificate.Id);
                 string changes = oldCert != null ? GetCertificateChanges(oldCert, certificate) : "إضافة جديدة";
 
@@ -694,62 +670,64 @@ namespace Enjaz.Services.Repositories
                              ReceptionId = @ReceptionId
                              WHERE Id = @Id;";
 
-                    using var command = new SqliteCommand(query, connection, transaction);
-                    command.Parameters.AddWithValue("@Id", certificate.Id);
-                    command.Parameters.AddWithValue("@RecipientName", certificate.RecipientName);
-                    command.Parameters.AddWithValue("@CertificateType", certificate.CertificateType);
-                    command.Parameters.AddWithValue("@Description", certificate.Description ?? "");
-                    command.Parameters.AddWithValue("@IssueDate", certificate.IssueDate.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture));
-                    command.Parameters.AddWithValue("@ExpiryDate", certificate.ExpiryDate.HasValue ? certificate.ExpiryDate.Value.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture) : DBNull.Value);
-                    command.Parameters.AddWithValue("@IssuingAuthority", certificate.IssuingAuthority ?? "");
+                    var parameters = new
+                    {
+                        certificate.Id,
+                        certificate.RecipientName,
+                        certificate.CertificateType,
+                        Description = certificate.Description ?? "",
+                        IssueDate = certificate.IssueDate.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture),
+                        ExpiryDate = certificate.ExpiryDate.HasValue ? certificate.ExpiryDate.Value.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture) : null,
+                        IssuingAuthority = certificate.IssuingAuthority ?? "",
+                        AnalysisType = certificate.AnalysisType ?? "",
+                        Sender = certificate.Sender ?? "",
+                        Supplier = certificate.Supplier ?? "",
+                        Origin = certificate.Origin ?? "",
+                        DeclarationNumber = certificate.DeclarationNumber ?? "",
+                        PolicyNumber = certificate.PolicyNumber ?? "",
+                        NotificationNumber = certificate.NotificationNumber ?? "",
+                        FinancialReceiptNumber = certificate.FinancialReceiptNumber ?? "",
+                        SpecialistName = certificate.SpecialistName ?? "",
+                        SectionHeadName = certificate.SectionHeadName ?? "",
+                        ManagerName = certificate.ManagerName ?? "",
+                        Notes = certificate.Notes ?? "",
+                        UpdatedBy = certificate.UpdatedBy,
+                        UpdatedByName = certificate.UpdatedByName,
+                        UpdatedAt = certificate.UpdatedAt.HasValue ? certificate.UpdatedAt.Value.ToString("yyyy-MM-dd HH:mm:ss") : null,
+                        ReceptionId = certificate.ReceptionId
+                    };
                     
-                    command.Parameters.AddWithValue("@AnalysisType", certificate.AnalysisType ?? "");
-                    command.Parameters.AddWithValue("@Sender", certificate.Sender ?? "");
-                    command.Parameters.AddWithValue("@Supplier", certificate.Supplier ?? "");
-                    command.Parameters.AddWithValue("@Origin", certificate.Origin ?? "");
-                    command.Parameters.AddWithValue("@DeclarationNumber", certificate.DeclarationNumber ?? "");
-                    command.Parameters.AddWithValue("@PolicyNumber", certificate.PolicyNumber ?? "");
-                    command.Parameters.AddWithValue("@NotificationNumber", certificate.NotificationNumber ?? "");
-                    command.Parameters.AddWithValue("@FinancialReceiptNumber", certificate.FinancialReceiptNumber ?? "");
-                    command.Parameters.AddWithValue("@SpecialistName", certificate.SpecialistName ?? "");
-                    command.Parameters.AddWithValue("@SectionHeadName", certificate.SectionHeadName ?? "");
-                    command.Parameters.AddWithValue("@ManagerName", certificate.ManagerName ?? "");
-                    command.Parameters.AddWithValue("@Notes", certificate.Notes ?? "");
-                    command.Parameters.AddWithValue("@UpdatedBy", (object?)certificate.UpdatedBy ?? DBNull.Value);
-                    command.Parameters.AddWithValue("@UpdatedByName", (object?)certificate.UpdatedByName ?? DBNull.Value);
-                    command.Parameters.AddWithValue("@UpdatedAt", certificate.UpdatedAt.HasValue ? certificate.UpdatedAt.Value.ToString("yyyy-MM-dd HH:mm:ss") : DBNull.Value);
-                    command.Parameters.AddWithValue("@ReceptionId", (object?)certificate.ReceptionId ?? DBNull.Value);
-
-                    await command.ExecuteNonQueryAsync();
+                    await connection.ExecuteAsync(query, parameters, transaction);
 
                     if (certificate.Samples != null)
                     {
-                        var deleteCmd = new SqliteCommand("DELETE FROM Samples WHERE CertificateId = @CertificateId", connection, transaction);
-                        deleteCmd.Parameters.AddWithValue("@CertificateId", certificate.Id);
-                        await deleteCmd.ExecuteNonQueryAsync();
+                        await connection.ExecuteAsync("DELETE FROM Samples WHERE CertificateId = @CertificateId", new { CertificateId = certificate.Id }, transaction);
 
-                        int rootNumber = 1;
-                        foreach (var sample in certificate.Samples)
+                        if (certificate.Samples.Count > 0)
                         {
+                            int rootNumber = 1;
                             var insertSampleQuery = @"INSERT INTO Samples 
                                 (CertificateId, Root, SampleNumber, Description, MeasurementDate, Result,
                                  IsotopeK40, IsotopeRa226, IsotopeTh232, IsotopeRa, IsotopeCs137)
                                 VALUES (@CertificateId, @Root, @SampleNumber, @Description, @MeasurementDate, @Result,
                                         @IsotopeK40, @IsotopeRa226, @IsotopeTh232, @IsotopeRa, @IsotopeCs137)";
+                                        
+                            var sampleParams = certificate.Samples.Select(s => new
+                            {
+                                CertificateId = certificate.Id,
+                                Root = rootNumber++,
+                                SampleNumber = s.SampleNumber ?? "",
+                                Description = s.Description ?? "",
+                                MeasurementDate = s.MeasurementDate.ToString("yyyy-MM-dd"),
+                                Result = s.Result ?? "",
+                                IsotopeK40 = s.IsotopeK40 ?? "",
+                                IsotopeRa226 = s.IsotopeRa226 ?? "",
+                                IsotopeTh232 = s.IsotopeTh232 ?? "",
+                                IsotopeRa = s.IsotopeRa ?? "",
+                                IsotopeCs137 = s.IsotopeCs137 ?? ""
+                            });
                             
-                            using var sampleCmd = new SqliteCommand(insertSampleQuery, connection, transaction);
-                            sampleCmd.Parameters.AddWithValue("@CertificateId", certificate.Id);
-                            sampleCmd.Parameters.AddWithValue("@Root", rootNumber++);
-                            sampleCmd.Parameters.AddWithValue("@SampleNumber", sample.SampleNumber ?? "");
-                            sampleCmd.Parameters.AddWithValue("@Description", sample.Description ?? "");
-                            sampleCmd.Parameters.AddWithValue("@MeasurementDate", sample.MeasurementDate.ToString("yyyy-MM-dd"));
-                            sampleCmd.Parameters.AddWithValue("@Result", sample.Result ?? "");
-                            sampleCmd.Parameters.AddWithValue("@IsotopeK40", sample.IsotopeK40 ?? "");
-                            sampleCmd.Parameters.AddWithValue("@IsotopeRa226", sample.IsotopeRa226 ?? "");
-                            sampleCmd.Parameters.AddWithValue("@IsotopeTh232", sample.IsotopeTh232 ?? "");
-                            sampleCmd.Parameters.AddWithValue("@IsotopeRa", sample.IsotopeRa ?? "");
-                            sampleCmd.Parameters.AddWithValue("@IsotopeCs137", sample.IsotopeCs137 ?? "");
-                            await sampleCmd.ExecuteNonQueryAsync();
+                            await connection.ExecuteAsync(insertSampleQuery, sampleParams, transaction);
                         }
                     }
 

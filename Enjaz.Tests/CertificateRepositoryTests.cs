@@ -18,12 +18,12 @@ namespace Enjaz.Tests
         private UserService _userService;
         private CertificateRepository _repository;
 
-        
+        [SetUp]
         public async Task Setup()
         {
             // Use a unique temporary file for each test
             _testDbPath = Path.Combine(Path.GetTempPath(), $"test_certs_{Guid.NewGuid()}.db");
-            _dbService = new DatabaseService(_testDbPath);
+            _dbService = new DatabaseService($"Data Source={_testDbPath}");
             _userService = new UserService();
             
             // CRITICAL: Insert a dummy user because of foreign key constraint in Certificates table

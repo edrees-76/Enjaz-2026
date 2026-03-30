@@ -125,9 +125,10 @@ namespace Enjaz.Services
                              // 2. جدول البيانات (يلي الملخص مباشرة)
                             column.Item().PaddingTop(10).Table(table =>
                             {
-                                // تعريف الأعمدة
+                                // تعريف الأعمدة — عمود التسلسل أولاً
                                 table.ColumnsDefinition(columns =>
                                 {
+                                    columns.ConstantColumn(30); // عمود م (التسلسل)
                                     foreach (var _ in selectedColumns)
                                     {
                                         columns.RelativeColumn();
@@ -137,6 +138,8 @@ namespace Enjaz.Services
                                 // رأس الجدول
                                 table.Header(header =>
                                 {
+                                    header.Cell().Background("#1B4F72").Padding(5)
+                                        .Text("م").FontColor(Colors.White).Bold().FontSize(9);
                                     foreach (var col in selectedColumns)
                                     {
                                         if (columnHeaders.ContainsKey(col))
@@ -149,10 +152,14 @@ namespace Enjaz.Services
 
                                 // صفوف البيانات
                                 int rowIndex = 0;
-                                foreach (var cert in certificates) // تمت إزالة حد 50 سجل لدعم التعدد التلقائي للصفحات
+                                foreach (var cert in certificates)
                                 {
                                     var bgColor = rowIndex % 2 == 0 ? Colors.White : Colors.Grey.Lighten4;
                                     
+                                    // عمود التسلسل
+                                    table.Cell().Background(bgColor).Border(0.5f).BorderColor(Colors.Grey.Lighten2)
+                                        .Padding(4).AlignCenter().Text((rowIndex + 1).ToString()).FontSize(8).Bold();
+
                                     foreach (var col in selectedColumns)
                                     {
                                         string value = col switch
@@ -345,6 +352,7 @@ namespace Enjaz.Services
                             {
                                 table.ColumnsDefinition(columnsDef =>
                                 {
+                                    columnsDef.ConstantColumn(30); // عمود م (التسلسل)
                                     foreach (var _ in selectedColumns)
                                     {
                                         columnsDef.RelativeColumn();
@@ -353,6 +361,8 @@ namespace Enjaz.Services
 
                                 table.Header(header =>
                                 {
+                                    header.Cell().Background("#1B4F72").Padding(5)
+                                        .Text("م").FontColor(Colors.White).Bold().FontSize(9);
                                     foreach (var col in selectedColumns)
                                     {
                                         if (columnHeaders.ContainsKey(col))
@@ -368,6 +378,10 @@ namespace Enjaz.Services
                                 {
                                     var bgColor = rowIndex % 2 == 0 ? Colors.White : Colors.Grey.Lighten4;
                                     
+                                    // عمود التسلسل
+                                    table.Cell().Background(bgColor).Border(0.5f).BorderColor(Colors.Grey.Lighten2)
+                                        .Padding(4).AlignCenter().Text((rowIndex + 1).ToString()).FontSize(8).Bold();
+
                                     foreach (var col in selectedColumns)
                                     {
                                         string value = col switch

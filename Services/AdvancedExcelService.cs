@@ -152,8 +152,15 @@ namespace Enjaz.Services
                 selectedColumns = columnHeaders.Keys.ToList();
             }
 
-            // كتابة العناوين
+            // كتابة العناوين — عمود التسلسل أولاً
             int col = 1;
+            ws.Cell(1, col).Value = "م";
+            ws.Cell(1, col).Style.Font.Bold = true;
+            ws.Cell(1, col).Style.Fill.BackgroundColor = XLColor.FromHtml("#1B4F72");
+            ws.Cell(1, col).Style.Font.FontColor = XLColor.White;
+            ws.Cell(1, col).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            col++;
+
             foreach (var prop in selectedColumns)
             {
                 if (columnHeaders.ContainsKey(prop))
@@ -168,9 +175,16 @@ namespace Enjaz.Services
 
             // كتابة البيانات
             int row = 2;
+            int seqNum = 1;
             foreach (var cert in certificates)
             {
                 col = 1;
+                // عمود التسلسل
+                ws.Cell(row, col).Value = seqNum;
+                ws.Cell(row, col).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                ws.Cell(row, col).Style.Font.Bold = true;
+                col++;
+
                 foreach (var prop in selectedColumns)
                 {
                     object? value = prop switch
@@ -202,10 +216,12 @@ namespace Enjaz.Services
                 }
 
                 row++;
+                seqNum++;
             }
 
             // تنسيق الجدول
             ws.Columns().AdjustToContents();
+            ws.Column(1).Width = 6; // عرض عمود التسلسل
             ws.Range(1, 1, 1, col - 1).Style.Border.BottomBorder = XLBorderStyleValues.Thick;
         }
 
@@ -373,8 +389,16 @@ namespace Enjaz.Services
                             { "CreatedByName", "اسم المستخدم" }
                         };
 
-                        // رأس الجدول
+                        // رأس الجدول — عمود التسلسل أولاً
                         int currentColumn = 1;
+                        var seqCell = ws.Cell(startTableRow, currentColumn);
+                        seqCell.Value = "م";
+                        seqCell.Style.Fill.BackgroundColor = XLColor.FromHtml("#1B4F72");
+                        seqCell.Style.Font.FontColor = XLColor.White;
+                        seqCell.Style.Font.Bold = true;
+                        seqCell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                        currentColumn++;
+
                         foreach (var col in selectedColumns)
                         {
                             if (columnHeaders.ContainsKey(col))
@@ -391,9 +415,23 @@ namespace Enjaz.Services
 
                         // بيانات الجدول
                         int currentRow = startTableRow + 1;
+                        int seqNum = 1;
                         foreach (var cert in certificates)
                         {
                             currentColumn = 1;
+                            // عمود التسلسل
+                            var numCell = ws.Cell(currentRow, currentColumn);
+                            numCell.Value = seqNum;
+                            numCell.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                            numCell.Style.Border.OutsideBorderColor = XLColor.LightGray;
+                            numCell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                            numCell.Style.Font.Bold = true;
+                            if (currentRow % 2 == 0)
+                            {
+                                numCell.Style.Fill.BackgroundColor = XLColor.FromHtml("#F8F9FA");
+                            }
+                            currentColumn++;
+
                             foreach (var col in selectedColumns)
                             {
                                 var cell = ws.Cell(currentRow, currentColumn);
@@ -426,6 +464,7 @@ namespace Enjaz.Services
                                 currentColumn++;
                             }
                             currentRow++;
+                            seqNum++;
                         }
 
                         ws.Columns().AdjustToContents();

@@ -335,12 +335,19 @@
                             </StackPanel>
                         </Button>
 
+                        <!-- وصف المنظومة -->
+                        <TextBlock Text="منظومة إنجاز: نظام رقمي شامل يضمن كفاءة إدارة العينات وسلامة إصدار الشهادات"
+                                   FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" 
+                                   HorizontalAlignment="Center" Margin="0,16,0,0" 
+                                   FontFamily="Manrope" TextWrapping="Wrap"
+                                   TextAlignment="Center"/>
+
                         <!-- تصميم و تنفيذ -->
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,14,0,0">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,0">
                             <TextBlock FontSize="12" FontWeight="SemiBold" 
                                        VerticalAlignment="Center" FontFamily="Manrope">
-                                <Run Text="تصميم و تنفيذ" Foreground="#64748B"/>
-                                <Run Text=" م. ادريس فتح الله الهرى" Foreground="#059669" FontWeight="Bold"/>
+                                <Run Text="تصميم و تنفيذ" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                <Run Text=" م. ادريس فتح الله الهرى" Foreground="{DynamicResource PrimaryBrush}" FontWeight="Bold"/>
                             </TextBlock>
                         </StackPanel>
                         

@@ -3,26 +3,32 @@
                     xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
                     xmlns:local="clr-namespace:Enjaz"
                     xmlns:helpers="clr-namespace:Enjaz.Helpers">
-    
-    <!-- الموارد تم نقلها لـ MainUIResources.xaml لتجنب التكرار -->
-    
-    <!-- Windows 10 Section Header Style -->
+
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- ═══  Enjaz 2026 — Liquid/Adaptive Glass Design System v2.0      ═══ -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+
+    <!-- ─── Section Header ─── -->
     <Style x:Key="WindowsSectionHeaderStyle" TargetType="TextBlock">
         <Setter Property="FontSize" Value="{DynamicResource FontSizeHeader}"/>
-        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="FontWeight" Value="Bold"/>
         <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
+        <Setter Property="FontFamily" Value="Manrope"/>
         <Setter Property="Margin" Value="0,0,0,15"/>
     </Style>
 
-    <!-- Windows 10 Title Line (Accent) -->
+    <!-- ─── Accent Line (Liquid Gradient) ─── -->
     <Style x:Key="WindowsAccentLineStyle" TargetType="Border">
-        <Setter Property="Background" Value="{DynamicResource SecondaryBrush}"/>
-        <Setter Property="Height" Value="2"/>
+        <Setter Property="Background" Value="{DynamicResource LiquidGradientBrush}"/>
+        <Setter Property="Height" Value="3"/>
         <Setter Property="HorizontalAlignment" Value="Left"/>
         <Setter Property="Margin" Value="0,-12,0,25"/>
+        <Setter Property="CornerRadius" Value="2"/>
     </Style>
 
-    <!-- Sidebar Button Style -->
+    <!-- ═══════════════════════════════════════ -->
+    <!-- ═══ Sidebar Navigation Button       ═══ -->
+    <!-- ═══════════════════════════════════════ -->
     <Style x:Key="SidebarButtonStyle" TargetType="Button">
         <Style.Resources>
             <Style TargetType="TextBlock">
@@ -34,12 +40,13 @@
         </Style.Resources>
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="Foreground" Value="{DynamicResource SidebarMutedBrush}"/>
-        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="FontSize" Value="13"/>
         <Setter Property="FontFamily" Value="Manrope"/>
         <Setter Property="FontWeight" Value="Medium"/>
-        <Setter Property="Padding" Value="16,12"/>
-        <Setter Property="Margin" Value="10,4"/>
-        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Padding" Value="16,11"/>
+        <Setter Property="Margin" Value="8,2"/>
+        <Setter Property="BorderThickness" Value="3,0,0,0"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
         <Setter Property="HorizontalContentAlignment" Value="Right"/>
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="Template">
@@ -47,18 +54,20 @@
                 <ControlTemplate TargetType="Button">
                     <Border x:Name="border" 
                             Background="{TemplateBinding Background}" 
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
                             Padding="{TemplateBinding Padding}"
-                            CornerRadius="12">
+                            CornerRadius="10">
                         <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" 
                                           VerticalAlignment="Center"/>
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="border" Property="Background" Value="{DynamicResource SidebarHoverBrush}"/>
+                            <Setter TargetName="border" Property="Background" Value="{DynamicResource HoverOverlayBrush}"/>
                             <Setter Property="Foreground" Value="{DynamicResource SidebarTextBrush}"/>
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
-                            <Setter Property="Opacity" Value="0.5"/>
+                            <Setter Property="Opacity" Value="0.4"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -66,7 +75,9 @@
         </Setter>
     </Style>
 
-    <!-- Action Button Style (Emerald/Primary Action) -->
+    <!-- ═══════════════════════════════════════ -->
+    <!-- ═══ Action Buttons (Liquid Glass)   ═══ -->
+    <!-- ═══════════════════════════════════════ -->
     <Style x:Key="ActionButtonStyle" TargetType="Button">
         <Style.Resources>
             <Style TargetType="TextBlock">
@@ -79,9 +90,9 @@
         <Setter Property="Background" Value="{DynamicResource SecondaryBrush}"/>
         <Setter Property="Foreground" Value="White"/>
         <Setter Property="FontSize" Value="14"/>
-        <Setter Property="FontFamily" Value="Inter"/>
+        <Setter Property="FontFamily" Value="Manrope"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
-        <Setter Property="Height" Value="46"/>
+        <Setter Property="Height" Value="44"/>
         <Setter Property="Padding" Value="24,0"/>
         <Setter Property="Margin" Value="5,0"/>
         <Setter Property="Cursor" Value="Hand"/>
@@ -90,20 +101,34 @@
                 <ControlTemplate TargetType="Button">
                     <Border x:Name="border" 
                             Background="{TemplateBinding Background}" 
-                            CornerRadius="12"
+                            CornerRadius="10"
                             Padding="{TemplateBinding Padding}"
                             TextElement.Foreground="{TemplateBinding Foreground}">
+                        <Border.Effect>
+                            <DropShadowEffect BlurRadius="12" ShadowDepth="1" Opacity="0.15" Color="Black"/>
+                        </Border.Effect>
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="border" Property="Opacity" Value="0.9"/>
+                            <Setter TargetName="border" Property="Opacity" Value="0.92"/>
+                            <Setter TargetName="border" Property="Effect">
+                                <Setter.Value>
+                                    <DropShadowEffect BlurRadius="18" ShadowDepth="2" Opacity="0.2" Color="Black"/>
+                                </Setter.Value>
+                            </Setter>
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
-                            <Setter TargetName="border" Property="Opacity" Value="0.8"/>
+                            <Setter TargetName="border" Property="Opacity" Value="0.85"/>
+                            <Setter TargetName="border" Property="RenderTransform">
+                                <Setter.Value>
+                                    <ScaleTransform ScaleX="0.98" ScaleY="0.98"/>
+                                </Setter.Value>
+                            </Setter>
+                            <Setter TargetName="border" Property="RenderTransformOrigin" Value="0.5,0.5"/>
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
-                            <Setter Property="Opacity" Value="0.5"/>
+                            <Setter Property="Opacity" Value="0.45"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -111,35 +136,72 @@
         </Setter>
     </Style>
 
-    <!-- Primary Button (Navy in Light, Emerald in Dark) -->
+    <!-- Primary Button -->
     <Style x:Key="PrimaryButtonStyle" TargetType="Button" BasedOn="{StaticResource ActionButtonStyle}">
         <Setter Property="Background" Value="{DynamicResource PrimaryBrush}"/>
         <Setter Property="Foreground" Value="White"/>
     </Style>
 
+    <!-- Danger Button -->
     <Style x:Key="DangerButtonStyle" TargetType="Button" BasedOn="{StaticResource ActionButtonStyle}">
         <Setter Property="Background" Value="{DynamicResource DangerBrush}"/>
     </Style>
 
+    <!-- Success Button -->
     <Style x:Key="SuccessButtonStyle" TargetType="Button" BasedOn="{StaticResource ActionButtonStyle}">
         <Setter Property="Background" Value="{DynamicResource SuccessBrush}"/>
     </Style>
 
+    <!-- Secondary Button (Glass Outline) -->
     <Style x:Key="SecondaryButtonStyle" TargetType="Button" BasedOn="{StaticResource ActionButtonStyle}">
-        <Setter Property="Background" Value="{DynamicResource BorderBrush}"/>
+        <Setter Property="Background" Value="Transparent"/>
         <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="border" 
+                            Background="Transparent"
+                            BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1.5"
+                            CornerRadius="10"
+                            Padding="{TemplateBinding Padding}">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="{DynamicResource HoverOverlayBrush}"/>
+                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource PrimaryBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="border" Property="RenderTransform">
+                                <Setter.Value>
+                                    <ScaleTransform ScaleX="0.98" ScaleY="0.98"/>
+                                </Setter.Value>
+                            </Setter>
+                            <Setter TargetName="border" Property="RenderTransformOrigin" Value="0.5,0.5"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.4"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
-    <!-- Form Input Styles -->
+    <!-- ═══════════════════════════════════════ -->
+    <!-- ═══ Form Inputs (Liquid Glass)      ═══ -->
+    <!-- ═══════════════════════════════════════ -->
     <Style x:Key="FormTextBoxStyle" TargetType="TextBox">
-        <Setter Property="Height" Value="46"/>
+        <Setter Property="Height" Value="44"/>
         <Setter Property="Padding" Value="14,0"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Setter Property="Background" Value="{DynamicResource InputBackgroundBrush}"/>
-        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource InputBorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
+        <Setter Property="CaretBrush" Value="{DynamicResource PrimaryBrush}"/>
         <Setter Property="FontSize" Value="14"/>
+        <Setter Property="FontFamily" Value="Manrope"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="TextBox">
@@ -147,12 +209,15 @@
                             Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="12">
+                            CornerRadius="10">
                         <ScrollViewer x:Name="PART_ContentHost" Margin="2,0"/>
                     </Border>
                     <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource SecondaryTextBrush}"/>
+                        </Trigger>
                         <Trigger Property="IsFocused" Value="True">
-                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource SecondaryBrush}"/>
+                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource InputFocusBrush}"/>
                             <Setter TargetName="border" Property="BorderThickness" Value="1.5"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
@@ -161,64 +226,81 @@
         </Setter>
     </Style>
 
-    <!-- Card Styles -->
+    <!-- ═══════════════════════════════════════ -->
+    <!-- ═══ Card Styles (Liquid Glass)      ═══ -->
+    <!-- ═══════════════════════════════════════ -->
+
+    <!-- Dashboard Card — elevated glass surface -->
     <Style x:Key="DashboardCardStyle" TargetType="Border">
         <Setter Property="Background" Value="{DynamicResource SurfaceBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="CornerRadius" Value="16"/>
+        <Setter Property="CornerRadius" Value="14"/>
         <Setter Property="Padding" Value="24"/>
         <Setter Property="Margin" Value="0,0,16,16"/>
         <Setter Property="Effect">
             <Setter.Value>
-                <DropShadowEffect BlurRadius="30" ShadowDepth="4" Color="Black" Opacity="0.03" />
+                <DropShadowEffect BlurRadius="20" ShadowDepth="2" Color="Black" Opacity="0.04"/>
             </Setter.Value>
         </Setter>
     </Style>
 
+    <!-- Stat Card — interactive with hover glow -->
     <Style x:Key="StatCardStyle" TargetType="Border">
         <Setter Property="Background" Value="{DynamicResource SurfaceBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="CornerRadius" Value="16"/>
+        <Setter Property="CornerRadius" Value="14"/>
         <Setter Property="Padding" Value="24"/>
         <Setter Property="Margin" Value="0,0,16,0"/>
         <Setter Property="Effect">
             <Setter.Value>
-                <DropShadowEffect BlurRadius="30" ShadowDepth="4" Color="Black" Opacity="0.03" />
+                <DropShadowEffect BlurRadius="16" ShadowDepth="2" Color="Black" Opacity="0.04"/>
             </Setter.Value>
         </Setter>
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="BorderBrush" Value="{DynamicResource SecondaryBrush}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBrush}"/>
+                <Setter Property="Effect">
+                    <Setter.Value>
+                        <DropShadowEffect BlurRadius="24" ShadowDepth="4" Color="#10B981" Opacity="0.08"/>
+                    </Setter.Value>
+                </Setter>
             </Trigger>
         </Style.Triggers>
     </Style>
 
     <!-- Login Card Style -->
     <Style x:Key="LoginCardStyle" TargetType="Border">
-        <Setter Property="Background" Value="{DynamicResource CardBackgroundBrush}"/>
-        <Setter Property="CornerRadius" Value="0"/>
-        <Setter Property="Padding" Value="40"/>
-        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
-        <Setter Property="BorderThickness" Value="1"/>
-    </Style>
-
-    <!-- Glassmorphism Card Style -->
-    <Style x:Key="EnjazSmartHelpGlassCardStyle" TargetType="Border">
         <Setter Property="Background" Value="{DynamicResource GlassBackgroundBrush}"/>
+        <Setter Property="CornerRadius" Value="16"/>
+        <Setter Property="Padding" Value="40"/>
         <Setter Property="BorderBrush" Value="{DynamicResource GlassBorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="CornerRadius" Value="20"/>
-        <Setter Property="Padding" Value="20"/>
         <Setter Property="Effect">
             <Setter.Value>
-                <DropShadowEffect BlurRadius="40" Opacity="0.1" ShadowDepth="2" Color="Black"/>
+                <DropShadowEffect BlurRadius="40" Opacity="0.12" ShadowDepth="4" Color="Black"/>
             </Setter.Value>
         </Setter>
     </Style>
 
-    <!-- Modern Search Box Style -->
+    <!-- Glassmorphism Card — frosted glass surface -->
+    <Style x:Key="EnjazSmartHelpGlassCardStyle" TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource GlassBackgroundBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource GlassBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="16"/>
+        <Setter Property="Padding" Value="20"/>
+        <Setter Property="Effect">
+            <Setter.Value>
+                <DropShadowEffect BlurRadius="32" Opacity="0.08" ShadowDepth="2" Color="Black"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- ═══ Glass Search Box                ═══ -->
+    <!-- ═══════════════════════════════════════ -->
     <Style x:Key="ModernSearchBoxStyle" TargetType="TextBox" BasedOn="{StaticResource FormTextBoxStyle}">
         <Setter Property="Background" Value="{DynamicResource GlassInputBackgroundBrush}"/>
         <Setter Property="BorderThickness" Value="0"/>
@@ -227,28 +309,31 @@
         <Setter Property="CaretBrush" Value="{DynamicResource GlassTextBrush}"/>
     </Style>
 
-    <!-- Form DatePicker Style -->
+    <!-- ═══════════════════════════════════════ -->
+    <!-- ═══ Form Controls                   ═══ -->
+    <!-- ═══════════════════════════════════════ -->
     <Style x:Key="FormDatePickerStyle" TargetType="DatePicker">
-        <Setter Property="Height" Value="46"/>
+        <Setter Property="Height" Value="44"/>
         <Setter Property="Padding" Value="14,0"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Setter Property="Background" Value="{DynamicResource InputBackgroundBrush}"/>
-        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource InputBorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
         <Setter Property="FontSize" Value="14"/>
+        <Setter Property="FontFamily" Value="Manrope"/>
     </Style>
 
-    <!-- Form ComboBox Style -->
     <Style x:Key="FormComboBoxStyle" TargetType="ComboBox">
-        <Setter Property="Height" Value="46"/>
+        <Setter Property="Height" Value="44"/>
         <Setter Property="Padding" Value="14,0"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Setter Property="Background" Value="{DynamicResource InputBackgroundBrush}"/>
-        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource InputBorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
         <Setter Property="FontSize" Value="14"/>
+        <Setter Property="FontFamily" Value="Manrope"/>
     </Style>
 
 </ResourceDictionary>

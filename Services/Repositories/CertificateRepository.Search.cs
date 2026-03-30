@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 using Microsoft.Data.Sqlite;
+using Dapper;
 using Enjaz.Models;
 
 namespace Enjaz.Services.Repositories
@@ -16,7 +19,7 @@ namespace Enjaz.Services.Repositories
         /// الحصول على عدد الشهادات المطابقة للبحث
         /// Get count of certificates matching search criteria
         /// </summary>
-        public System.Threading.Tasks.Task<int> GetSearchCertificatesCountAsync(string searchTerm, string searchCriteria, DateTime? startDate = null, DateTime? endDate = null, bool showDeleted = false)
+        public Task<int> GetSearchCertificatesCountAsync(string searchTerm, string searchCriteria, DateTime? startDate = null, DateTime? endDate = null, bool showDeleted = false)
         {
              return _db.ExecuteWithRetryAsync(async () =>
              {
@@ -118,7 +121,7 @@ namespace Enjaz.Services.Repositories
         /// البحث عن الشهادات بشكل غير متزامن مع تقسيم الصفحات
         /// Search certificates asynchronously with pagination
         /// </summary>
-        public System.Threading.Tasks.Task<List<Certificate>> SearchCertificatesAsync(string searchTerm, string searchCriteria, int pageNumber, int pageSize, DateTime? startDate = null, DateTime? endDate = null, bool showDeleted = false)
+        public Task<List<Certificate>> SearchCertificatesAsync(string searchTerm, string searchCriteria, int pageNumber, int pageSize, DateTime? startDate = null, DateTime? endDate = null, bool showDeleted = false)
         {
             return _db.ExecuteWithRetryAsync(async () =>
             {
@@ -146,6 +149,7 @@ namespace Enjaz.Services.Repositories
 
                 query += " ORDER BY c.CreatedAt DESC LIMIT @Limit OFFSET @Offset;";
 
+                // Search uses manual SqliteCommand due to dynamic filter building
                 using var command = new SqliteCommand(query, connection);
                 command.Parameters.AddWithValue("@Limit", pageSize);
                 command.Parameters.AddWithValue("@Offset", offset);
@@ -196,7 +200,7 @@ namespace Enjaz.Services.Repositories
             }, "SearchCertificatesAsync");
         }
 
-        public System.Threading.Tasks.Task<List<Certificate>> GetCertificatesBySenderAndDateAsync(string sender, DateTime startDate, DateTime endDate)
+        public Task<List<Certificate>> GetCertificatesBySenderAndDateAsync(string sender, DateTime startDate, DateTime endDate)
         {
             return _db.ExecuteWithRetryAsync(async () =>
             {
@@ -238,30 +242,24 @@ namespace Enjaz.Services.Repositories
                     certificates.Add(MapCertificateFromReader(reader));
                 }
                 
-                // 2. جلب العينات لكل شهادة (لهذا يتم عرض أرقام العينات في رسالة الإحالة)
-                foreach (var cert in certificates)
+                // 2. جلب العينات لكل شهادة باستخدام Dapper (لعرض أرقام العينات في رسالة الإحالة)
+                if (certificates.Count > 0)
                 {
-                    cert.Samples = new System.Collections.ObjectModel.ObservableCollection<Sample>(
-                        await GetSamplesByCertificateIdAsync(connection, cert.Id));
+                    var certIds = certificates.Select(c => c.Id).ToList();
+                    var allSamples = await connection.QueryAsync<Sample>(
+                        "SELECT Id, CertificateId, Root, SampleNumber, Description, MeasurementDate, Result, IsotopeK40, IsotopeRa226, IsotopeTh232, IsotopeRa, IsotopeCs137 FROM Samples WHERE CertificateId IN @Ids ORDER BY Root ASC",
+                        new { Ids = certIds });
+                    
+                    var samplesByCert = allSamples.GroupBy(s => s.CertificateId).ToDictionary(g => g.Key, g => g.ToList());
+                    foreach (var cert in certificates)
+                    {
+                        cert.Samples = new ObservableCollection<Sample>(
+                            samplesByCert.ContainsKey(cert.Id) ? samplesByCert[cert.Id] : new List<Sample>());
+                    }
                 }
                 
                 return certificates;
             }, "GetCertificatesBySenderAndDateAsync");
-        }
-
-        private async Task<List<Sample>> GetSamplesByCertificateIdAsync(SqliteConnection connection, int certificateId)
-        {
-            var samples = new List<Sample>();
-            var query = "SELECT Id, CertificateId, Root, SampleNumber, Description, MeasurementDate, Result, IsotopeK40, IsotopeRa226, IsotopeTh232, IsotopeRa, IsotopeCs137 FROM Samples WHERE CertificateId = @Id ORDER BY Root ASC";
-            
-            using var cmd = new SqliteCommand(query, connection);
-            cmd.Parameters.AddWithValue("@Id", certificateId);
-            using var reader = await cmd.ExecuteReaderAsync();
-            while (await reader.ReadAsync())
-            {
-                samples.Add(MapSampleFromReader((SqliteDataReader)reader));
-            }
-            return samples;
         }
 
         #endregion
@@ -272,11 +270,10 @@ namespace Enjaz.Services.Repositories
         /// الحصول على القيم الفريدة لعمود معين لاقتراحات الملء التلقائي
         /// Get unique values for a specific column for AutoComplete suggestions
         /// </summary>
-        public System.Threading.Tasks.Task<List<string>> GetDistinctFieldValuesAsync(string columnName)
+        public Task<List<string>> GetDistinctFieldValuesAsync(string columnName)
         {
             return _db.ExecuteWithRetryAsync(async () =>
             {
-                var values = new List<string>();
                 using var connection = new SqliteConnection(_db.ConnectionString);
                 await connection.OpenAsync();
 
@@ -287,7 +284,7 @@ namespace Enjaz.Services.Repositories
                 };
 
                 if (!allowedColumns.Contains(columnName))
-                    return values;
+                    return new List<string>();
 
                 var query = $"SELECT DISTINCT {columnName} FROM Certificates WHERE {columnName} IS NOT NULL AND {columnName} != '' ORDER BY {columnName} ASC";
                 
@@ -297,18 +294,12 @@ namespace Enjaz.Services.Repositories
                     query = $"SELECT DISTINCT {columnName} FROM Samples WHERE {columnName} IS NOT NULL AND {columnName} != '' ORDER BY {columnName} ASC";
                 }
 
-                using var command = new SqliteCommand(query, connection);
-                using var reader = await command.ExecuteReaderAsync();
-
-                while (await reader.ReadAsync())
-                {
-                    values.Add(reader.GetString(0));
-                }
-                return values;
+                var results = await connection.QueryAsync<string>(query);
+                return results.AsList();
             }, "GetDistinctFieldValuesAsync");
         }
 
-        public System.Threading.Tasks.Task<bool> IsFinancialReceiptDuplicateAsync(string receiptNumber, int? excludeId = null)
+        public Task<bool> IsFinancialReceiptDuplicateAsync(string receiptNumber, int? excludeId = null)
         {
             return _db.ExecuteWithRetryAsync(async () =>
             {
@@ -323,14 +314,11 @@ namespace Enjaz.Services.Repositories
                     query += " AND Id != @ExcludeId";
                 }
 
-                using var command = new SqliteCommand(query, connection);
-                command.Parameters.AddWithValue("@ReceiptNumber", receiptNumber.Trim());
-                if (excludeId.HasValue)
-                {
-                    command.Parameters.AddWithValue("@ExcludeId", excludeId.Value);
-                }
-
-                var count = Convert.ToInt32(await command.ExecuteScalarAsync());
+                var count = await connection.ExecuteScalarAsync<int>(query, new 
+                { 
+                    ReceiptNumber = receiptNumber.Trim(), 
+                    ExcludeId = excludeId ?? 0 
+                });
                 return count > 0;
             }, "IsFinancialReceiptDuplicateAsync");
         }

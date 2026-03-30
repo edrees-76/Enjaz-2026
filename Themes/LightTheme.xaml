@@ -1,49 +1,66 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     
-    <!-- ═══ Enjaz Light Theme Color Palette ═══ -->
-    <Color x:Key="PrimaryColor">#0B193C</Color> <!-- Navy Blue -->
-    <Color x:Key="PrimaryLightColor">#222E52</Color> 
-    <Color x:Key="SecondaryColor">#059669</Color> <!-- Emerald Green -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- ═══ Enjaz 2026 — Liquid/Adaptive Glass Light Theme              ═══ -->
+    <!-- ═══ Version 2.0 — Arctic Frost + Navy Depth                     ═══ -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+
+    <!-- ─── Core Identity Colors ─── -->
+    <Color x:Key="PrimaryColor">#0B193C</Color>         <!-- Navy Blue — authoritative -->
+    <Color x:Key="PrimaryLightColor">#1E3A6E</Color>    <!-- Lighter navy -->
+    <Color x:Key="PrimaryDarkColor">#050D1F</Color>     <!-- Deepest navy -->
+    <Color x:Key="SecondaryColor">#059669</Color>       <!-- Emerald Green — fresh accent -->
     <Color x:Key="SecondaryLightColor">#D1FAE5</Color>
+    <Color x:Key="AccentColor">#0891B2</Color>          <!-- Cyan 600 — highlights -->
 
-    <!-- Backgrounds -->
-    <Color x:Key="WindowBackgroundColor">#F4F7F9</Color>
-    <Color x:Key="SurfaceColor">#FFFFFF</Color>
-    <Color x:Key="SidebarColor">#0B193C</Color>
-    <Color x:Key="SidebarHoverColor">#1a2f5c</Color>
+    <!-- ─── Liquid Glass Backgrounds ─── -->
+    <Color x:Key="WindowBackgroundColor">#F0F4F8</Color>      <!-- Cool gray base -->
+    <Color x:Key="SurfaceColor">#FFFFFF</Color>               <!-- Pure white cards -->
+    <Color x:Key="SurfaceElevatedColor">#FFFFFF</Color>       <!-- Elevated white -->
+    <Color x:Key="SidebarColor">#0B193C</Color>               <!-- Navy sidebar -->
+    <Color x:Key="SidebarHoverColor">#142952</Color>          <!-- Navy hover -->
     
-    <!-- Text -->
-    <Color x:Key="PrimaryTextColor">#0B193C</Color>
-    <Color x:Key="SecondaryTextColor">#454652</Color>
-    <Color x:Key="SidebarTextColor">#FFFFFF</Color>
-    <Color x:Key="SidebarMutedColor">#CBD5E1</Color>
+    <!-- ─── Adaptive Text ─── -->
+    <Color x:Key="PrimaryTextColor">#0F172A</Color>     <!-- Slate 900 — rich dark -->
+    <Color x:Key="SecondaryTextColor">#475569</Color>    <!-- Slate 600 -->
+    <Color x:Key="TertiaryTextColor">#94A3B8</Color>    <!-- Slate 400 -->
+    <Color x:Key="SidebarTextColor">#F1F5F9</Color>     <!-- Slate 100 -->
+    <Color x:Key="SidebarMutedColor">#94A3B8</Color>    <!-- Slate 400 -->
     
-    <!-- UI Elements -->
-    <Color x:Key="BorderColor">#E2E8F0</Color>
+    <!-- ─── UI Fabric ─── -->
+    <Color x:Key="BorderColor">#E2E8F0</Color>           <!-- Slate 200 -->
     <Color x:Key="DividerColor">#E2E8F0</Color>
-    <Color x:Key="InputBackgroundColor">#FFFFFF</Color>
-    <Color x:Key="InputBorderColor">#E2E8F0</Color>
-    <Color x:Key="SelectionColor">#EFF6FF</Color>
+    <Color x:Key="InputBackgroundColor">#F8FAFC</Color>   <!-- Slate 50 — subtle input wells -->
+    <Color x:Key="InputBorderColor">#CBD5E1</Color>       <!-- Slate 300 -->
+    <Color x:Key="SelectionColor">#EFF6FF</Color>         <!-- Blue 50 — soft selection -->
+    <Color x:Key="HoverOverlayColor">#0A000000</Color>    <!-- 4% black overlay -->
 
-    <!-- Actions -->
+    <!-- ─── Semantic Actions ─── -->
     <Color x:Key="SuccessColor">#059669</Color>
-    <Color x:Key="WarningColor">#F59E0B</Color>
-    <Color x:Key="DangerColor">#ba1a1a</Color>
+    <Color x:Key="WarningColor">#D97706</Color>     <!-- Amber 600 — better contrast -->
+    <Color x:Key="DangerColor">#DC2626</Color>      <!-- Red 600 -->
+    <Color x:Key="InfoColor">#2563EB</Color>        <!-- Blue 600 -->
 
-    <!-- ═══ Brushes ═══ -->
+    <!-- ═══════════════════════════════════════ -->
+    <!-- ═══ Solid Brushes                   ═══ -->
+    <!-- ═══════════════════════════════════════ -->
     <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource PrimaryColor}"/>
     <SolidColorBrush x:Key="PrimaryActionBrush" Color="{StaticResource PrimaryColor}"/>
     <SolidColorBrush x:Key="PrimaryLightBrush" Color="{StaticResource PrimaryLightColor}"/>
+    <SolidColorBrush x:Key="PrimaryDarkBrush" Color="{StaticResource PrimaryDarkColor}"/>
     <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource SecondaryColor}"/>
+    <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}"/>
     
     <SolidColorBrush x:Key="WindowBackgroundBrush" Color="{StaticResource WindowBackgroundColor}"/>
     <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource SurfaceColor}"/>
+    <SolidColorBrush x:Key="SurfaceElevatedBrush" Color="{StaticResource SurfaceElevatedColor}"/>
     <SolidColorBrush x:Key="SidebarBrush" Color="{StaticResource SidebarColor}"/>
     <SolidColorBrush x:Key="SidebarHoverBrush" Color="{StaticResource SidebarHoverColor}"/>
     
     <SolidColorBrush x:Key="PrimaryTextBrush" Color="{StaticResource PrimaryTextColor}"/>
     <SolidColorBrush x:Key="SecondaryTextBrush" Color="{StaticResource SecondaryTextColor}"/>
+    <SolidColorBrush x:Key="TertiaryTextBrush" Color="{StaticResource TertiaryTextColor}"/>
     <SolidColorBrush x:Key="SidebarTextBrush" Color="{StaticResource SidebarTextColor}"/>
     <SolidColorBrush x:Key="SidebarMutedBrush" Color="{StaticResource SidebarMutedColor}"/>
     
@@ -57,14 +74,16 @@
     <SolidColorBrush x:Key="SuccessBrush" Color="{StaticResource SuccessColor}"/>
     <SolidColorBrush x:Key="WarningBrush" Color="{StaticResource WarningColor}"/>
     <SolidColorBrush x:Key="DangerBrush" Color="{StaticResource DangerColor}"/>
+    <SolidColorBrush x:Key="InfoBrush" Color="{StaticResource InfoColor}"/>
     
     <SolidColorBrush x:Key="SelectionBrush" Color="{StaticResource SelectionColor}"/>
+    <SolidColorBrush x:Key="HoverOverlayBrush" Color="{StaticResource HoverOverlayColor}"/>
     
-    <!-- Button Brushes -->
-    <SolidColorBrush x:Key="SecondaryButtonBrush" Color="#3B82F6"/> <!-- Blue -->
-    <SolidColorBrush x:Key="TertiaryButtonBrush" Color="#F59E0B"/> <!-- Amber -->
+    <!-- ─── Button Brushes ─── -->
+    <SolidColorBrush x:Key="SecondaryButtonBrush" Color="#2563EB"/>
+    <SolidColorBrush x:Key="TertiaryButtonBrush" Color="#D97706"/>
     
-    <!-- MaterialDesign Button Overrides - ensures white text on dark primary buttons -->
+    <!-- MaterialDesign Button Overrides — white text on dark buttons -->
     <SolidColorBrush x:Key="PrimaryHueMidBrush" Color="{StaticResource PrimaryColor}"/>
     <SolidColorBrush x:Key="PrimaryHueMidForegroundBrush" Color="#FFFFFF"/>
     <SolidColorBrush x:Key="PrimaryHueLightBrush" Color="{StaticResource PrimaryLightColor}"/>
@@ -72,17 +91,51 @@
     <SolidColorBrush x:Key="PrimaryHueDarkBrush" Color="#050D1F"/>
     <SolidColorBrush x:Key="PrimaryHueDarkForegroundBrush" Color="#FFFFFF"/>
     
-    <!-- Sidebar Selected -->
-    <SolidColorBrush x:Key="SidebarSelectedBackgroundBrush" Color="#FFFFFF"/>
-    <SolidColorBrush x:Key="SidebarSelectedForegroundBrush" Color="{StaticResource PrimaryColor}"/>
+    <!-- ─── Sidebar Selected ─── -->
+    <SolidColorBrush x:Key="SidebarSelectedBackgroundBrush" Color="#1E3A6E"/>
+    <SolidColorBrush x:Key="SidebarSelectedForegroundBrush" Color="#FFFFFF"/>
 
-    <!-- DataGrid -->
-    <SolidColorBrush x:Key="DataGridHeaderBrush" Color="#F8FAFC"/>
-    <!-- Glassmorphism Brushes -->
-    <SolidColorBrush x:Key="GlassBackgroundBrush" Color="#CCFFFFFF"/>
-    <SolidColorBrush x:Key="GlassBorderBrush" Color="#1A000000"/>
-    <SolidColorBrush x:Key="GlassInputBackgroundBrush" Color="#F1F5F9"/>
-    <SolidColorBrush x:Key="GlassTextBrush" Color="#1E293B"/>
+    <!-- ─── DataGrid ─── -->
+    <SolidColorBrush x:Key="DataGridHeaderBrush" Color="#F1F5F9"/>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- ═══ Liquid Glass System (Light)     ═══ -->
+    <!-- ═══════════════════════════════════════ -->
+    
+    <!-- Glass Surfaces — frosted white with subtle depth -->
+    <SolidColorBrush x:Key="GlassBackgroundBrush" Color="#CCFFFFFF"/>       <!-- 80% white -->
+    <SolidColorBrush x:Key="GlassBorderBrush" Color="#1A000000"/>           <!-- 10% black border -->
+    <SolidColorBrush x:Key="GlassInputBackgroundBrush" Color="#F1F5F9"/>    <!-- Slate 100 -->
+    <SolidColorBrush x:Key="GlassTextBrush" Color="#0F172A"/>
     <SolidColorBrush x:Key="GlassMutedTextBrush" Color="#64748B"/>
+    
+    <!-- Glass Elevated — for cards, popups, dropdowns -->
+    <SolidColorBrush x:Key="GlassElevatedBrush" Color="#E6FFFFFF"/>         <!-- 90% white -->
+    <SolidColorBrush x:Key="GlassHighlightBrush" Color="#F0FFFFFF"/>        <!-- 94% white — active -->
+    
+    <!-- Gradient Brushes — Liquid flow effect -->
+    <LinearGradientBrush x:Key="LiquidGradientBrush" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#0B193C" Offset="0"/>
+        <GradientStop Color="#1E3A6E" Offset="0.5"/>
+        <GradientStop Color="#059669" Offset="1"/>
+    </LinearGradientBrush>
+    
+    <LinearGradientBrush x:Key="LiquidGradientSubtleBrush" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#0D0B193C" Offset="0"/>
+        <GradientStop Color="#0D059669" Offset="0.5"/>
+        <GradientStop Color="#0D0891B2" Offset="1"/>
+    </LinearGradientBrush>
+    
+    <LinearGradientBrush x:Key="SidebarGradientBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#0B193C" Offset="0"/>
+        <GradientStop Color="#0E1F48" Offset="0.5"/>
+        <GradientStop Color="#0B193C" Offset="1"/>
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="HeaderGlowBrush" StartPoint="0,0" EndPoint="1,0">
+        <GradientStop Color="#00059669" Offset="0"/>
+        <GradientStop Color="#1A059669" Offset="0.5"/>
+        <GradientStop Color="#00059669" Offset="1"/>
+    </LinearGradientBrush>
 
 </ResourceDictionary>

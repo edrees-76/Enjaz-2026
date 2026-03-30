@@ -195,6 +195,19 @@ namespace Enjaz.ViewModels
                         // 1. Set current user in UserService
                         _userService.Login(user!);
 
+                        try
+                        {
+                            var dbService = _serviceProvider.GetService(typeof(DatabaseService)) as DatabaseService;
+                            if (dbService != null)
+                            {
+                                await dbService.LogActionAsync(user!.Id, user.Username, "تسجيل دخول", "تم تسجيل الدخول إلى المنظومة بنجاح.");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Services.LoggerService.LogError("Audit Log Error", ex);
+                        }
+
                         // 1.5 Apply Unified Theme (Sync App with current Login preference)
                         settings.AppIsDarkMode = IsDarkMode;
                         settings.LoginIsDarkMode = IsDarkMode;

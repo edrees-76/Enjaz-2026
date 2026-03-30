@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Data.Sqlite;
 using Enjaz.Models;
 using Enjaz.Helpers;
 using System.Threading.Tasks;
+using Dapper;
 
 namespace Enjaz.Services.Repositories
 {
@@ -22,17 +24,10 @@ namespace Enjaz.Services.Repositories
         {
             return _db.ExecuteWithRetryAsync(async () =>
             {
-                var senders = new List<string>();
                 using var connection = new SqliteConnection(_db.ConnectionString);
-                await connection.OpenAsync();
                 var query = "SELECT DISTINCT Sender FROM SampleReceptions WHERE Sender IS NOT NULL AND Sender != ''";
-                using var command = new SqliteCommand(query, connection);
-                using var reader = await command.ExecuteReaderAsync();
-                while (await reader.ReadAsync())
-                {
-                    senders.Add(reader.GetString(0));
-                }
-                return senders;
+                var senders = await connection.QueryAsync<string>(query);
+                return senders.AsList();
             }, "GetDistinctSendersAsync");
         }
 
@@ -55,39 +50,39 @@ namespace Enjaz.Services.Repositories
                                          @CreatedBy, @CreatedByName);
                                  SELECT last_insert_rowid();";
 
-                    using var command = new SqliteCommand(query, connection, transaction);
-                    command.Parameters.AddWithValue("@AnalysisRequestNumber", reception.AnalysisRequestNumber);
-                    command.Parameters.AddWithValue("@NotificationNumber", reception.NotificationNumber ?? "");
-                    command.Parameters.AddWithValue("@DeclarationNumber", reception.DeclarationNumber ?? "");
-                    command.Parameters.AddWithValue("@Supplier", reception.Supplier ?? "");
-                    command.Parameters.AddWithValue("@Sender", reception.Sender ?? "");
-                    command.Parameters.AddWithValue("@Origin", reception.Origin ?? "");
-                    command.Parameters.AddWithValue("@PolicyNumber", reception.PolicyNumber ?? "");
-                    command.Parameters.AddWithValue("@FinancialReceiptNumber", reception.FinancialReceiptNumber ?? "");
-                    command.Parameters.AddWithValue("@CertificateType", reception.CertificateType);
-                    command.Parameters.AddWithValue("@Date", reception.Date.ToString("yyyy-MM-dd HH:mm:ss"));
-                    command.Parameters.AddWithValue("@Status", reception.Status);
-                    command.Parameters.AddWithValue("@CreatedBy", _userService.CurrentUser?.Id ?? 1);
-                    command.Parameters.AddWithValue("@CreatedByName", _userService.CurrentUser?.FullName ?? "النظام");
-
-                    var idObj = await command.ExecuteScalarAsync();
-                    if (idObj == null) throw new Exception("Failed to retrieve ID");
-                    int newId = Convert.ToInt32(idObj);
-
-                    if (reception.Samples != null)
+                    var parameters = new
                     {
-                        foreach (var sample in reception.Samples)
+                        reception.AnalysisRequestNumber,
+                        NotificationNumber = reception.NotificationNumber ?? "",
+                        DeclarationNumber = reception.DeclarationNumber ?? "",
+                        Supplier = reception.Supplier ?? "",
+                        Sender = reception.Sender ?? "",
+                        Origin = reception.Origin ?? "",
+                        PolicyNumber = reception.PolicyNumber ?? "",
+                        FinancialReceiptNumber = reception.FinancialReceiptNumber ?? "",
+                        reception.CertificateType,
+                        Date = reception.Date.ToString("yyyy-MM-dd HH:mm:ss"),
+                        reception.Status,
+                        CreatedBy = _userService.CurrentUser?.Id ?? 1,
+                        CreatedByName = _userService.CurrentUser?.FullName ?? "النظام"
+                    };
+
+                    int newId = await connection.ExecuteScalarAsync<int>(query, parameters, transaction);
+
+                    if (reception.Samples != null && reception.Samples.Any())
+                    {
+                        var insertSampleQuery = @"INSERT INTO ReceptionSamples 
+                            (ReceptionId, SampleNumber, Description)
+                            VALUES (@ReceptionId, @SampleNumber, @Description)";
+                        
+                        var sampleParams = reception.Samples.Select(s => new
                         {
-                            var insertSampleQuery = @"INSERT INTO ReceptionSamples 
-                                (ReceptionId, SampleNumber, Description)
-                                VALUES (@ReceptionId, @SampleNumber, @Description)";
-                            
-                            using var sampleCmd = new SqliteCommand(insertSampleQuery, connection, transaction);
-                            sampleCmd.Parameters.AddWithValue("@ReceptionId", newId);
-                            sampleCmd.Parameters.AddWithValue("@SampleNumber", sample.SampleNumber ?? "");
-                            sampleCmd.Parameters.AddWithValue("@Description", sample.Description ?? "");
-                            await sampleCmd.ExecuteNonQueryAsync();
-                        }
+                            ReceptionId = newId,
+                            SampleNumber = s.SampleNumber ?? "",
+                            Description = s.Description ?? ""
+                        });
+
+                        await connection.ExecuteAsync(insertSampleQuery, sampleParams, transaction);
                     }
 
                     transaction.Commit();
@@ -133,41 +128,44 @@ namespace Enjaz.Services.Repositories
                              UpdatedAt = CURRENT_TIMESTAMP
                              WHERE Id = @Id;";
 
-                    using var command = new SqliteCommand(query, connection, transaction);
-                    command.Parameters.AddWithValue("@Id", reception.Id);
-                    command.Parameters.AddWithValue("@AnalysisRequestNumber", reception.AnalysisRequestNumber);
-                    command.Parameters.AddWithValue("@NotificationNumber", reception.NotificationNumber ?? "");
-                    command.Parameters.AddWithValue("@DeclarationNumber", reception.DeclarationNumber ?? "");
-                    command.Parameters.AddWithValue("@Supplier", reception.Supplier ?? "");
-                    command.Parameters.AddWithValue("@Sender", reception.Sender ?? "");
-                    command.Parameters.AddWithValue("@Origin", reception.Origin ?? "");
-                    command.Parameters.AddWithValue("@PolicyNumber", reception.PolicyNumber ?? "");
-                    command.Parameters.AddWithValue("@FinancialReceiptNumber", reception.FinancialReceiptNumber ?? "");
-                    command.Parameters.AddWithValue("@CertificateType", reception.CertificateType);
-                    command.Parameters.AddWithValue("@Date", reception.Date.ToString("yyyy-MM-dd HH:mm:ss"));
-                    command.Parameters.AddWithValue("@Status", reception.Status);
-                    command.Parameters.AddWithValue("@UpdatedBy", _userService.CurrentUser?.Id ?? 1);
-                    command.Parameters.AddWithValue("@UpdatedByName", _userService.CurrentUser?.FullName ?? "النظام");
+                    var parameters = new
+                    {
+                        reception.Id,
+                        reception.AnalysisRequestNumber,
+                        NotificationNumber = reception.NotificationNumber ?? "",
+                        DeclarationNumber = reception.DeclarationNumber ?? "",
+                        Supplier = reception.Supplier ?? "",
+                        Sender = reception.Sender ?? "",
+                        Origin = reception.Origin ?? "",
+                        PolicyNumber = reception.PolicyNumber ?? "",
+                        FinancialReceiptNumber = reception.FinancialReceiptNumber ?? "",
+                        reception.CertificateType,
+                        Date = reception.Date.ToString("yyyy-MM-dd HH:mm:ss"),
+                        reception.Status,
+                        UpdatedBy = _userService.CurrentUser?.Id ?? 1,
+                        UpdatedByName = _userService.CurrentUser?.FullName ?? "النظام"
+                    };
 
-                    await command.ExecuteNonQueryAsync();
+                    await connection.ExecuteAsync(query, parameters, transaction);
 
                     if (reception.Samples != null)
                     {
-                        var deleteCmd = new SqliteCommand("DELETE FROM ReceptionSamples WHERE ReceptionId = @ReceptionId", connection, transaction);
-                        deleteCmd.Parameters.AddWithValue("@ReceptionId", reception.Id);
-                        await deleteCmd.ExecuteNonQueryAsync();
+                        await connection.ExecuteAsync("DELETE FROM ReceptionSamples WHERE ReceptionId = @ReceptionId", new { ReceptionId = reception.Id }, transaction);
 
-                        foreach (var sample in reception.Samples)
+                        if (reception.Samples.Any())
                         {
                             var insertSampleQuery = @"INSERT INTO ReceptionSamples 
                                 (ReceptionId, SampleNumber, Description)
                                 VALUES (@ReceptionId, @SampleNumber, @Description)";
+                                
+                            var sampleParams = reception.Samples.Select(s => new
+                            {
+                                ReceptionId = reception.Id,
+                                SampleNumber = s.SampleNumber ?? "",
+                                Description = s.Description ?? ""
+                            });
                             
-                            using var sampleCmd = new SqliteCommand(insertSampleQuery, connection, transaction);
-                            sampleCmd.Parameters.AddWithValue("@ReceptionId", reception.Id);
-                            sampleCmd.Parameters.AddWithValue("@SampleNumber", sample.SampleNumber ?? "");
-                            sampleCmd.Parameters.AddWithValue("@Description", sample.Description ?? "");
-                            await sampleCmd.ExecuteNonQueryAsync();
+                            await connection.ExecuteAsync(insertSampleQuery, sampleParams, transaction);
                         }
                     }
 
@@ -192,13 +190,9 @@ namespace Enjaz.Services.Repositories
             return _db.ExecuteWithRetryAsync(async () =>
             {
                 using var connection = new SqliteConnection(_db.ConnectionString);
-                await connection.OpenAsync();
-                
                 var query = "DELETE FROM SampleReceptions WHERE Id = @Id;";
-                using var command = new SqliteCommand(query, connection);
-                command.Parameters.AddWithValue("@Id", id);
+                int rows = await connection.ExecuteAsync(query, new { Id = id });
                 
-                int rows = await command.ExecuteNonQueryAsync();
                 if (rows > 0)
                 {
                     await _db.LogActionAsync(_userService.CurrentUser?.Id, _userService.CurrentUser?.FullName ?? "غير معروف", "حذف استلام", 
@@ -213,45 +207,11 @@ namespace Enjaz.Services.Repositories
         {
              return _db.ExecuteWithRetryAsync(async () =>
              {
-                 var receptions = new List<SampleReception>();
                  using var connection = new SqliteConnection(_db.ConnectionString);
-                 await connection.OpenAsync();
-
-                 var query = @"SELECT Id, AnalysisRequestNumber, NotificationNumber, DeclarationNumber, 
-                               Supplier, Sender, Origin, PolicyNumber, FinancialReceiptNumber, 
-                               CertificateType, Date, Status, CreatedBy, CreatedByName
-                               FROM SampleReceptions 
-                               ORDER BY Date DESC LIMIT 200;";
-
-                 using var command = new SqliteCommand(query, connection);
-                 using var reader = await command.ExecuteReaderAsync();
-
-                 while (await reader.ReadAsync())
-                 {
-                     receptions.Add(new SampleReception
-                     {
-                         Id = reader.GetInt32(0),
-                         AnalysisRequestNumber = reader.GetString(1),
-                         NotificationNumber = reader.IsDBNull(2) ? "" : reader.GetString(2),
-                         DeclarationNumber = reader.IsDBNull(3) ? "" : reader.GetString(3),
-                         Supplier = reader.IsDBNull(4) ? "" : reader.GetString(4),
-                         Sender = reader.IsDBNull(5) ? "" : reader.GetString(5),
-                         Origin = reader.IsDBNull(6) ? "" : reader.GetString(6),
-                         PolicyNumber = reader.IsDBNull(7) ? "" : reader.GetString(7),
-                         FinancialReceiptNumber = reader.IsDBNull(8) ? "" : reader.GetString(8),
-                         CertificateType = reader.GetString(9),
-                         Date = ParseDbDate(reader.GetString(10)),
-                         Status = reader.GetString(11),
-                         CreatedBy = reader.GetInt32(12),
-                         CreatedByName = reader.IsDBNull(13) ? "" : reader.GetString(13)
-                     });
-                 }
+                 var query = "SELECT * FROM SampleReceptions ORDER BY Date DESC LIMIT 200;";
+                 var receptions = (await connection.QueryAsync<SampleReception>(query)).AsList();
                  
-                 foreach (var rec in receptions)
-                 {
-                     rec.Samples = await GetSamplesForReceptionAsync(connection, rec.Id);
-                 }
-                 
+                 await PopulateSamplesAsync(connection, receptions);
                  return receptions;
              }, "GetAllReceptionsAsync");
         }
@@ -260,46 +220,11 @@ namespace Enjaz.Services.Repositories
         {
              return _db.ExecuteWithRetryAsync(async () =>
              {
-                 var receptions = new List<SampleReception>();
                  using var connection = new SqliteConnection(_db.ConnectionString);
-                 await connection.OpenAsync();
-
-                 var query = @"SELECT Id, AnalysisRequestNumber, NotificationNumber, DeclarationNumber, 
-                               Supplier, Sender, Origin, PolicyNumber, FinancialReceiptNumber, 
-                               CertificateType, Date, Status, CreatedBy, CreatedByName
-                               FROM SampleReceptions 
-                               WHERE Status = 'لم يتم إصدار شهادة'
-                               ORDER BY Date DESC;";
-
-                 using var command = new SqliteCommand(query, connection);
-                 using var reader = await command.ExecuteReaderAsync();
-
-                 while (await reader.ReadAsync())
-                 {
-                     receptions.Add(new SampleReception
-                     {
-                         Id = reader.GetInt32(0),
-                         AnalysisRequestNumber = reader.GetString(1),
-                         NotificationNumber = reader.IsDBNull(2) ? "" : reader.GetString(2),
-                         DeclarationNumber = reader.IsDBNull(3) ? "" : reader.GetString(3),
-                         Supplier = reader.IsDBNull(4) ? "" : reader.GetString(4),
-                         Sender = reader.IsDBNull(5) ? "" : reader.GetString(5),
-                         Origin = reader.IsDBNull(6) ? "" : reader.GetString(6),
-                         PolicyNumber = reader.IsDBNull(7) ? "" : reader.GetString(7),
-                         FinancialReceiptNumber = reader.IsDBNull(8) ? "" : reader.GetString(8),
-                         CertificateType = reader.GetString(9),
-                         Date = ParseDbDate(reader.GetString(10)),
-                         Status = reader.GetString(11),
-                         CreatedBy = reader.GetInt32(12),
-                         CreatedByName = reader.IsDBNull(13) ? "" : reader.GetString(13)
-                     });
-                 }
+                 var query = "SELECT * FROM SampleReceptions WHERE Status = 'لم يتم إصدار شهادة' ORDER BY Date DESC;";
+                 var receptions = (await connection.QueryAsync<SampleReception>(query)).AsList();
                  
-                 foreach (var rec in receptions)
-                 {
-                     rec.Samples = await GetSamplesForReceptionAsync(connection, rec.Id);
-                 }
-                 
+                 await PopulateSamplesAsync(connection, receptions);
                  return receptions;
              }, "GetPendingReceptionsAsync");
         }
@@ -308,51 +233,14 @@ namespace Enjaz.Services.Repositories
         {
              return _db.ExecuteWithRetryAsync(async () =>
              {
-                 var receptions = new List<SampleReception>();
                  using var connection = new SqliteConnection(_db.ConnectionString);
-                 await connection.OpenAsync();
-
-                 var query = @"SELECT Id, AnalysisRequestNumber, NotificationNumber, DeclarationNumber, 
-                               Supplier, Sender, Origin, PolicyNumber, FinancialReceiptNumber, 
-                               CertificateType, Date, Status, CreatedBy, CreatedByName
-                               FROM SampleReceptions 
-                               WHERE Status = 'لم يتم إصدار شهادة' AND Date <= @ThresholdDate
-                               ORDER BY Date DESC;";
-
                  DateTime thresholdDate = DateTime.Now.AddDays(-daysDelayed);
                  string thresholdDateString = thresholdDate.ToString("yyyy-MM-dd HH:mm:ss");
 
-                 using var command = new SqliteCommand(query, connection);
-                 command.Parameters.AddWithValue("@ThresholdDate", thresholdDateString);
+                 var query = "SELECT * FROM SampleReceptions WHERE Status = 'لم يتم إصدار شهادة' AND Date <= @ThresholdDate ORDER BY Date DESC;";
+                 var receptions = (await connection.QueryAsync<SampleReception>(query, new { ThresholdDate = thresholdDateString })).AsList();
                  
-                 using var reader = await command.ExecuteReaderAsync();
-
-                 while (await reader.ReadAsync())
-                 {
-                     receptions.Add(new SampleReception
-                     {
-                         Id = reader.GetInt32(0),
-                         AnalysisRequestNumber = reader.GetString(1),
-                         NotificationNumber = reader.IsDBNull(2) ? "" : reader.GetString(2),
-                         DeclarationNumber = reader.IsDBNull(3) ? "" : reader.GetString(3),
-                         Supplier = reader.IsDBNull(4) ? "" : reader.GetString(4),
-                         Sender = reader.IsDBNull(5) ? "" : reader.GetString(5),
-                         Origin = reader.IsDBNull(6) ? "" : reader.GetString(6),
-                         PolicyNumber = reader.IsDBNull(7) ? "" : reader.GetString(7),
-                         FinancialReceiptNumber = reader.IsDBNull(8) ? "" : reader.GetString(8),
-                         CertificateType = reader.GetString(9),
-                         Date = ParseDbDate(reader.GetString(10)),
-                         Status = reader.GetString(11),
-                         CreatedBy = reader.GetInt32(12),
-                         CreatedByName = reader.IsDBNull(13) ? "" : reader.GetString(13)
-                     });
-                 }
-                 
-                 foreach (var rec in receptions)
-                 {
-                     rec.Samples = await GetSamplesForReceptionAsync(connection, rec.Id);
-                 }
-                 
+                 await PopulateSamplesAsync(connection, receptions);
                  return receptions;
              }, "GetDelayedPendingReceptionsAsync");
         }
@@ -361,14 +249,9 @@ namespace Enjaz.Services.Repositories
         {
             return _db.ExecuteWithRetryAsync(async () =>
             {
-                var receptions = new List<SampleReception>();
                 using var connection = new SqliteConnection(_db.ConnectionString);
-                await connection.OpenAsync();
-
-                var query = @"SELECT Id, AnalysisRequestNumber, NotificationNumber, DeclarationNumber, 
-                              Supplier, Sender, Origin, PolicyNumber, FinancialReceiptNumber, 
-                              CertificateType, Date, Status, CreatedBy, CreatedByName
-                              FROM SampleReceptions 
+                string searchPattern = $"%{searchTerm}%";
+                var query = @"SELECT * FROM SampleReceptions 
                               WHERE 
                               AnalysisRequestNumber LIKE @Search 
                               OR NotificationNumber LIKE @Search 
@@ -378,67 +261,11 @@ namespace Enjaz.Services.Repositories
                               OR PolicyNumber LIKE @Search
                               ORDER BY Date DESC LIMIT 200;";
 
-                string searchPattern = $"%{searchTerm}%";
-
-                using var command = new SqliteCommand(query, connection);
-                command.Parameters.AddWithValue("@Search", searchPattern);
+                var receptions = (await connection.QueryAsync<SampleReception>(query, new { Search = searchPattern })).AsList();
                 
-                using var reader = await command.ExecuteReaderAsync();
-
-                while (await reader.ReadAsync())
-                {
-                    receptions.Add(new SampleReception
-                    {
-                        Id = reader.GetInt32(0),
-                        AnalysisRequestNumber = reader.GetString(1),
-                        NotificationNumber = reader.IsDBNull(2) ? "" : reader.GetString(2),
-                        DeclarationNumber = reader.IsDBNull(3) ? "" : reader.GetString(3),
-                        Supplier = reader.IsDBNull(4) ? "" : reader.GetString(4),
-                        Sender = reader.IsDBNull(5) ? "" : reader.GetString(5),
-                        Origin = reader.IsDBNull(6) ? "" : reader.GetString(6),
-                        PolicyNumber = reader.IsDBNull(7) ? "" : reader.GetString(7),
-                        FinancialReceiptNumber = reader.IsDBNull(8) ? "" : reader.GetString(8),
-                        CertificateType = reader.GetString(9),
-                        Date = ParseDbDate(reader.GetString(10)),
-                        Status = reader.GetString(11),
-                        CreatedBy = reader.GetInt32(12),
-                        CreatedByName = reader.IsDBNull(13) ? "" : reader.GetString(13)
-                    });
-                }
-                
-                foreach (var rec in receptions)
-                {
-                    rec.Samples = await GetSamplesForReceptionAsync(connection, rec.Id);
-                }
-
+                await PopulateSamplesAsync(connection, receptions);
                 return receptions;
             }, "SearchSampleReceptionsAsync");
-        }
-
-        private async Task<System.Collections.ObjectModel.ObservableCollection<ReceptionSample>> GetSamplesForReceptionAsync(SqliteConnection connection, int receptionId)
-        {
-            var samples = new System.Collections.ObjectModel.ObservableCollection<ReceptionSample>();
-            var samplesQuery = @"SELECT Id, SampleNumber, Description
-                                 FROM ReceptionSamples 
-                                 WHERE ReceptionId = @ReceptionId";
-            
-            using var samplesCmd = new SqliteCommand(samplesQuery, connection);
-            samplesCmd.Parameters.AddWithValue("@ReceptionId", receptionId);
-            using var samplesReader = await samplesCmd.ExecuteReaderAsync();
-            
-            int count = 1;
-            while (await samplesReader.ReadAsync())
-            {
-                samples.Add(new ReceptionSample
-                {
-                    Id = samplesReader.GetInt32(0),
-                    ReceptionId = receptionId,
-                    Root = (count++).ToString(),
-                    SampleNumber = samplesReader.IsDBNull(1) ? "" : samplesReader.GetString(1),
-                    Description = samplesReader.IsDBNull(2) ? "" : samplesReader.GetString(2)
-                });
-            }
-            return samples;
         }
 
         /// <summary>
@@ -448,19 +275,13 @@ namespace Enjaz.Services.Repositories
         {
             return _db.ExecuteWithRetryAsync(async () =>
             {
-                var receptions = new List<SampleReception>();
                 using var connection = new SqliteConnection(_db.ConnectionString);
-                await connection.OpenAsync();
-
-                string query;
                 string searchPattern = $"%{value}%";
+                string query;
 
                 if (field == "رقم العينة")
                 {
-                    // البحث عبر جدول العينات المرتبط
-                    query = @"SELECT DISTINCT sr.Id, sr.AnalysisRequestNumber, sr.NotificationNumber, sr.DeclarationNumber, 
-                              sr.Supplier, sr.Sender, sr.Origin, sr.PolicyNumber, sr.FinancialReceiptNumber, 
-                              sr.CertificateType, sr.Date, sr.Status, sr.CreatedBy, sr.CreatedByName
+                    query = @"SELECT DISTINCT sr.* 
                               FROM SampleReceptions sr
                               INNER JOIN ReceptionSamples rs ON rs.ReceptionId = sr.Id
                               WHERE rs.SampleNumber LIKE @Search
@@ -468,75 +289,40 @@ namespace Enjaz.Services.Repositories
                 }
                 else if (field == "رقم الإخطار" || field == "رقم الاخطار")
                 {
-                    query = @"SELECT Id, AnalysisRequestNumber, NotificationNumber, DeclarationNumber, 
-                              Supplier, Sender, Origin, PolicyNumber, FinancialReceiptNumber, 
-                              CertificateType, Date, Status, CreatedBy, CreatedByName
-                              FROM SampleReceptions 
+                    query = @"SELECT * FROM SampleReceptions 
                               WHERE NotificationNumber LIKE @Search
                               ORDER BY Date DESC LIMIT 100;";
                 }
                 else // رقم الإقرار
                 {
-                    query = @"SELECT Id, AnalysisRequestNumber, NotificationNumber, DeclarationNumber, 
-                              Supplier, Sender, Origin, PolicyNumber, FinancialReceiptNumber, 
-                              CertificateType, Date, Status, CreatedBy, CreatedByName
-                              FROM SampleReceptions 
+                    query = @"SELECT * FROM SampleReceptions 
                               WHERE DeclarationNumber LIKE @Search
                               ORDER BY Date DESC LIMIT 100;";
                 }
 
-                using var command = new SqliteCommand(query, connection);
-                command.Parameters.AddWithValue("@Search", searchPattern);
-                using var reader = await command.ExecuteReaderAsync();
+                var receptions = (await connection.QueryAsync<SampleReception>(query, new { Search = searchPattern })).AsList();
 
-                while (await reader.ReadAsync())
-                {
-                    receptions.Add(new SampleReception
-                    {
-                        Id = reader.GetInt32(0),
-                        AnalysisRequestNumber = reader.GetString(1),
-                        NotificationNumber = reader.IsDBNull(2) ? "" : reader.GetString(2),
-                        DeclarationNumber = reader.IsDBNull(3) ? "" : reader.GetString(3),
-                        Supplier = reader.IsDBNull(4) ? "" : reader.GetString(4),
-                        Sender = reader.IsDBNull(5) ? "" : reader.GetString(5),
-                        Origin = reader.IsDBNull(6) ? "" : reader.GetString(6),
-                        PolicyNumber = reader.IsDBNull(7) ? "" : reader.GetString(7),
-                        FinancialReceiptNumber = reader.IsDBNull(8) ? "" : reader.GetString(8),
-                        CertificateType = reader.GetString(9),
-                        Date = ParseDbDate(reader.GetString(10)),
-                        Status = reader.GetString(11),
-                        CreatedBy = reader.GetInt32(12),
-                        CreatedByName = reader.IsDBNull(13) ? "" : reader.GetString(13)
-                    });
-                }
-
-                foreach (var rec in receptions)
-                {
-                    rec.Samples = await GetSamplesForReceptionAsync(connection, rec.Id);
-                }
-
+                await PopulateSamplesAsync(connection, receptions);
                 return receptions;
             }, "SearchReceptionsByFieldAsync");
         }
 
-        /// <summary>
-        /// تحديث حالة الاستلام (مثلاً من "لم يتم إصدار شهادة" إلى "تم إصدار شهادة")
-        /// </summary>
         public Task<bool> UpdateReceptionStatusAsync(int receptionId, string newStatus)
         {
             return _db.ExecuteWithRetryAsync(async () =>
             {
                 using var connection = new SqliteConnection(_db.ConnectionString);
-                await connection.OpenAsync();
-
                 var query = "UPDATE SampleReceptions SET Status = @Status, UpdatedBy = @UpdatedBy, UpdatedByName = @UpdatedByName, UpdatedAt = CURRENT_TIMESTAMP WHERE Id = @Id;";
-                using var command = new SqliteCommand(query, connection);
-                command.Parameters.AddWithValue("@Id", receptionId);
-                command.Parameters.AddWithValue("@Status", newStatus);
-                command.Parameters.AddWithValue("@UpdatedBy", _userService.CurrentUser?.Id ?? 1);
-                command.Parameters.AddWithValue("@UpdatedByName", _userService.CurrentUser?.FullName ?? "النظام");
+                
+                var parameters = new
+                {
+                    Id = receptionId,
+                    Status = newStatus,
+                    UpdatedBy = _userService.CurrentUser?.Id ?? 1,
+                    UpdatedByName = _userService.CurrentUser?.FullName ?? "النظام"
+                };
 
-                int rows = await command.ExecuteNonQueryAsync();
+                int rows = await connection.ExecuteAsync(query, parameters);
                 return rows > 0;
             }, "UpdateReceptionStatusAsync");
         }
@@ -546,57 +332,60 @@ namespace Enjaz.Services.Repositories
             return _db.ExecuteWithRetryAsync(async () =>
             {
                 using var connection = new SqliteConnection(_db.ConnectionString);
-                await connection.OpenAsync();
+                var query = "SELECT * FROM SampleReceptions WHERE Id = @Id;";
+                var rec = await connection.QueryFirstOrDefaultAsync<SampleReception>(query, new { Id = id });
 
-                var query = @"SELECT Id, AnalysisRequestNumber, NotificationNumber, DeclarationNumber, 
-                               Supplier, Sender, Origin, PolicyNumber, FinancialReceiptNumber, 
-                               CertificateType, Date, Status, CreatedBy, CreatedByName
-                               FROM SampleReceptions 
-                               WHERE Id = @Id;";
-
-                using var command = new SqliteCommand(query, connection);
-                command.Parameters.AddWithValue("@Id", id);
-                
-                using var reader = await command.ExecuteReaderAsync();
-
-                if (await reader.ReadAsync())
+                if (rec != null)
                 {
-                    var rec = new SampleReception
-                    {
-                        Id = reader.GetInt32(0),
-                        AnalysisRequestNumber = reader.GetString(1),
-                        NotificationNumber = reader.IsDBNull(2) ? "" : reader.GetString(2),
-                        DeclarationNumber = reader.IsDBNull(3) ? "" : reader.GetString(3),
-                        Supplier = reader.IsDBNull(4) ? "" : reader.GetString(4),
-                        Sender = reader.IsDBNull(5) ? "" : reader.GetString(5),
-                        Origin = reader.IsDBNull(6) ? "" : reader.GetString(6),
-                        PolicyNumber = reader.IsDBNull(7) ? "" : reader.GetString(7),
-                        FinancialReceiptNumber = reader.IsDBNull(8) ? "" : reader.GetString(8),
-                        CertificateType = reader.GetString(9),
-                        Date = ParseDbDate(reader.GetString(10)),
-                        Status = reader.GetString(11),
-                        CreatedBy = reader.GetInt32(12),
-                        CreatedByName = reader.IsDBNull(13) ? "" : reader.GetString(13)
-                    };
-                    
                     rec.Samples = await GetSamplesForReceptionAsync(connection, rec.Id);
-                    return rec;
                 }
                 
-                return null;
+                return rec;
             }, "GetReceptionByIdAsync");
         }
-        private DateTime ParseDbDate(string dateStr)
+
+        private async Task<System.Collections.ObjectModel.ObservableCollection<ReceptionSample>> GetSamplesForReceptionAsync(SqliteConnection connection, int receptionId)
         {
-            if (string.IsNullOrEmpty(dateStr)) return DateTime.Now;
+            var samplesQuery = "SELECT Id, ReceptionId, SampleNumber, Description FROM ReceptionSamples WHERE ReceptionId = @ReceptionId";
+            var samplesList = await connection.QueryAsync<ReceptionSample>(samplesQuery, new { ReceptionId = receptionId });
             
-            string[] formats = { "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd", "dd/MM/yyyy", "dd/MM/yyyy HH:mm:ss", "MM/dd/yyyy" };
-            if (DateTime.TryParseExact(dateStr, formats, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out DateTime result))
+            var samples = new System.Collections.ObjectModel.ObservableCollection<ReceptionSample>();
+            int count = 1;
+            foreach (var sample in samplesList)
             {
-                return result;
+                sample.Root = (count++).ToString();
+                samples.Add(sample);
             }
+            return samples;
+        }
+
+        private async Task PopulateSamplesAsync(SqliteConnection connection, List<SampleReception> receptions)
+        {
+            if (!receptions.Any()) return;
+
+            var receptionIds = receptions.Select(r => r.Id).ToList();
+            var samplesQuery = "SELECT Id, ReceptionId, SampleNumber, Description FROM ReceptionSamples WHERE ReceptionId IN @Ids";
+            var allSamples = await connection.QueryAsync<ReceptionSample>(samplesQuery, new { Ids = receptionIds });
+            var samplesLookup = allSamples.GroupBy(s => s.ReceptionId).ToDictionary(g => g.Key, g => g.ToList());
             
-            return DateTime.TryParse(dateStr, out result) ? result : DateTime.Now;
+            foreach (var rec in receptions)
+            {
+                if (samplesLookup.TryGetValue(rec.Id, out var samples))
+                {
+                    int count = 1;
+                    var obsSamples = new System.Collections.ObjectModel.ObservableCollection<ReceptionSample>();
+                    foreach (var sample in samples)
+                    {
+                        sample.Root = (count++).ToString();
+                        obsSamples.Add(sample);
+                    }
+                    rec.Samples = obsSamples;
+                }
+                else
+                {
+                    rec.Samples = new System.Collections.ObjectModel.ObservableCollection<ReceptionSample>();
+                }
+            }
         }
     }
 }

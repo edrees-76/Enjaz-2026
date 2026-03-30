@@ -40,13 +40,16 @@ namespace Enjaz.Tests
         [Test]
         public void AddCertificateCommand_SetsIsEditingTrue()
         {
+            // Setup the mock to return a reception so that the flow continues
+            _mockReceptionSearchService.Setup(s => s.ShowSearchDialog()).Returns(new SampleReception { Id = 1, CertificateType = "اختبار" });
+
             var viewModel = new CertificatesViewModel(null!, _mockPdfService.Object, _mockNotificationService.Object, null!, null!, null!, _mockReceptionSearchService.Object);
 
             viewModel.AddCertificateCommand.Execute(null);
 
             Assert.IsTrue(viewModel.IsEditing);
-            Assert.IsNotNull(viewModel.SelectedCertificate);
-            Assert.AreEqual("ENZ-", viewModel.SelectedCertificate.CertificateNumber.Substring(0, 4));
+            Assert.IsNull(viewModel.SelectedCertificate); // It should be null for new creations.
+            Assert.AreEqual("اختبار", viewModel.CertificateType); // Loaded from the mocked reception
         }
     }
 }

@@ -15,7 +15,7 @@ namespace Enjaz.Tests
         private DatabaseService _dbService;
         private ArchiveService _archiveService;
 
-        [OneTimeSetUp]
+        [SetUp]
         public void Setup()
         {
             // Create unique paths for each test
@@ -25,7 +25,7 @@ namespace Enjaz.Tests
             _archiveDbPath = Path.Combine(tempDir, "archive.db"); // ArchiveService expects it in the same folder
 
             // Initialize DatabaseService with test path
-            _dbService = new DatabaseService(_testDbPath);
+            _dbService = new DatabaseService($"Data Source={_testDbPath}");
             _archiveService = new ArchiveService(_dbService);
             
             // Adjust archive path in test to match where ArchiveService will put it (same dir as main db)
@@ -35,7 +35,7 @@ namespace Enjaz.Tests
             if (File.Exists(_archiveDbPath)) File.Delete(_archiveDbPath);
         }
 
-        [OneTimeTearDown]
+        [TearDown]
         public void TearDown()
         {
             // Close connections is handled by using blocks in methods, 

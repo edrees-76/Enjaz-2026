@@ -136,8 +136,8 @@
         </Grid.ColumnDefinitions>
 
         <!-- الشريط الجانبي -->
-        <Border Grid.Column="0" Background="{DynamicResource SidebarBrush}"
-                BorderBrush="{DynamicResource DividerBrush}" BorderThickness="1,0,0,0"
+        <Border Grid.Column="0" Background="{DynamicResource SidebarGradientBrush}"
+                BorderBrush="{DynamicResource GlassBorderBrush}" BorderThickness="0,0,1,0"
                 Visibility="{Binding IsSidebarVisible, Converter={StaticResource BoolToVisConverter}}">
             <Grid>
                 <Grid.RowDefinitions>
@@ -186,7 +186,6 @@
                                     <DataTrigger Binding="{Binding CurrentView}" Value="{x:Static models:NavigationDestination.Home}">
                                         <Setter Property="Background" Value="{DynamicResource SurfaceBrush}"/>
                                         <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
-                                        <Setter Property="BorderThickness" Value="3,0,0,0"/>
                                         <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBrush}"/>
                                         <Setter Property="FontWeight" Value="SemiBold"/>
                                     </DataTrigger>
@@ -206,14 +205,12 @@
                                     <DataTrigger Binding="{Binding CurrentView}" Value="{x:Static models:NavigationDestination.SampleReceptions}">
                                         <Setter Property="Background" Value="{DynamicResource SurfaceBrush}"/>
                                         <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
-                                        <Setter Property="BorderThickness" Value="3,0,0,0"/>
                                         <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBrush}"/>
                                         <Setter Property="FontWeight" Value="SemiBold"/>
                                     </DataTrigger>
                                     <DataTrigger Binding="{Binding CurrentView}" Value="{x:Static models:NavigationDestination.SampleReceptionForm}">
                                         <Setter Property="Background" Value="{DynamicResource SurfaceBrush}"/>
                                         <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
-                                        <Setter Property="BorderThickness" Value="3,0,0,0"/>
                                         <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBrush}"/>
                                         <Setter Property="FontWeight" Value="SemiBold"/>
                                     </DataTrigger>
@@ -233,7 +230,6 @@
                                     <DataTrigger Binding="{Binding CurrentView}" Value="{x:Static models:NavigationDestination.Certificates}">
                                         <Setter Property="Background" Value="{DynamicResource SurfaceBrush}"/>
                                         <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
-                                        <Setter Property="BorderThickness" Value="3,0,0,0"/>
                                         <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBrush}"/>
                                         <Setter Property="FontWeight" Value="SemiBold"/>
                                     </DataTrigger>
@@ -253,7 +249,6 @@
                                     <DataTrigger Binding="{Binding CurrentView}" Value="{x:Static models:NavigationDestination.Reports}">
                                         <Setter Property="Background" Value="{DynamicResource SurfaceBrush}"/>
                                         <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
-                                        <Setter Property="BorderThickness" Value="3,0,0,0"/>
                                         <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBrush}"/>
                                         <Setter Property="FontWeight" Value="SemiBold"/>
                                     </DataTrigger>
@@ -273,7 +268,6 @@
                                     <DataTrigger Binding="{Binding CurrentView}" Value="{x:Static models:NavigationDestination.AdminProcedures}">
                                         <Setter Property="Background" Value="{DynamicResource SurfaceBrush}"/>
                                         <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
-                                        <Setter Property="BorderThickness" Value="3,0,0,0"/>
                                         <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBrush}"/>
                                         <Setter Property="FontWeight" Value="SemiBold"/>
                                     </DataTrigger>
@@ -293,14 +287,12 @@
                                     <DataTrigger Binding="{Binding CurrentView}" Value="{x:Static models:NavigationDestination.Users}">
                                         <Setter Property="Background" Value="{DynamicResource SurfaceBrush}"/>
                                         <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
-                                        <Setter Property="BorderThickness" Value="3,0,0,0"/>
                                         <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBrush}"/>
                                         <Setter Property="FontWeight" Value="SemiBold"/>
                                     </DataTrigger>
                                     <DataTrigger Binding="{Binding CurrentView}" Value="{x:Static models:NavigationDestination.UserForm}">
                                         <Setter Property="Background" Value="{DynamicResource SurfaceBrush}"/>
                                         <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
-                                        <Setter Property="BorderThickness" Value="3,0,0,0"/>
                                         <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBrush}"/>
                                         <Setter Property="FontWeight" Value="SemiBold"/>
                                     </DataTrigger>
@@ -319,7 +311,6 @@
                                     <DataTrigger Binding="{Binding CurrentView}" Value="{x:Static models:NavigationDestination.Settings}">
                                         <Setter Property="Background" Value="{DynamicResource SurfaceBrush}"/>
                                         <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
-                                        <Setter Property="BorderThickness" Value="3,0,0,0"/>
                                         <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBrush}"/>
                                         <Setter Property="FontWeight" Value="SemiBold"/>
                                     </DataTrigger>
@@ -339,7 +330,6 @@
                                     <DataTrigger Binding="{Binding CurrentView}" Value="{x:Static models:NavigationDestination.Help}">
                                         <Setter Property="Background" Value="{DynamicResource SurfaceBrush}"/>
                                         <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
-                                        <Setter Property="BorderThickness" Value="3,0,0,0"/>
                                         <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBrush}"/>
                                         <Setter Property="FontWeight" Value="SemiBold"/>
                                     </DataTrigger>
@@ -359,7 +349,6 @@
                                     <DataTrigger Binding="{Binding CurrentView}" Value="{x:Static models:NavigationDestination.About}">
                                         <Setter Property="Background" Value="{DynamicResource SurfaceBrush}"/>
                                         <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
-                                        <Setter Property="BorderThickness" Value="3,0,0,0"/>
                                         <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBrush}"/>
                                         <Setter Property="FontWeight" Value="SemiBold"/>
                                     </DataTrigger>
@@ -367,45 +356,57 @@
                             </Style>
                         </Button.Style>
                     </Button>
-                    <!-- User Profile Section (Compacted) -->
-                    <StackPanel Margin="10,0,10,10">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <Border Background="{DynamicResource SuccessBrush}" Width="36" Height="36" CornerRadius="18" Margin="0,0,12,0">
-                                <materialDesign:PackIcon Kind="Account" Foreground="White" Width="20" Height="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                <TextBlock Text="{Binding CurrentUser.FullName}" Foreground="{DynamicResource SidebarTextBrush}" FontWeight="SemiBold" FontSize="13" FontFamily="Manrope"/>
-                                <TextBlock Text="{Binding CurrentUser.Role}" Foreground="{DynamicResource SidebarMutedBrush}" FontSize="11" FontFamily="Manrope"/>
-                            </StackPanel>
-                        </Grid>
-                    </StackPanel>
-
-                    <!-- Theme Toggle (Moved to Sidebar) -->
+                    <!-- Theme Toggle -->
                     <Button Command="{Binding ToggleThemeCommand}" Margin="0,5">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Width="18" Height="18" Margin="0,0,12,0" VerticalAlignment="Center">
                                 <materialDesign:PackIcon.Style>
                                     <Style TargetType="materialDesign:PackIcon">
-                                        <Setter Property="Kind" Value="WeatherNight"/>
+                                        <Setter Property="Kind" Value="Brightness7"/>
                                         <Setter Property="Foreground" Value="{DynamicResource SidebarMutedBrush}"/>
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding AppIsDarkMode}" Value="False">
-                                                <Setter Property="Kind" Value="WeatherSunny"/>
+                                                <Setter Property="Kind" Value="Brightness4"/>
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
                                 </materialDesign:PackIcon.Style>
                             </materialDesign:PackIcon>
-                            <TextBlock Text="تبديل المظهر" VerticalAlignment="Center" FontFamily="Manrope" FontSize="13"/>
+                            <TextBlock VerticalAlignment="Center" FontFamily="Manrope" FontSize="13">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Text" Value="وضع فاتح"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding AppIsDarkMode}" Value="False">
+                                                <Setter Property="Text" Value="وضع داكن"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
                         </StackPanel>
                         <Button.Style>
                             <Style TargetType="Button" BasedOn="{StaticResource SidebarButtonStyle}"/>
                         </Button.Style>
                     </Button>
+
+                    <!-- User Profile Section -->
+                    <Border Margin="10,8,10,10" Padding="10,8" CornerRadius="10" 
+                            Background="{DynamicResource HoverOverlayBrush}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Border Background="{DynamicResource SuccessBrush}" Width="32" Height="32" CornerRadius="16" Margin="0,0,10,0">
+                                <materialDesign:PackIcon Kind="Account" Foreground="White" Width="18" Height="18" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding CurrentUser.FullName}" Foreground="{DynamicResource SidebarTextBrush}" FontWeight="SemiBold" FontSize="12" FontFamily="Manrope"/>
+                                <TextBlock Text="{Binding CurrentUser.Role}" Foreground="{DynamicResource SidebarMutedBrush}" FontSize="10" FontFamily="Manrope"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
                 </StackPanel>
                 </ScrollViewer>
 
@@ -439,7 +440,7 @@
                     </Button.Style>
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="Logout" Width="18" Height="18" Margin="0,0,12,0" VerticalAlignment="Center"/>
-                        <TextBlock Text="تسجيل الخروج" VerticalAlignment="Center" 
+                        <TextBlock Text="تسجيل الخروج" VerticalAlignment="Center"
                                    Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}"
                                    FontFamily="Manrope" FontSize="13" FontWeight="SemiBold"/>
                     </StackPanel>
@@ -457,9 +458,9 @@
 
             <!-- شريط العنوان -->
             <Border Grid.Row="0" Background="{DynamicResource SurfaceBrush}" Padding="20,12"
-                    BorderThickness="0">
+                    BorderThickness="0,0,0,1" BorderBrush="{DynamicResource DividerBrush}">
                 <Border.Effect>
-                    <DropShadowEffect BlurRadius="32" ShadowDepth="4" Color="#0B193C" Opacity="0.08" Direction="270" />
+                    <DropShadowEffect BlurRadius="24" ShadowDepth="2" Color="#0B193C" Opacity="0.06" Direction="270" />
                 </Border.Effect>
                 <Grid>
                     <Grid.ColumnDefinitions>

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Data.Sqlite;
+using Dapper;
 using Enjaz.Models;
 using Enjaz.Helpers;
 using Enjaz.Services;
@@ -159,17 +160,8 @@ namespace Enjaz.Services.Repositories
                         query += " AND Id != @UserId";
                     }
 
-                    using (var command = new SqliteCommand(query, connection))
-                    {
-                        command.Parameters.AddWithValue("@Username", username);
-                        if (userIdToExclude.HasValue)
-                        {
-                            command.Parameters.AddWithValue("@UserId", userIdToExclude.Value);
-                        }
-
-                        long count = (long)(await command.ExecuteScalarAsync() ?? 0);
-                        return count == 0;
-                    }
+                    long count = await connection.ExecuteScalarAsync<long>(query, new { Username = username, UserId = userIdToExclude });
+                    return count == 0;
                 }
             }, "IsUsernameUniqueAsync");
         }
@@ -188,19 +180,16 @@ namespace Enjaz.Services.Repositories
                         INSERT INTO Users (Username, PasswordHash, FullName, Role, IsActive, IsEditor, Permissions, CreatedAt)
                         VALUES (@Username, @PasswordHash, @FullName, @Role, @IsActive, @IsEditor, @Permissions, @CreatedAt)";
 
-                    using (var command = new SqliteCommand(query, connection))
-                    {
-                        command.Parameters.AddWithValue("@Username", user.Username);
-                        command.Parameters.AddWithValue("@PasswordHash", PasswordHelper.HashPassword(password));
-                        command.Parameters.AddWithValue("@FullName", user.FullName);
-                        command.Parameters.AddWithValue("@Role", (int)user.Role);
-                        command.Parameters.AddWithValue("@IsActive", user.IsActive ? 1 : 0);
-                        command.Parameters.AddWithValue("@IsEditor", user.IsEditor ? 1 : 0);
-                        command.Parameters.AddWithValue("@Permissions", user.Permissions ?? string.Empty);
-                        command.Parameters.AddWithValue("@CreatedAt", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
-
-                        await command.ExecuteNonQueryAsync();
-                    }
+                    await connection.ExecuteAsync(query, new {
+                        Username = user.Username,
+                        PasswordHash = PasswordHelper.HashPassword(password),
+                        FullName = user.FullName,
+                        Role = (int)user.Role,
+                        IsActive = user.IsActive ? 1 : 0,
+                        IsEditor = user.IsEditor ? 1 : 0,
+                        Permissions = user.Permissions ?? string.Empty,
+                        CreatedAt = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
+                    });
                 }
             }, "AddUserAsync");
         }
@@ -265,12 +254,7 @@ namespace Enjaz.Services.Repositories
                     int isActive = freeze ? 0 : 1;
 
                     string query = "UPDATE Users SET IsActive = @IsActive WHERE Id = @Id";
-                    using (var command = new SqliteCommand(query, connection))
-                    {
-                        command.Parameters.AddWithValue("@Id", userId);
-                        command.Parameters.AddWithValue("@IsActive", isActive);
-                        await command.ExecuteNonQueryAsync();
-                    }
+                    await connection.ExecuteAsync(query, new { IsActive = isActive, Id = userId });
                 }
             }, "ToggleUserFreezeAsync");
         }
