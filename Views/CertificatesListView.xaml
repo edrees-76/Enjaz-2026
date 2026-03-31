@@ -349,15 +349,15 @@
                                                 <TextBlock Text="بلد المنشأ" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="12" Margin="0,0,0,3"/>
                                                 <TextBlock Text="{Binding SelectedCertificate.Origin}" Foreground="{DynamicResource PrimaryTextBrush}" FontSize="13" FontWeight="SemiBold"/>
                                             </StackPanel>
+
+                                            <!-- تاريخ الإصدار -->
                                             <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,0,0,15">
-                                                <TextBlock Text="جهة الإصدار" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="12" Margin="0,0,0,3"/>
-                                                <TextBlock Text="{Binding SelectedCertificate.IssuingAuthority}" Foreground="{DynamicResource PrimaryTextBrush}" FontSize="13" FontWeight="SemiBold"/>
-                                            </StackPanel>
-                                            <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,0,15">
                                                 <TextBlock Text="تاريخ الإصدار" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="12" Margin="0,0,0,3"/>
                                                 <TextBlock Text="{Binding SelectedCertificate.IssueDate, StringFormat=yyyy/MM/dd HH:mm}" Foreground="{DynamicResource PrimaryTextBrush}" FontSize="13" FontWeight="SemiBold"/>
                                             </StackPanel>
-                                            <StackPanel Grid.Row="2" Grid.Column="1" Margin="0,0,0,15">
+
+                                            <!-- عدد العينات -->
+                                            <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,0,15">
                                                 <TextBlock Text="عدد العينات" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="12" Margin="0,0,0,3"/>
                                                 <TextBlock Text="{Binding SelectedCertificate.SampleCount}" Foreground="{DynamicResource PrimaryActionBrush}" FontSize="15" FontWeight="Bold"/>
                                             </StackPanel>

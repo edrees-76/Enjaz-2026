@@ -231,28 +231,35 @@ namespace Enjaz.Services
             var sheet = workbook.Worksheets.Add("الرسوم البيانية");
             sheet.RightToLeft = true;
 
-            int currentRow = 2;
-            int currentColumn = 2;
+            int currentChartIndex = 0;
+            int baseRow = 2;
+            int baseColumn = 2;
+            int rowIncrement = 90; // Increased to 90 to ensure absolute vertical separation
+            int columnIncrement = 40; // Increased to 40 to ensure absolute horizontal separation
 
             foreach (var chart in chartImages)
             {
+                int chartRow = baseRow + (currentChartIndex / 2) * rowIncrement;
+                int chartCol = baseColumn + (currentChartIndex % 2) * columnIncrement;
+
                 // Title
-                sheet.Cell(currentRow, currentColumn).Value = chart.Key;
-                sheet.Cell(currentRow, currentColumn).Style.Font.Bold = true;
-                sheet.Cell(currentRow, currentColumn).Style.Font.FontSize = 14;
+                sheet.Cell(chartRow, chartCol).Value = chart.Key;
+                sheet.Cell(chartRow, chartCol).Style.Font.Bold = true;
+                sheet.Cell(chartRow, chartCol).Style.Font.FontSize = 14;
+                sheet.Cell(chartRow, chartCol).Style.Font.FontColor = XLColor.FromHtml("#1B4F72");
 
                 // Image
                 using (var ms = new MemoryStream(chart.Value))
                 {
                     var picture = sheet.AddPicture(ms)
-                        .MoveTo(sheet.Cell(currentRow + 1, currentColumn))
-                        .Scale(0.8); // Adjust scale as needed
+                        .MoveTo(sheet.Cell(chartRow + 1, chartCol));
+                    
+                    // Note: We don't scale too much here because the images are 300 DPI
+                    // ClosedXML handles the physical size based on pixel count
+                    picture.Scale(0.7); 
                 }
 
-                // Move to next position
-                // Check if we should move to next column or next row
-                // For simplicity, let's just stack them vertically with spacing
-                currentRow += 25; 
+                currentChartIndex++;
             }
             
             sheet.Columns().AdjustToContents();

@@ -24,6 +24,7 @@ namespace Enjaz.ViewModels
         private string _currentDateTime = string.Empty;
         private bool _isViewingDetails;
         private bool _isSidebarVisible = true;
+        private bool _isDashboardOpen;
         
         // Security Challenge Properties
         private bool _isSecurityChallengeOpen;
@@ -363,11 +364,18 @@ namespace Enjaz.ViewModels
             }
         }
 
+        public bool IsDashboardOpen
+        {
+            get => _isDashboardOpen;
+            set => SetProperty(ref _isDashboardOpen, value);
+        }
+
         public bool IsSecurityChallengeOpen
         {
             get => _isSecurityChallengeOpen;
             set => SetProperty(ref _isSecurityChallengeOpen, value);
         }
+
 
         public string SecurityChallengeTitle
         {
@@ -797,6 +805,7 @@ namespace Enjaz.ViewModels
         }
         private bool CheckNavigationSafety()
         {
+            // Allow navigation if only the dashboard is open (it's non-modal now)
             if (IsAnyModalOpen)
             {
                 ShowGlobalNotification(
