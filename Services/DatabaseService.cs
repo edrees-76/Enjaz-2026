@@ -132,7 +132,9 @@ namespace Enjaz.Services
                         DELETE FROM Samples;
                         DELETE FROM Certificates;
                         DELETE FROM AuditLogs;
-                        DELETE FROM ReferralLetters;";
+                        DELETE FROM ReferralLetters;
+                        DELETE FROM SampleReceptions;
+                        DELETE FROM ReceptionSamples;";
                     using (var cmd = new SqliteCommand(clearDataQuery, connection, transaction))
                     {
                         cmd.ExecuteNonQuery();
