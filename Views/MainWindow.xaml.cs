@@ -12,6 +12,7 @@ namespace Enjaz.Views
     public partial class MainWindow : Window
     {
         private bool _isLoggingOut = false;
+        private DashboardWindow? _dashboardWindow;
 
         /// <summary>
         /// إنشاء النافذة الرئيسية مع بيانات المستخدم
@@ -29,12 +30,31 @@ namespace Enjaz.Views
             // Subscribe to open dashboard event
             viewModel.ReportingVM.RequestOpenDashboard += () =>
             {
-                var dashboardWindow = new DashboardWindow
+                // Singleton pattern for Dashboard window
+                if (_dashboardWindow != null)
+                {
+                    _dashboardWindow.Activate();
+                    if (_dashboardWindow.WindowState == WindowState.Minimized)
+                        _dashboardWindow.WindowState = WindowState.Normal;
+                    return;
+                }
+
+                _dashboardWindow = new DashboardWindow
                 {
                     DataContext = viewModel.ReportingVM,
                     Owner = this
                 };
-                dashboardWindow.Show();
+
+                // Clear reference when closed
+                _dashboardWindow.Closed += (s, e) => 
+                {
+                    _dashboardWindow = null;
+                    viewModel.IsDashboardOpen = false; // Update VM state
+                };
+                
+                // Show non-modal
+                _dashboardWindow.Show();
+                viewModel.IsDashboardOpen = true; // Update VM state
             };
         }
 

@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\منظومة انجاز 2026\\Enjaz.csproj": {}
+    "d:\\منظومة انجاز 2026\\Enjaz.csproj": {}
   },
   "projects": {
-    "D:\\منظومة انجاز 2026\\Enjaz.csproj": {
+    "d:\\منظومة انجاز 2026\\Enjaz.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\منظومة انجاز 2026\\Enjaz.csproj",
+        "projectUniqueName": "d:\\منظومة انجاز 2026\\Enjaz.csproj",
         "projectName": "Enjaz",
-        "projectPath": "D:\\منظومة انجاز 2026\\Enjaz.csproj",
+        "projectPath": "d:\\منظومة انجاز 2026\\Enjaz.csproj",
         "packagesPath": "C:\\Users\\DELL\\.nuget\\packages\\",
-        "outputPath": "D:\\منظومة انجاز 2026\\obj\\",
+        "outputPath": "d:\\منظومة انجاز 2026\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\DELL\\AppData\\Roaming\\NuGet\\NuGet.Config"

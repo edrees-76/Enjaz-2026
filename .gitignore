@@ -7,3 +7,18 @@ Thumbs.db
 .idea/
 .gemini/
 .agent/
+
+# .NET / Visual Studio
+bin/
+obj/
+*.user
+*.suo
+*.docstates
+*.db
+*.sqlite
+*.sqlite3
+!/Enjaz.db # Keep example db if needed, or exclude everything
+*.bak
+*.tmp
+.vs/
+.history/
