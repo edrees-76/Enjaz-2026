@@ -165,7 +165,7 @@ namespace Enjaz.Controls
 
             if (SelectedDate.HasValue)
             {
-                DisplayText.Text = SelectedDate.Value.ToString("dd/MM/yyyy");
+                DisplayText.Text = SelectedDate.Value.ToString("dd/MM/yyyy HH:mm");
                 try { DisplayText.Foreground = (Brush)FindResource("PrimaryTextBrush"); }
                 catch { DisplayText.Foreground = Brushes.Black; }
             }
@@ -433,7 +433,9 @@ namespace Enjaz.Controls
         {
             if (sender is Button btn && btn.Tag is DateTime date)
             {
-                _tempSelectedDate = date;
+                // دمج التاريخ المختار مع الوقت الحالي للنظام لضمان دقة توقيت الشهادة
+                _tempSelectedDate = date.Date.Add(DateTime.Now.TimeOfDay);
+                
                 _displayDate = new DateTime(date.Year, date.Month, 1);
                 
                 // تحديث واجهة التقويم لإبراز تحديد اليوم دون إغلاق النافذة (حتى يضغط موافق)

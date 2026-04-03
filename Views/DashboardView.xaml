@@ -59,7 +59,7 @@
                     <Grid>
                         <StackPanel>
                             <materialDesign:PackIcon Kind="FoodApple" Width="28" Height="28" Foreground="{DynamicResource DangerBrush}" HorizontalAlignment="Right" Margin="0,0,0,5"/>
-                            <TextBlock Text="شهادات استهلاكية" FontFamily="Inter" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,5"/>
+                            <TextBlock Text="شهادات عينات استهلاكية" FontFamily="Inter" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,5"/>
                             <TextBlock Text="{Binding ConsumerCertificatesCount}" FontSize="24" FontWeight="Black" FontFamily="Manrope" Foreground="{DynamicResource DangerBrush}"/>
                         </StackPanel>
                     </Grid>
@@ -70,7 +70,7 @@
                     <Grid>
                         <StackPanel>
                             <materialDesign:PackIcon Kind="Nature" Width="28" Height="28" Foreground="{DynamicResource SuccessBrush}" HorizontalAlignment="Right" Margin="0,0,0,5"/>
-                            <TextBlock Text="شهادات بيئية" FontFamily="Inter" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,5"/>
+                            <TextBlock Text="شهادات عينات بيئية" FontFamily="Inter" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,5"/>
                             <TextBlock Text="{Binding EnvironmentalCertificatesCount}" FontSize="24" FontWeight="Black" FontFamily="Manrope" Foreground="{DynamicResource SuccessBrush}"/>
                         </StackPanel>
                     </Grid>
@@ -92,7 +92,7 @@
                     <Grid>
                         <StackPanel>
                             <materialDesign:PackIcon Kind="FoodApple" Width="28" Height="28" Foreground="{DynamicResource WarningBrush}" HorizontalAlignment="Right" Margin="0,0,0,5"/>
-                            <TextBlock Text="عينات استهلاكية" FontFamily="Inter" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,5"/>
+                            <TextBlock Text="شهادات عينات استهلاكية" FontFamily="Inter" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,5"/>
                             <TextBlock Text="{Binding ConsumableSamplesCount}" FontSize="24" FontWeight="Black" FontFamily="Manrope" Foreground="{DynamicResource WarningBrush}"/>
                         </StackPanel>
                     </Grid>
@@ -103,7 +103,7 @@
                     <Grid>
                         <StackPanel>
                             <materialDesign:PackIcon Kind="Nature" Width="28" Height="28" Foreground="{DynamicResource SuccessBrush}" HorizontalAlignment="Right" Margin="0,0,0,5"/>
-                            <TextBlock Text="عينات بيئية" FontFamily="Inter" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,5"/>
+                            <TextBlock Text="شهادات عينات بيئية" FontFamily="Inter" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,5"/>
                             <TextBlock Text="{Binding EnvironmentalSamplesCount}" FontSize="24" FontWeight="Black" FontFamily="Manrope" Foreground="{DynamicResource SuccessBrush}"/>
                         </StackPanel>
                     </Grid>
@@ -151,7 +151,7 @@
                         </Border>
                         <Border Grid.Column="1" Style="{DynamicResource DashboardCardStyle}">
                             <DockPanel>
-                                <TextBlock DockPanel.Dock="Top" Text="الشهادات (بيئي/استهلاكي)" FontFamily="Manrope" FontSize="16" FontWeight="Bold" Margin="0,0,0,15" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                <TextBlock DockPanel.Dock="Top" Text="توزيع شهادات العينات (بيئي/استهلاكي)" FontFamily="Manrope" FontSize="16" FontWeight="Bold" Margin="0,0,0,15" Foreground="{DynamicResource PrimaryTextBrush}"/>
                                 <lvc:PieChart Series="{Binding TypeSeries}" LegendLocation="Bottom" HoverPushOut="5" InnerRadius="60">
                                     <lvc:PieChart.DataTooltip>
                                         <lvc:DefaultTooltip Background="{DynamicResource SurfaceBrush}" Foreground="{DynamicResource PrimaryTextBrush}" BulletSize="10"/>
@@ -193,7 +193,7 @@
                         </Border>
                         <Border Grid.Column="1" Style="{DynamicResource DashboardCardStyle}">
                             <DockPanel>
-                                <TextBlock DockPanel.Dock="Top" Text="العينات (بيئي/استهلاكي)" FontFamily="Manrope" FontSize="16" FontWeight="Bold" Margin="0,0,0,15" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                <TextBlock DockPanel.Dock="Top" Text="توزيع شهادات العينات (بيئي/استهلاكي)" FontFamily="Manrope" FontSize="16" FontWeight="Bold" Margin="0,0,0,15" Foreground="{DynamicResource PrimaryTextBrush}"/>
                                 <lvc:PieChart Series="{Binding SampleTypeSeries}" LegendLocation="Bottom" HoverPushOut="5" InnerRadius="60">
                                     <lvc:PieChart.DataTooltip>
                                         <lvc:DefaultTooltip Background="{DynamicResource SurfaceBrush}" Foreground="{DynamicResource PrimaryTextBrush}" BulletSize="10"/>

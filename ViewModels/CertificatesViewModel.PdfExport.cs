@@ -194,8 +194,9 @@ namespace Enjaz.ViewModels
                 UpdateCollection(AvailableAnalysisTypes, analysisTypes);
 
                 var results = await _certificateRepository.GetDistinctFieldValuesAsync("Result");
-                if (!results.Contains("خالية من العناصر المشعة المصنعة"))
-                    results.Add("خالية من العناصر المشعة المصنعة");
+                // التأكد من وجود الجملة الافتراضية في بداية القائمة
+                results.Remove("خالية من العناصر المشعة المصنعة"); 
+                results.Insert(0, "خالية من العناصر المشعة المصنعة");
                 UpdateCollection(AvailableResults, results);
 
                 var recipients = await _certificateRepository.GetDistinctFieldValuesAsync("RecipientName");

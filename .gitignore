@@ -1,3 +1,4 @@
+# Prerequisites
 node_modules/
 .env
 .DS_Store
@@ -17,8 +18,31 @@ obj/
 *.db
 *.sqlite
 *.sqlite3
-!/Enjaz.db # Keep example db if needed, or exclude everything
+!/Enjaz.db # Keep main db if explicitly needed
 *.bak
 *.tmp
 .vs/
 .history/
+
+# Build and Publish
+dist/
+publish/
+Setup_Enjaz_2026.exe
+Installer_Script_v104.iss
+msbuild.log
+build_output.txt
+run_log.txt
+error.log
+
+# Python Cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Testing
+TestResults/
+PerformanceTests/bin/
+PerformanceTests/obj/
+Enjaz.Tests/bin/
+Enjaz.Tests/obj/

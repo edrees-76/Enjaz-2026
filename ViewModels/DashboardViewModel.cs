@@ -226,14 +226,14 @@ namespace Enjaz.ViewModels
                 {
                     new PieSeries
                     {
-                        Title = "عينات بيئية",
+                        Title = "شهادات عينات بيئية",
                         Values = new ChartValues<int> { EnvironmentalCertificatesCount },
                         DataLabels = true,
                         Fill = (System.Windows.Media.Brush)Application.Current.Resources["SuccessBrush"]
                     },
                     new PieSeries
                     {
-                        Title = "عينات استهلاكية",
+                        Title = "شهادات عينات استهلاكية",
                         Values = new ChartValues<int> { ConsumerCertificatesCount },
                         DataLabels = true,
                         Fill = (System.Windows.Media.Brush)Application.Current.Resources["SecondaryActionBrush"]
@@ -265,7 +265,7 @@ namespace Enjaz.ViewModels
                 {
                     new ColumnSeries
                     {
-                        Title = "عينات بيئية",
+                        Title = "شهادات عينات بيئية",
                         Values = envValues,
                         DataLabels = true,
                         LabelPoint = point => point.Y > 0 ? point.Y.ToString() : "",
@@ -273,7 +273,7 @@ namespace Enjaz.ViewModels
                     },
                     new ColumnSeries
                     {
-                        Title = "عينات استهلاكية",
+                        Title = "شهادات عينات استهلاكية",
                         Values = conValues,
                         DataLabels = true,
                         LabelPoint = point => point.Y > 0 ? point.Y.ToString() : "",
@@ -289,14 +289,14 @@ namespace Enjaz.ViewModels
                 {
                     new PieSeries
                     {
-                        Title = "عينات بيئية",
+                        Title = "شهادات عينات بيئية",
                         Values = new ChartValues<int> { EnvironmentalSamplesCount },
                         DataLabels = true,
                         Fill = (System.Windows.Media.Brush)Application.Current.Resources["SuccessBrush"]
                     },
                     new PieSeries
                     {
-                        Title = "عينات استهلاكية",
+                        Title = "شهادات عينات استهلاكية",
                         Values = new ChartValues<int> { ConsumableSamplesCount },
                         DataLabels = true,
                         Fill = (System.Windows.Media.Brush)Application.Current.Resources["SecondaryActionBrush"]
@@ -324,7 +324,7 @@ namespace Enjaz.ViewModels
                 {
                     new ColumnSeries
                     {
-                        Title = "عينات بيئية",
+                        Title = "شهادات عينات بيئية",
                         Values = envSampleValues,
                         DataLabels = true,
                         LabelPoint = point => point.Y > 0 ? point.Y.ToString() : "",
@@ -332,7 +332,7 @@ namespace Enjaz.ViewModels
                     },
                     new ColumnSeries
                     {
-                        Title = "عينات استهلاكية",
+                        Title = "شهادات عينات استهلاكية",
                         Values = conSampleValues,
                         DataLabels = true,
                         LabelPoint = point => point.Y > 0 ? point.Y.ToString() : "",

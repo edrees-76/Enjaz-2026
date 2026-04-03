@@ -18,6 +18,23 @@ namespace Enjaz.Services.Repositories
         private readonly DatabaseService _db;
         private readonly UserService _userService;
 
+        private static void ConvertToLocalTime(Certificate certificate)
+        {
+            if (certificate == null) return;
+
+            if (certificate.CreatedAt.Kind == DateTimeKind.Unspecified)
+                certificate.CreatedAt = DateTime.SpecifyKind(certificate.CreatedAt, DateTimeKind.Utc).ToLocalTime();
+
+            if (certificate.UpdatedAt.HasValue && certificate.UpdatedAt.Value.Kind == DateTimeKind.Unspecified)
+                certificate.UpdatedAt = DateTime.SpecifyKind(certificate.UpdatedAt.Value, DateTimeKind.Utc).ToLocalTime();
+        }
+
+        private static void ConvertAllToLocalTime(List<Certificate> certificates)
+        {
+            if (certificates == null) return;
+            foreach (var c in certificates) ConvertToLocalTime(c);
+        }
+
         public CertificateRepository(DatabaseService db, UserService userService)
         {
             _db = db;
@@ -40,19 +57,27 @@ namespace Enjaz.Services.Repositories
         {
             if (columnCount == 0) columnCount = reader.FieldCount;
 
-            return new Certificate
+            var issueDate = SafeParseDate(reader.GetString(5), "yyyy-MM-dd HH:mm:ss");
+            var createdAt = SafeParseDate(reader.GetString(10), "yyyy-MM-dd HH:mm:ss");
+
+            if (issueDate.TimeOfDay == TimeSpan.Zero && createdAt.TimeOfDay != TimeSpan.Zero)
+            {
+                issueDate = issueDate.Date.Add(createdAt.TimeOfDay);
+            }
+
+            var certificate = new Certificate
             {
                 Id = reader.GetInt32(0),
                 CertificateNumber = reader.GetString(1),
                 RecipientName = reader.GetString(2),
                 CertificateType = reader.GetString(3),
                 Description = reader.IsDBNull(4) ? "" : reader.GetString(4),
-                IssueDate = SafeParseDate(reader.GetString(5), "yyyy-MM-dd"),
+                IssueDate = issueDate,
                 ExpiryDate = reader.IsDBNull(6) ? null : SafeParseDate(reader.GetString(6), "yyyy-MM-dd"),
                 IssuingAuthority = reader.IsDBNull(7) ? "" : reader.GetString(7),
                 CreatedBy = reader.GetInt32(8),
                 CreatedByName = reader.IsDBNull(9) ? "" : reader.GetString(9),
-                CreatedAt = SafeParseDate(reader.GetString(10), "yyyy-MM-dd HH:mm:ss"),
+                CreatedAt = createdAt,
                 AnalysisType = reader.IsDBNull(11) ? "" : reader.GetString(11),
                 Sender = reader.IsDBNull(12) ? "" : reader.GetString(12),
                 Supplier = reader.IsDBNull(13) ? "" : reader.GetString(13),
@@ -68,10 +93,14 @@ namespace Enjaz.Services.Repositories
                 UpdatedBy = reader.IsDBNull(23) ? null : (int?)reader.GetInt32(23),
                 UpdatedByName = reader.IsDBNull(24) ? "" : reader.GetString(24),
                 UpdatedAt = reader.IsDBNull(25) ? null : (DateTime?)SafeParseDate(reader.GetString(25), "yyyy-MM-dd HH:mm:ss"),
-                // Optional columns â€” only if present in the query
                 SampleCount = columnCount > 26 && !reader.IsDBNull(26) ? reader.GetInt32(26) : 0,
-                ReceptionId = columnCount > 26 && reader.GetName(columnCount - 1) == "ReceptionId" && !reader.IsDBNull(columnCount - 1) ? (int?)reader.GetInt32(columnCount - 1) : null
+                ReceptionId = columnCount > 27 && !reader.IsDBNull(27) ? (int?)reader.GetInt32(27) : null
             };
+
+            // Apply UTC to Local conversion
+            ConvertToLocalTime(certificate);
+            
+            return certificate;
         }
 
         /// <summary>
@@ -264,7 +293,7 @@ namespace Enjaz.Services.Repositories
 
                 var query = @"SELECT c.Id, c.CertificateNumber, c.RecipientName, c.CertificateType, 
                               c.Description, c.IssueDate, c.ExpiryDate, c.IssuingAuthority, 
-                              c.CreatedBy, c.CreatedByName, datetime(c.CreatedAt, 'localtime'),
+                              c.CreatedBy, c.CreatedByName, c.CreatedAt,
                               c.AnalysisType, c.Sender, c.Supplier, c.Origin, c.DeclarationNumber,
                               c.PolicyNumber, c.NotificationNumber, c.FinancialReceiptNumber,
                               c.SpecialistName, c.SectionHeadName, c.ManagerName, c.Notes,
@@ -321,7 +350,7 @@ namespace Enjaz.Services.Repositories
 
                 var query = @"SELECT c.Id, c.CertificateNumber, c.RecipientName, c.CertificateType, 
                               c.Description, c.IssueDate, c.ExpiryDate, c.IssuingAuthority, 
-                              c.CreatedBy, c.CreatedByName, datetime(c.CreatedAt, 'localtime'),
+                              c.CreatedBy, c.CreatedByName, c.CreatedAt,
                               c.AnalysisType, c.Sender, c.Supplier, c.Origin, c.DeclarationNumber,
                               c.PolicyNumber, c.NotificationNumber, c.FinancialReceiptNumber,
                               c.SpecialistName, c.SectionHeadName, c.ManagerName, c.Notes,
@@ -388,7 +417,7 @@ namespace Enjaz.Services.Repositories
 
                 var query = @"SELECT c.Id, c.CertificateNumber, c.RecipientName, c.CertificateType, 
                               c.Description, c.IssueDate, c.ExpiryDate, c.IssuingAuthority, 
-                              c.CreatedBy, c.CreatedByName, datetime(c.CreatedAt, 'localtime'),
+                              c.CreatedBy, c.CreatedByName, c.CreatedAt,
                               c.AnalysisType, c.Sender, c.Supplier, c.Origin, c.DeclarationNumber,
                               c.PolicyNumber, c.NotificationNumber, c.FinancialReceiptNumber,
                               c.SpecialistName, c.SectionHeadName, c.ManagerName, c.Notes,
@@ -439,7 +468,7 @@ namespace Enjaz.Services.Repositories
 
                 var query = @"SELECT c.Id, c.CertificateNumber, c.RecipientName, c.CertificateType, 
                               c.Description, c.IssueDate, c.ExpiryDate, c.IssuingAuthority, 
-                              c.CreatedBy, c.CreatedByName, datetime(c.CreatedAt, 'localtime'),
+                              c.CreatedBy, c.CreatedByName, c.CreatedAt,
                               c.AnalysisType, c.Sender, c.Supplier, c.Origin, c.DeclarationNumber,
                               c.PolicyNumber, c.NotificationNumber, c.FinancialReceiptNumber,
                               c.SpecialistName, c.SectionHeadName, c.ManagerName, c.Notes,
@@ -528,7 +557,7 @@ namespace Enjaz.Services.Repositories
                         certificate.RecipientName,
                         certificate.CertificateType,
                         Description = certificate.Description ?? "",
-                        IssueDate = certificate.IssueDate.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture),
+                        IssueDate = certificate.IssueDate.ToString("yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture),
                         ExpiryDate = certificate.ExpiryDate.HasValue ? certificate.ExpiryDate.Value.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture) : null,
                         IssuingAuthority = certificate.IssuingAuthority ?? "",
                         CreatedBy = validUserId,
@@ -676,7 +705,7 @@ namespace Enjaz.Services.Repositories
                         certificate.RecipientName,
                         certificate.CertificateType,
                         Description = certificate.Description ?? "",
-                        IssueDate = certificate.IssueDate.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture),
+                        IssueDate = certificate.IssueDate.ToString("yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture),
                         ExpiryDate = certificate.ExpiryDate.HasValue ? certificate.ExpiryDate.Value.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture) : null,
                         IssuingAuthority = certificate.IssuingAuthority ?? "",
                         AnalysisType = certificate.AnalysisType ?? "",

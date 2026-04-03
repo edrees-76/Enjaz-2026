@@ -1,0 +1,92 @@
+<Window x:Class="Enjaz.Views.SplashScreen"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="منظومة إنجاز - جاري التحميل" 
+        Height="400" Width="600"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        WindowStartupLocation="CenterScreen"
+        Topmost="True"
+        ShowInTaskbar="False">
+    
+    <Border CornerRadius="25" BorderThickness="1">
+        <Border.BorderBrush>
+            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="#FFFFFF" Offset="0"/>
+                <GradientStop Color="#A0A0A0" Offset="1"/>
+            </LinearGradientBrush>
+        </Border.BorderBrush>
+        <Border.Background>
+            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="#F0F4F8" Offset="0"/>
+                <GradientStop Color="#D9E2EC" Offset="1"/>
+            </LinearGradientBrush>
+        </Border.Background>
+        
+        <Grid Margin="20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!-- Logo Section -->
+            <StackPanel Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Center">
+                <Image Source="/Assets/enjaz_3d_icon_transparent.png" Height="150" Width="150">
+                    <Image.Effect>
+                        <DropShadowEffect BlurRadius="20" ShadowDepth="5" Opacity="0.3"/>
+                    </Image.Effect>
+                </Image>
+                <TextBlock Text="منظومة إنجاز" 
+                           FontSize="36" 
+                           FontWeight="Bold" 
+                           Foreground="#243B53" 
+                           TextAlignment="Center" 
+                           Margin="0,20,0,0">
+                    <TextBlock.Effect>
+                        <DropShadowEffect BlurRadius="5" ShadowDepth="2" Opacity="0.2"/>
+                    </TextBlock.Effect>
+                </TextBlock>
+                <TextBlock Text="الإصدار المتكامل 2026" 
+                           FontSize="14" 
+                           Foreground="#486581" 
+                           TextAlignment="Center" 
+                           Opacity="0.8"/>
+            </StackPanel>
+
+            <!-- Status Section -->
+            <StackPanel Grid.Row="1" Margin="40,20,40,10">
+                <ProgressBar x:Name="LoadProgress" 
+                             Height="6" 
+                             IsIndeterminate="True" 
+                             Foreground="#334E68" 
+                             Background="#BCCCDC"
+                             BorderThickness="0">
+                    <ProgressBar.Clip>
+                        <RectangleGeometry Rect="0,0,520,6" RadiusX="3" RadiusY="3"/>
+                    </ProgressBar.Clip>
+                </ProgressBar>
+                <TextBlock x:Name="StatusMessage" 
+                           Text="جاري تهيئة خدمات النظام..." 
+                           HorizontalAlignment="Center" 
+                           Margin="0,8,0,0" 
+                           FontSize="12" 
+                           Foreground="#486581"
+                           FlowDirection="RightToLeft"/>
+            </StackPanel>
+
+            <!-- Footer Section -->
+            <TextBlock Grid.Row="2" 
+                       Text="جميع الحقوق محفوظة © 2026" 
+                       FontSize="10" 
+                       Foreground="#627D98" 
+                       HorizontalAlignment="Center" 
+                       Margin="0,10,0,10"
+                       Opacity="0.6"/>
+        </Grid>
+    </Border>
+</Window>

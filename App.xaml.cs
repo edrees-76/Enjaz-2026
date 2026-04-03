@@ -51,6 +51,11 @@ namespace Enjaz
         {
             base.OnStartup(e);
 
+            // 0. Show Splash Screen
+            var splash = new Views.SplashScreen();
+            splash.Show();
+            
+            splash.UpdateMessage("جاري تهيئة خدمات النظام...");
             Services.LoggerService.LogInfo("Application Started");
 
             var serviceCollection = new ServiceCollection();
@@ -59,24 +64,35 @@ namespace Enjaz
 
             try
             {
-                // 1. Initialize Database Service (Ensure DB exists)
+                // 1. Initialize Database Service
+                splash.UpdateMessage("جاري التحقق من قاعدة البيانات...");
                 var dbService = ServiceProvider.GetRequiredService<Services.DatabaseService>();
                 var userRepository = ServiceProvider.GetRequiredService<Services.Repositories.UserRepository>();
                 await userRepository.CreateDefaultAdminAsync();
 
                 // 2. Load Appearance Settings
+                splash.UpdateMessage("جاري تحميل إعدادات الواجهة والمظهر...");
                 var settingsService = ServiceProvider.GetRequiredService<Services.SettingsService>();
                 var themeService = ServiceProvider.GetRequiredService<Services.ThemeService>();
                 var settings = settingsService.Current;
                 themeService.Initialize(settings.CurrentTheme, settings.LoginIsDarkMode, settings.FontSizeScale);
                 
+                // Add a small artificial delay to show the beautiful splash for a bit
+                await System.Threading.Tasks.Task.Delay(1000);
+                
                 // 3. Show Login Window using DI
+                splash.UpdateMessage("جاري فتح واجهة الدخول...");
                 var loginWindow = ServiceProvider.GetRequiredService<Views.LoginWindow>();
                 loginWindow.Show();
+                
                 Services.LoggerService.LogInfo("LoginWindow Shown.");
+                
+                // Close Splash
+                splash.Close();
             }
             catch (Exception ex)
             {
+                splash.Close();
                 Services.LoggerService.LogError("Application Startup Failed", ex);
                 
                 var errorWindow = new Views.ErrorDialogWindow("خطأ جسيم", $"فشل بدء تشغيل النظام: {ex.Message}\n\nيرجى التواصل مع الدعم الفني.");

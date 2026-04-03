@@ -250,7 +250,7 @@
                                                 <DataTemplate>
                                                      <ComboBox IsEditable="True" 
                                                                Text="{Binding Result, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                               ItemsSource="{Binding DataContext.AvailableResults, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                               ItemsSource="{Binding DataContext.AvailableResults, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                                Style="{DynamicResource FormComboBoxStyle}" FontSize="12" Height="35" Padding="5,2"
                                                                Foreground="{DynamicResource PrimaryTextBrush}"
                                                                Background="{DynamicResource InputBackgroundBrush}"

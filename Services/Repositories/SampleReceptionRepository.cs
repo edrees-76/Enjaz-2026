@@ -11,6 +11,29 @@ namespace Enjaz.Services.Repositories
 {
     public class SampleReceptionRepository
     {
+        /// <summary>
+        /// تحويل توقيت UTC إلى التوقيت المحلي بعد جلب البيانات من قاعدة البيانات
+        /// </summary>
+        private static void ConvertToLocalTime(SampleReception reception)
+        {
+            // CreatedAt مخزّن بتوقيت UTC (من CURRENT_TIMESTAMP) — نحوّله للمحلي
+            if (reception.CreatedAt.Kind == DateTimeKind.Unspecified)
+            {
+                reception.CreatedAt = DateTime.SpecifyKind(reception.CreatedAt, DateTimeKind.Utc).ToLocalTime();
+            }
+            // UpdatedAt — نفس المعالجة
+            if (reception.UpdatedAt.HasValue && reception.UpdatedAt.Value.Kind == DateTimeKind.Unspecified)
+            {
+                reception.UpdatedAt = DateTime.SpecifyKind(reception.UpdatedAt.Value, DateTimeKind.Utc).ToLocalTime();
+            }
+        }
+
+        private static void ConvertAllToLocalTime(List<SampleReception> receptions)
+        {
+            foreach (var r in receptions)
+                ConvertToLocalTime(r);
+        }
+
         private readonly DatabaseService _db;
         private readonly UserService _userService;
 
@@ -211,6 +234,7 @@ namespace Enjaz.Services.Repositories
                  var query = "SELECT * FROM SampleReceptions ORDER BY Date DESC LIMIT 200;";
                  var receptions = (await connection.QueryAsync<SampleReception>(query)).AsList();
                  
+                 ConvertAllToLocalTime(receptions);
                  await PopulateSamplesAsync(connection, receptions);
                  return receptions;
              }, "GetAllReceptionsAsync");
@@ -224,6 +248,7 @@ namespace Enjaz.Services.Repositories
                  var query = "SELECT * FROM SampleReceptions WHERE Status = 'لم يتم إصدار شهادة' ORDER BY Date DESC;";
                  var receptions = (await connection.QueryAsync<SampleReception>(query)).AsList();
                  
+                 ConvertAllToLocalTime(receptions);
                  await PopulateSamplesAsync(connection, receptions);
                  return receptions;
              }, "GetPendingReceptionsAsync");
@@ -240,6 +265,7 @@ namespace Enjaz.Services.Repositories
                  var query = "SELECT * FROM SampleReceptions WHERE Status = 'لم يتم إصدار شهادة' AND Date <= @ThresholdDate ORDER BY Date DESC;";
                  var receptions = (await connection.QueryAsync<SampleReception>(query, new { ThresholdDate = thresholdDateString })).AsList();
                  
+                 ConvertAllToLocalTime(receptions);
                  await PopulateSamplesAsync(connection, receptions);
                  return receptions;
              }, "GetDelayedPendingReceptionsAsync");
@@ -263,6 +289,7 @@ namespace Enjaz.Services.Repositories
 
                 var receptions = (await connection.QueryAsync<SampleReception>(query, new { Search = searchPattern })).AsList();
                 
+                ConvertAllToLocalTime(receptions);
                 await PopulateSamplesAsync(connection, receptions);
                 return receptions;
             }, "SearchSampleReceptionsAsync");
@@ -302,6 +329,7 @@ namespace Enjaz.Services.Repositories
 
                 var receptions = (await connection.QueryAsync<SampleReception>(query, new { Search = searchPattern })).AsList();
 
+                ConvertAllToLocalTime(receptions);
                 await PopulateSamplesAsync(connection, receptions);
                 return receptions;
             }, "SearchReceptionsByFieldAsync");
@@ -334,6 +362,8 @@ namespace Enjaz.Services.Repositories
                 using var connection = new SqliteConnection(_db.ConnectionString);
                 var query = "SELECT * FROM SampleReceptions WHERE Id = @Id;";
                 var rec = await connection.QueryFirstOrDefaultAsync<SampleReception>(query, new { Id = id });
+
+                if (rec != null) ConvertToLocalTime(rec);
 
                 if (rec != null)
                 {
