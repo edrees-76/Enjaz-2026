@@ -151,7 +151,7 @@
                         </Border>
                         <Border Grid.Column="1" Style="{DynamicResource DashboardCardStyle}">
                             <DockPanel>
-                                <TextBlock DockPanel.Dock="Top" Text="توزيع شهادات العينات (بيئي/استهلاكي)" FontFamily="Manrope" FontSize="16" FontWeight="Bold" Margin="0,0,0,15" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                <TextBlock DockPanel.Dock="Top" Text="توزيع شهادات العينات (بيئي/استهلاكية)" FontFamily="Manrope" FontSize="15" FontWeight="Bold" Margin="0,0,0,10" Foreground="{DynamicResource PrimaryTextBrush}" TextWrapping="Wrap" TextAlignment="Center"/>
                                 <lvc:PieChart Series="{Binding TypeSeries}" LegendLocation="Bottom" HoverPushOut="5" InnerRadius="60">
                                     <lvc:PieChart.DataTooltip>
                                         <lvc:DefaultTooltip Background="{DynamicResource SurfaceBrush}" Foreground="{DynamicResource PrimaryTextBrush}" BulletSize="10"/>
@@ -193,7 +193,7 @@
                         </Border>
                         <Border Grid.Column="1" Style="{DynamicResource DashboardCardStyle}">
                             <DockPanel>
-                                <TextBlock DockPanel.Dock="Top" Text="توزيع شهادات العينات (بيئي/استهلاكي)" FontFamily="Manrope" FontSize="16" FontWeight="Bold" Margin="0,0,0,15" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                <TextBlock DockPanel.Dock="Top" Text="توزيع شهادات العينات (بيئي/استهلاكية)" FontFamily="Manrope" FontSize="15" FontWeight="Bold" Margin="0,0,0,10" Foreground="{DynamicResource PrimaryTextBrush}" TextWrapping="Wrap" TextAlignment="Center"/>
                                 <lvc:PieChart Series="{Binding SampleTypeSeries}" LegendLocation="Bottom" HoverPushOut="5" InnerRadius="60">
                                     <lvc:PieChart.DataTooltip>
                                         <lvc:DefaultTooltip Background="{DynamicResource SurfaceBrush}" Foreground="{DynamicResource PrimaryTextBrush}" BulletSize="10"/>

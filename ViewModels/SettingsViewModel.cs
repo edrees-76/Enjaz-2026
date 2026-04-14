@@ -154,6 +154,7 @@ namespace Enjaz.ViewModels
         public ICommand UpgradeAtqaanDbCommand { get; }
 
         private readonly ArchiveService _archiveService;
+        private readonly IDialogService _dialogService;
         private int _archiveMonths = 6;
 
         public int ArchiveMonths
@@ -162,7 +163,7 @@ namespace Enjaz.ViewModels
             set => SetProperty(ref _archiveMonths, value);
         }
 
-        public SettingsViewModel(SettingsService settingsService, BackupService backupService, DatabaseService dbService, INotificationService notificationService, UserService userService, ArchiveService archiveService)
+        public SettingsViewModel(SettingsService settingsService, BackupService backupService, DatabaseService dbService, INotificationService notificationService, UserService userService, ArchiveService archiveService, IDialogService dialogService)
         {
             _settingsService = settingsService;
             _backupService = backupService;
@@ -170,6 +171,7 @@ namespace Enjaz.ViewModels
             _notificationService = notificationService;
             _userService = userService;
             _archiveService = archiveService;
+            _dialogService = dialogService;
 
             var settings = _settingsService.Current;
             _backupPath = settings.BackupPath;
@@ -237,43 +239,28 @@ namespace Enjaz.ViewModels
 
         private void BrowseFolder()
         {
-            var dialog = new Microsoft.Win32.OpenFolderDialog
+            string? selectedFolder = _dialogService.ShowFolderBrowserDialog();
+            if (!string.IsNullOrEmpty(selectedFolder))
             {
-                Title = "اختر مجلد الحفظ الاحتياطي",
-                InitialDirectory = Directory.Exists(BackupPath) ? BackupPath : string.Empty
-            };
-
-            if (dialog.ShowDialog() == true)
-            {
-                BackupPath = dialog.FolderName;
+                BackupPath = selectedFolder;
             }
         }
 
         private void BrowseCloudFolder()
         {
-            var dialog = new Microsoft.Win32.OpenFolderDialog
+            string? selectedFolder = _dialogService.ShowFolderBrowserDialog();
+            if (!string.IsNullOrEmpty(selectedFolder))
             {
-                Title = "اختر مجلد جوجل درايف أو ون درايف",
-                InitialDirectory = Directory.Exists(CloudSyncPath) ? CloudSyncPath : string.Empty
-            };
-
-            if (dialog.ShowDialog() == true)
-            {
-                CloudSyncPath = dialog.FolderName;
+                CloudSyncPath = selectedFolder;
             }
         }
 
         private void BrowseDatabaseFolder()
         {
-            var dialog = new Microsoft.Win32.OpenFolderDialog
+            string? selectedFolder = _dialogService.ShowFolderBrowserDialog();
+            if (!string.IsNullOrEmpty(selectedFolder))
             {
-                Title = "اختر مجلد قاعدة البيانات (لربط الشبكة)",
-                InitialDirectory = Directory.Exists(DatabasePath) ? DatabasePath : string.Empty
-            };
-
-            if (dialog.ShowDialog() == true)
-            {
-                DatabasePath = dialog.FolderName;
+                DatabasePath = selectedFolder;
             }
         }
 
@@ -334,16 +321,9 @@ namespace Enjaz.ViewModels
 
         private void ExecuteUpgradeAtqaanDb()
         {
-            var dialog = new Microsoft.Win32.OpenFileDialog
+            string? selectedFile = _dialogService.ShowOpenFileDialog("ملفات قاعدة البيانات (*.db)|*.db");
+            if (!string.IsNullOrEmpty(selectedFile))
             {
-                Title = "اختر ملف قاعدة بيانات اتقان للترقية",
-                Filter = "ملفات قاعدة البيانات (*.db)|*.db",
-                InitialDirectory = BackupPath
-            };
-
-            if (dialog.ShowDialog() == true)
-            {
-                string selectedFile = dialog.FileName;
                 
                 RaiseConfirmation(
                     "تأكيد ترقية قاعدة البيانات",
@@ -401,33 +381,40 @@ namespace Enjaz.ViewModels
 
         private void ExecuteRestoreBackup()
         {
-            var dialog = new Microsoft.Win32.OpenFileDialog
-            {
-                Title = "اختر ملف النسخة الاحتياطية للاستعادة",
-                Filter = "ملفات قاعدة البيانات (*.db)|*.db",
-                InitialDirectory = BackupPath
-            };
+            string? selectedFile = _dialogService.ShowOpenFileDialog("ملفات قاعدة البيانات المشفّرة والتقليدية (*.edb;*.db)|*.edb;*.db|جميع الملفات (*.*)|*.*");
 
-            if (dialog.ShowDialog() == true)
+            if (!string.IsNullOrEmpty(selectedFile))
             {
                 // رسالة تحذير قبل الاستعادة
                 RaiseConfirmation(
                     "تأكيد استعادة البيانات",
                     "تحذير: ستقوم هذه العملية باستبدال جميع البيانات الحالية ببيانات النسخة الاحتياطية المختارة. هل أنت متأكد من الاستمرار؟",
                     NotificationType.Warning,
-                    (confirmed) => 
+                    async (confirmed) => 
                     {
                         if (!confirmed) return;
                         
                         try
                         {
-                            if (_dbService.RestoreDatabase(dialog.FileName))
+                            bool restoreSuccess = false;
+                            
+                            if (Path.GetExtension(selectedFile).Equals(".edb", StringComparison.OrdinalIgnoreCase))
+                            {
+                                string targetDbPath = _dbService.DbFilePath;
+                                restoreSuccess = await _backupService.RestoreEncryptedBackupAsync(selectedFile, targetDbPath);
+                            }
+                            else
+                            {
+                                restoreSuccess = _dbService.RestoreDatabase(selectedFile);
+                            }
+
+                            if (restoreSuccess)
                             {
                                 _notificationService.ShowSuccess("تم استعادة البيانات بنجاح. يرجى إعادة تشغيل المنظومة لضمان عرض البيانات الجديدة.");
                             }
                             else
                             {
-                                _notificationService.ShowError("فشل استعادة البيانات. تأكد من أن الملف ليس قيد الاستخدام.");
+                                _notificationService.ShowError("فشل استعادة البيانات. تأكد من صحة الملف وكلمة المرور المشفرة إن وجدت.");
                             }
                         }
                         catch (Exception ex)

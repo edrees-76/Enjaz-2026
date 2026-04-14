@@ -18,6 +18,7 @@ namespace Enjaz.Services
         private static readonly System.Threading.SemaphoreSlim _maintenanceLock = new System.Threading.SemaphoreSlim(1, 1);
 
         public string ConnectionString => _connectionString;
+        public string DbFilePath => _dbPath;
 
         /// <summary>
         /// Constructor for testing (in-memory SQLite)
