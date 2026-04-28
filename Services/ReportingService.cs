@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -14,10 +14,12 @@ namespace Enjaz.Services
     public class ReportingService
     {
         private readonly CertificateRepository _certificateRepository;
+        private readonly ISampleRepository _sampleRepository;
 
-        public ReportingService(CertificateRepository certificateRepository)
+        public ReportingService(CertificateRepository certificateRepository, ISampleRepository sampleRepository)
         {
             _certificateRepository = certificateRepository;
+            _sampleRepository = sampleRepository;
         }
 
         /// <summary>
@@ -33,7 +35,7 @@ namespace Enjaz.Services
         /// </summary>
         public async Task<List<Sample>> GetSamplesByDateRangeAsync(DateTime startDate, DateTime endDate)
         {
-            return await _certificateRepository.GetSamplesByDateRangeAsync(startDate, endDate);
+            return await _sampleRepository.GetSamplesByDateRangeAsync(startDate, endDate);
         }
 
         /// <summary>

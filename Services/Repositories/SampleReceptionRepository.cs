@@ -9,7 +9,7 @@ using Dapper;
 
 namespace Enjaz.Services.Repositories
 {
-    public class SampleReceptionRepository
+    public class SampleReceptionRepository : IReceptionRepository
     {
         /// <summary>
         /// تحويل توقيت UTC إلى التوقيت المحلي بعد جلب البيانات من قاعدة البيانات
@@ -36,11 +36,13 @@ namespace Enjaz.Services.Repositories
 
         private readonly DatabaseService _db;
         private readonly UserService _userService;
+        private readonly Services.Caching.ICacheService _cacheService;
 
-        public SampleReceptionRepository(DatabaseService db, UserService userService)
+        public SampleReceptionRepository(DatabaseService db, UserService userService, Services.Caching.ICacheService cacheService)
         {
             _db = db;
             _userService = userService;
+            _cacheService = cacheService;
         }
 
         public Task<List<string>> GetDistinctSendersAsync()
@@ -112,6 +114,8 @@ namespace Enjaz.Services.Repositories
                     
                     await _db.LogActionAsync(_userService.CurrentUser?.Id, _userService.CurrentUser?.FullName ?? "غير معروف", "إنشاء استلام", 
                         $"إيصال استلام جديد رقم {reception.AnalysisRequestNumber}", newId);
+                    
+                    _cacheService.Clear();
                     
                     return newId;
                 }
@@ -197,6 +201,8 @@ namespace Enjaz.Services.Repositories
                     await _db.LogActionAsync(_userService.CurrentUser?.Id, _userService.CurrentUser?.FullName ?? "غير معروف", "تعديل استلام", 
                         $"تعديل بيانات الاستلام رقم طلب التحليل {reception.AnalysisRequestNumber}", reception.Id);
                     
+                    _cacheService.Clear();
+                    
                     return true;
                 }
                 catch (Exception ex)
@@ -220,6 +226,7 @@ namespace Enjaz.Services.Repositories
                 {
                     await _db.LogActionAsync(_userService.CurrentUser?.Id, _userService.CurrentUser?.FullName ?? "غير معروف", "حذف استلام", 
                         $"حذف استلام برقم معرف {id}", id);
+                    _cacheService.Clear();
                     return true;
                 }
                 return false;
@@ -351,6 +358,7 @@ namespace Enjaz.Services.Repositories
                 };
 
                 int rows = await connection.ExecuteAsync(query, parameters);
+                if (rows > 0) _cacheService.Clear();
                 return rows > 0;
             }, "UpdateReceptionStatusAsync");
         }

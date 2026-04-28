@@ -1,42 +1,47 @@
 using System;
-using System.Windows;
-using Enjaz.Services.Repositories;
-using LiveCharts;
-using LiveCharts.Wpf;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Media;
+using Enjaz.Services.Repositories;
 using Enjaz.Models;
 using Enjaz.Services;
+using Enjaz.Helpers;
+using Enjaz.Services.Statistics;
 
 namespace Enjaz.ViewModels
 {
     public class DashboardViewModel : BaseViewModel
     {
-        private readonly CertificateRepository _certificateRepository;
-        private readonly DatabaseService _databaseService;
+        private readonly IDashboardService _dashboardService;
 
         // Dashboard Properties
         private ObservableCollection<int> _availableYears;
         private int _selectedYear;
         private bool _showRecentActivities;
         private ObservableCollection<AuditLog> _recentActivities;
-        private SeriesCollection _dashboardMonthlySeries;
-        private SeriesCollection _typeSeries;
-        private string[] _monthlyLabels;
-        private Func<double, string> _yFormatter;
+
+        // Native WPF Chart Data
+        private List<MonthlyBarItem> _certMonthlyBars;
+        private List<MonthlyBarItem> _sampleMonthlyBars;
+        private List<DonutSlice> _certDonutSlices;
+        private List<DonutSlice> _sampleDonutSlices;
+
+        // KPI Counts
         private int _totalCertificatesCount;
         private int _todayCertificatesCount;
         private int _environmentalCertificatesCount;
         private int _consumerCertificatesCount;
-        
-        // Sample counts
         private int _totalSamplesCount;
         private int _todaySamplesCount;
         private int _environmentalSamplesCount;
         private int _consumableSamplesCount;
-        
-        // Sample Charts
-        private SeriesCollection _sampleMonthlySeries;
-        private SeriesCollection _sampleTypeSeries;
+
+        // Chart max value for scaling
+        private int _certMaxMonthly;
+        private int _sampleMaxMonthly;
 
         public ObservableCollection<int> AvailableYears
         {
@@ -62,48 +67,50 @@ namespace Enjaz.ViewModels
             set => SetProperty(ref _showRecentActivities, value);
         }
 
-        public SeriesCollection DashboardMonthlySeries
-        {
-            get => _dashboardMonthlySeries;
-            set => SetProperty(ref _dashboardMonthlySeries, value);
-        }
-
-        public SeriesCollection TypeSeries
-        {
-            get => _typeSeries;
-            set => SetProperty(ref _typeSeries, value);
-        }
-
-        public SeriesCollection SampleMonthlySeries
-        {
-            get => _sampleMonthlySeries;
-            set => SetProperty(ref _sampleMonthlySeries, value);
-        }
-
-        public SeriesCollection SampleTypeSeries
-        {
-            get => _sampleTypeSeries;
-            set => SetProperty(ref _sampleTypeSeries, value);
-        }
-
         public ObservableCollection<AuditLog> RecentActivities
         {
             get => _recentActivities;
             set => SetProperty(ref _recentActivities, value);
         }
 
-        public string[] MonthlyLabels
+        // Native Chart Properties
+        public List<MonthlyBarItem> CertMonthlyBars
         {
-            get => _monthlyLabels;
-            set => SetProperty(ref _monthlyLabels, value);
+            get => _certMonthlyBars;
+            set => SetProperty(ref _certMonthlyBars, value);
         }
 
-        public Func<double, string> YFormatter
+        public List<MonthlyBarItem> SampleMonthlyBars
         {
-            get => _yFormatter;
-            set => SetProperty(ref _yFormatter, value);
+            get => _sampleMonthlyBars;
+            set => SetProperty(ref _sampleMonthlyBars, value);
         }
 
+        public List<DonutSlice> CertDonutSlices
+        {
+            get => _certDonutSlices;
+            set => SetProperty(ref _certDonutSlices, value);
+        }
+
+        public List<DonutSlice> SampleDonutSlices
+        {
+            get => _sampleDonutSlices;
+            set => SetProperty(ref _sampleDonutSlices, value);
+        }
+
+        public int CertMaxMonthly
+        {
+            get => _certMaxMonthly;
+            set => SetProperty(ref _certMaxMonthly, value);
+        }
+
+        public int SampleMaxMonthly
+        {
+            get => _sampleMaxMonthly;
+            set => SetProperty(ref _sampleMaxMonthly, value);
+        }
+
+        // KPI Properties
         public int TotalCertificatesCount
         {
             get => _totalCertificatesCount;
@@ -152,35 +159,31 @@ namespace Enjaz.ViewModels
             set => SetProperty(ref _consumableSamplesCount, value);
         }
 
-        public DashboardViewModel(CertificateRepository certificateRepository, DatabaseService databaseService)
+        public DashboardViewModel(IDashboardService dashboardService)
         {
-            _certificateRepository = certificateRepository;
-            _databaseService = databaseService;
+            _dashboardService = dashboardService;
             
-            // Initialize arrays and collections to prevent null warnings
             _availableYears = new ObservableCollection<int>();
             _selectedYear = DateTime.Now.Year;
             _showRecentActivities = true;
-            _dashboardMonthlySeries = new SeriesCollection();
-            _typeSeries = new SeriesCollection();
-            _sampleMonthlySeries = new SeriesCollection();
-            _sampleTypeSeries = new SeriesCollection();
             _recentActivities = new ObservableCollection<AuditLog>();
-            _monthlyLabels = Array.Empty<string>();
-            _yFormatter = value => value.ToString("N0");
+            _certMonthlyBars = new List<MonthlyBarItem>();
+            _sampleMonthlyBars = new List<MonthlyBarItem>();
+            _certDonutSlices = new List<DonutSlice>();
+            _sampleDonutSlices = new List<DonutSlice>();
         }
 
-        public async System.Threading.Tasks.Task LoadDashboardDataAsync()
+        public async Task LoadDashboardDataAsync()
         {
             try
             {
                 IsBusy = true;
                 BusyMessage = "جاري تحميل بيانات لوحة التحكم...";
 
-                // 0. تهيئة قائمة السنوات المتاحة إذا كانت فارغة
+                // 0. Initialize available years
                 if (AvailableYears == null || AvailableYears.Count == 0)
                 {
-                    var yearsList = await _certificateRepository.GetAvailableYearsAsync();
+                    var yearsList = await _dashboardService.GetAvailableYearsAsync();
                     AvailableYears = new ObservableCollection<int>(yearsList);
                     if (!AvailableYears.Contains(_selectedYear))
                     {
@@ -190,160 +193,123 @@ namespace Enjaz.ViewModels
 
                 ShowRecentActivities = (_selectedYear == DateTime.Now.Year);
 
-                // 1. تحميل الإحصائيات الرقمية (بشكل متوازي لتحسين الأداء)
-                int currentYear = _selectedYear;
-                var totalCertTask = _certificateRepository.GetTotalCertificatesCountAsync(false, currentYear);
-                var todayCertTask = _certificateRepository.GetCertificatesCountByDateAsync(DateTime.Now);
-                var envCertTask = _certificateRepository.GetCertificatesCountByTypeAsync("بيئية", currentYear);
-                var conCertTask = _certificateRepository.GetCertificatesCountByTypeAsync("استهلاكية", currentYear);
+                // 1. Load all statistics
+                var data = await _dashboardService.GetDashboardDataAsync(_selectedYear, DateTime.Now);
 
-                var totalSampleTask = _certificateRepository.GetTotalSamplesCountAsync(currentYear);
-                var todaySampleTask = _certificateRepository.GetSamplesCountByDateAsync(DateTime.Now);
-                var envSampleTask = _certificateRepository.GetSamplesCountByTypeAsync("بيئية", currentYear);
-                var conSampleTask = _certificateRepository.GetSamplesCountByTypeAsync("استهلاكية", currentYear);
-                var auditLogsTask = _databaseService.GetAuditLogsAsync(limit: 5);
+                TotalCertificatesCount = data.TotalCertificates;
+                TodayCertificatesCount = data.TodayCertificates;
+                EnvironmentalCertificatesCount = data.EnvCertificates;
+                ConsumerCertificatesCount = data.ConCertificates;
 
-                await System.Threading.Tasks.Task.WhenAll(
-                    totalCertTask, todayCertTask, envCertTask, conCertTask,
-                    totalSampleTask, todaySampleTask, envSampleTask, conSampleTask,
-                    auditLogsTask
-                );
+                TotalSamplesCount = data.TotalSamples;
+                TodaySamplesCount = data.TodaySamples;
+                EnvironmentalSamplesCount = data.EnvSamples;
+                ConsumableSamplesCount = data.ConSamples;
 
-                TotalCertificatesCount = await totalCertTask;
-                TodayCertificatesCount = await todayCertTask;
-                EnvironmentalCertificatesCount = await envCertTask;
-                ConsumerCertificatesCount = await conCertTask;
+                RecentActivities = new ObservableCollection<AuditLog>(data.RecentActivities);
 
-                TotalSamplesCount = await totalSampleTask;
-                TodaySamplesCount = await todaySampleTask;
-                EnvironmentalSamplesCount = await envSampleTask;
-                ConsumableSamplesCount = await conSampleTask;
+                // Modern color palette
+                var envColor = new SolidColorBrush(Color.FromRgb(5, 150, 105));     // Emerald #059669
+                var conColor = new SolidColorBrush(Color.FromRgb(14, 165, 233));     // Sky #0EA5E9
+                var envLightColor = new SolidColorBrush(Color.FromRgb(16, 185, 129)); // Emerald-400
+                var conLightColor = new SolidColorBrush(Color.FromRgb(56, 189, 248)); // Sky-400
 
-                RecentActivities = new ObservableCollection<AuditLog>(await auditLogsTask);
-
-                // 2. إعداد الرسم البياني الدائري (توزيع الأنواع)
-                TypeSeries = new SeriesCollection
-                {
-                    new PieSeries
-                    {
-                        Title = "شهادات عينات بيئية",
-                        Values = new ChartValues<int> { EnvironmentalCertificatesCount },
-                        DataLabels = true,
-                        Fill = (System.Windows.Media.Brush)Application.Current.Resources["SuccessBrush"]
-                    },
-                    new PieSeries
-                    {
-                        Title = "شهادات عينات استهلاكية",
-                        Values = new ChartValues<int> { ConsumerCertificatesCount },
-                        DataLabels = true,
-                        Fill = (System.Windows.Media.Brush)Application.Current.Resources["SecondaryActionBrush"]
-                    }
-                };
-
-                // 3. إعداد الرسم البياني الشريطي (الإصدار الشهري)
-                var envStatsTask = _certificateRepository.GetMonthlyStatisticsByTypeAsync(currentYear, "بيئية");
-                var conStatsTask = _certificateRepository.GetMonthlyStatisticsByTypeAsync(currentYear, "استهلاكية");
-
-                await System.Threading.Tasks.Task.WhenAll(envStatsTask, conStatsTask);
-
-                var envStats = await envStatsTask;
-                var conStats = await conStatsTask;
-
-                var envValues = new ChartValues<int>();
-                var conValues = new ChartValues<int>();
-                var labels = new string[12];
+                // 2. Arabic month names (native WPF TextBlock handles them perfectly)
                 var arabicMonths = new[] { "يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر" };
 
+                // 3. Build Certificate Monthly Bars
+                var certBars = new List<MonthlyBarItem>();
+                int certMax = 1;
                 for (int i = 1; i <= 12; i++)
                 {
-                    envValues.Add(envStats.TryGetValue(i, out var envVal) ? envVal : 0);
-                    conValues.Add(conStats.TryGetValue(i, out var conVal) ? conVal : 0);
-                    labels[i - 1] = arabicMonths[i - 1];
+                    int env = data.MonthlyEnvCertificates.TryGetValue(i, out var ev) ? ev : 0;
+                    int con = data.MonthlyConCertificates.TryGetValue(i, out var cv) ? cv : 0;
+                    int monthMax = Math.Max(env, con);
+                    if (monthMax > certMax) certMax = monthMax;
+                    certBars.Add(new MonthlyBarItem
+                    {
+                        Month = arabicMonths[i - 1],
+                        Value1 = env,
+                        Value2 = con,
+                        Label1 = "بيئية",
+                        Label2 = "استهلاكية",
+                        Color1 = envColor,
+                        Color2 = conColor
+                    });
                 }
+                // Set max for scaling
+                foreach (var bar in certBars) bar.MaxValue = certMax;
+                CertMaxMonthly = certMax;
+                CertMonthlyBars = certBars;
 
-                DashboardMonthlySeries = new SeriesCollection
+                // 4. Build Certificate Donut
+                int certTotal = EnvironmentalCertificatesCount + ConsumerCertificatesCount;
+                CertDonutSlices = new List<DonutSlice>
                 {
-                    new ColumnSeries
+                    new DonutSlice
                     {
-                        Title = "شهادات عينات بيئية",
-                        Values = envValues,
-                        DataLabels = true,
-                        LabelPoint = point => point.Y > 0 ? point.Y.ToString() : "",
-                        Fill = (System.Windows.Media.Brush)Application.Current.Resources["SuccessBrush"]
+                        Label = "شهادات بيئية",
+                        Value = EnvironmentalCertificatesCount,
+                        Percentage = certTotal > 0 ? (double)EnvironmentalCertificatesCount / certTotal * 100 : 0,
+                        Fill = envColor
                     },
-                    new ColumnSeries
+                    new DonutSlice
                     {
-                        Title = "شهادات عينات استهلاكية",
-                        Values = conValues,
-                        DataLabels = true,
-                        LabelPoint = point => point.Y > 0 ? point.Y.ToString() : "",
-                        Fill = (System.Windows.Media.Brush)Application.Current.Resources["SecondaryActionBrush"]
+                        Label = "شهادات استهلاكية",
+                        Value = ConsumerCertificatesCount,
+                        Percentage = certTotal > 0 ? (double)ConsumerCertificatesCount / certTotal * 100 : 0,
+                        Fill = conColor
                     }
                 };
 
-                MonthlyLabels = labels;
-                YFormatter = value => value.ToString("N0");
-
-                // 4. إعداد الرسوم البيانية للعينات
-                SampleTypeSeries = new SeriesCollection
-                {
-                    new PieSeries
-                    {
-                        Title = "شهادات عينات بيئية",
-                        Values = new ChartValues<int> { EnvironmentalSamplesCount },
-                        DataLabels = true,
-                        Fill = (System.Windows.Media.Brush)Application.Current.Resources["SuccessBrush"]
-                    },
-                    new PieSeries
-                    {
-                        Title = "شهادات عينات استهلاكية",
-                        Values = new ChartValues<int> { ConsumableSamplesCount },
-                        DataLabels = true,
-                        Fill = (System.Windows.Media.Brush)Application.Current.Resources["SecondaryActionBrush"]
-                    }
-                };
-
-                var envSampleStatsTask = _certificateRepository.GetMonthlySamplesStatisticsByTypeAsync(currentYear, "بيئية");
-                var conSampleStatsTask = _certificateRepository.GetMonthlySamplesStatisticsByTypeAsync(currentYear, "استهلاكية");
-
-                await System.Threading.Tasks.Task.WhenAll(envSampleStatsTask, conSampleStatsTask);
-
-                var envSampleStats = await envSampleStatsTask;
-                var conSampleStats = await conSampleStatsTask;
-
-                var envSampleValues = new ChartValues<int>();
-                var conSampleValues = new ChartValues<int>();
-
+                // 5. Build Sample Monthly Bars
+                var sampleBars = new List<MonthlyBarItem>();
+                int sampleMax = 1;
                 for (int i = 1; i <= 12; i++)
                 {
-                    envSampleValues.Add(envSampleStats.TryGetValue(i, out var envSampleVal) ? envSampleVal : 0);
-                    conSampleValues.Add(conSampleStats.TryGetValue(i, out var conSampleVal) ? conSampleVal : 0);
+                    int env = data.MonthlyEnvSamples.TryGetValue(i, out var esv) ? esv : 0;
+                    int con = data.MonthlyConSamples.TryGetValue(i, out var csv) ? csv : 0;
+                    int monthMax = Math.Max(env, con);
+                    if (monthMax > sampleMax) sampleMax = monthMax;
+                    sampleBars.Add(new MonthlyBarItem
+                    {
+                        Month = arabicMonths[i - 1],
+                        Value1 = env,
+                        Value2 = con,
+                        Label1 = "بيئية",
+                        Label2 = "استهلاكية",
+                        Color1 = envLightColor,
+                        Color2 = conLightColor
+                    });
                 }
+                foreach (var bar in sampleBars) bar.MaxValue = sampleMax;
+                SampleMaxMonthly = sampleMax;
+                SampleMonthlyBars = sampleBars;
 
-                SampleMonthlySeries = new SeriesCollection
+                // 6. Build Sample Donut
+                int sampleTotal = EnvironmentalSamplesCount + ConsumableSamplesCount;
+                SampleDonutSlices = new List<DonutSlice>
                 {
-                    new ColumnSeries
+                    new DonutSlice
                     {
-                        Title = "شهادات عينات بيئية",
-                        Values = envSampleValues,
-                        DataLabels = true,
-                        LabelPoint = point => point.Y > 0 ? point.Y.ToString() : "",
-                        Fill = (System.Windows.Media.Brush)Application.Current.Resources["SuccessBrush"]
+                        Label = "عينات بيئية",
+                        Value = EnvironmentalSamplesCount,
+                        Percentage = sampleTotal > 0 ? (double)EnvironmentalSamplesCount / sampleTotal * 100 : 0,
+                        Fill = envLightColor
                     },
-                    new ColumnSeries
+                    new DonutSlice
                     {
-                        Title = "شهادات عينات استهلاكية",
-                        Values = conSampleValues,
-                        DataLabels = true,
-                        LabelPoint = point => point.Y > 0 ? point.Y.ToString() : "",
-                        Fill = (System.Windows.Media.Brush)Application.Current.Resources["SecondaryActionBrush"]
+                        Label = "عينات استهلاكية",
+                        Value = ConsumableSamplesCount,
+                        Percentage = sampleTotal > 0 ? (double)ConsumableSamplesCount / sampleTotal * 100 : 0,
+                        Fill = conLightColor
                     }
                 };
             }
             catch (Exception ex)
             {
-               StatusMessage = $"خطأ في تحميل بيانات الإحصائيات: {ex.Message}";
-               Console.WriteLine($"Error loading dashboard data: {ex.Message}");
+                StatusMessage = $"خطأ في تحميل بيانات الإحصائيات: {ex.Message}";
+                Console.WriteLine($"Error loading dashboard data: {ex.Message}");
             }
             finally
             {

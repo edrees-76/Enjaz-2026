@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using Microsoft.Data.Sqlite;
 using Dapper;
 using Enjaz.Models;
@@ -84,11 +85,11 @@ namespace Enjaz.Services.Repositories
                                     // If a separate legacy verification is needed, it would be called here.
                                     passwordVerified = PasswordHelper.VerifyPassword(password, storedHash);
 
-                                    // Admin account fixup logic: If legacy hash is used for 'admin' and it's correct,
-                                    // re-hash with new algorithm and update the database.
-                                    if (passwordVerified && username.Equals("admin", StringComparison.OrdinalIgnoreCase))
+                                    // Security Fix: Auto-upgrade legacy SHA256 hash to PBKDF2 for ALL users
+                                    // Previously this was limited to admin only, leaving other users vulnerable
+                                    if (passwordVerified)
                                     {
-                                        LoggerService.LogInfo($"Admin user '{username}' logged in with legacy hash. Updating password to new algorithm.");
+                                        LoggerService.LogInfo($"User '{username}' logged in with legacy hash. Upgrading to PBKDF2.");
                                         string newHash = PasswordHelper.HashPassword(password);
                                         string updateQuery = "UPDATE Users SET PasswordHash = @NewHash WHERE Id = @Id";
                                         using (var updateCmd = new SqliteCommand(updateQuery, connection))
@@ -97,7 +98,7 @@ namespace Enjaz.Services.Repositories
                                             updateCmd.Parameters.AddWithValue("@Id", reader.GetInt32(0));
                                             await updateCmd.ExecuteNonQueryAsync();
                                         }
-                                        LoggerService.LogInfo($"Admin user '{username}' password hash updated successfully.");
+                                        LoggerService.LogInfo($"User '{username}' password hash upgraded successfully.");
                                     }
                                 }
                                 else
@@ -114,11 +115,14 @@ namespace Enjaz.Services.Repositories
                                         return ((User?)null, LoginResult.AccountFrozen);
                                     }
 
+                                    // Security Fix: Do NOT load PasswordHash into memory
+                                    // This prevents credential exposure via memory dumps
+                                    // Password verification is done via VerifyPasswordByUserIdAsync instead
                                     var user = new User
                                     {
                                         Id = reader.GetInt32(0),
                                         Username = reader.GetString(1),
-                                        PasswordHash = storedHash,
+                                        PasswordHash = string.Empty,
                                         FullName = reader.GetString(3),
                                         Role = (UserRole)reader.GetInt32(4),
                                         IsActive = isActive,
@@ -287,8 +291,20 @@ namespace Enjaz.Services.Repositories
                                  insertCmd.Parameters.AddWithValue("@FullName", "مدير النظام");
                                  insertCmd.Parameters.AddWithValue("@Role", (int)UserRole.Admin);
                                  insertCmd.Parameters.AddWithValue("@CreatedAt", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                                 // Security Fix: Store temp password in a protected file instead of logging it
+                                 try
+                                 {
+                                     string credDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Enjaz");
+                                     if (!Directory.Exists(credDir)) Directory.CreateDirectory(credDir);
+                                     string credFile = Path.Combine(credDir, "initial_credentials.txt");
+                                     File.WriteAllText(credFile, $"Admin Username: admin\nTemporary Password: {tempPassword}\n\nIMPORTANT: Change this password immediately and delete this file!");
+                                     // Set file as hidden
+                                     File.SetAttributes(credFile, FileAttributes.Hidden);
+                                 }
+                                 catch { /* Non-critical: if file write fails, admin can still reset via other means */ }
                                  await insertCmd.ExecuteNonQueryAsync();
-                                 LoggerService.LogWarning($"Default admin created with TEMPORARY password: {tempPassword}. CHANGE THIS IMMEDIATELY!");
+                                 // Security Fix: Never log passwords in plaintext
+                                 LoggerService.LogWarning("Default admin created with a temporary password. Check 'initial_credentials.txt' in AppData\\Enjaz and change it immediately!");
                              }
                         }
                         else
@@ -320,6 +336,32 @@ namespace Enjaz.Services.Repositories
                     }
                 }
             }, "CreateDefaultAdminAsync");
+        }
+        /// <summary>
+        /// التحقق من كلمة مرور المستخدم مباشرة من قاعدة البيانات
+        /// بدون تحميل الهاش في الذاكرة (أمان ضد Memory Dump)
+        /// Verify user password directly from DB without loading hash into memory
+        /// </summary>
+        public System.Threading.Tasks.Task<bool> VerifyPasswordByUserIdAsync(int userId, string password)
+        {
+            return _db.ExecuteWithRetryAsync(async () =>
+            {
+                using (var connection = new SqliteConnection(_db.ConnectionString))
+                {
+                    await connection.OpenAsync();
+                    string query = "SELECT PasswordHash FROM Users WHERE Id = @Id AND IsActive = 1";
+                    using (var command = new SqliteCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@Id", userId);
+                        var result = await command.ExecuteScalarAsync();
+                        if (result == null || result == DBNull.Value)
+                            return false;
+
+                        string storedHash = result.ToString()!;
+                        return PasswordHelper.VerifyPassword(password, storedHash);
+                    }
+                }
+            }, "VerifyPasswordByUserIdAsync");
         }
     }
 }

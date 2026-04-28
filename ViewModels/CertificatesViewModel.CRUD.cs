@@ -261,7 +261,7 @@ namespace Enjaz.ViewModels
             BusyMessage = "جاري تحميل بيانات العينات...";
             try
             {
-                var samples = await _certificateRepository.GetSamplesByCertificateIdAsync(certificate.Id);
+                var samples = await _sampleRepository.GetSamplesByCertificateIdAsync(certificate.Id);
                 Samples = new ObservableCollection<Sample>(samples);
             }
             finally

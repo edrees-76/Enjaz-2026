@@ -13,6 +13,7 @@ namespace Enjaz.ViewModels
     public partial class CertificatesViewModel : BaseViewModel
     {
         private readonly CertificateRepository _certificateRepository;
+        private readonly ISampleRepository _sampleRepository;
         private readonly IPdfService _pdfService;
         private readonly ExcelExportService _excelExportService;
         private readonly UserService _userService;
@@ -70,9 +71,10 @@ namespace Enjaz.ViewModels
         private bool _isInternalClear = false;
         private int? _linkedReceptionId = null;
 
-        public CertificatesViewModel(CertificateRepository certificateRepository, IPdfService pdfService, INotificationService notificationService, ExcelExportService excelExportService, UserService userService, SampleReceptionRepository sampleReceptionRepository, IReceptionSearchService receptionSearchService)
+        public CertificatesViewModel(CertificateRepository certificateRepository, ISampleRepository sampleRepository, IPdfService pdfService, INotificationService notificationService, ExcelExportService excelExportService, UserService userService, SampleReceptionRepository sampleReceptionRepository, IReceptionSearchService receptionSearchService)
         {
             _certificateRepository = certificateRepository;
+            _sampleRepository = sampleRepository;
             _pdfService = pdfService;
             _notificationService = notificationService;
             _excelExportService = excelExportService;

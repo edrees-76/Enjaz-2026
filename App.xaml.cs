@@ -80,7 +80,11 @@ namespace Enjaz
                 // Add a small artificial delay to show the beautiful splash for a bit
                 await System.Threading.Tasks.Task.Delay(1000);
                 
-                // 3. Show Login Window using DI
+                // 3. Start Background Tasks
+                var backgroundJobs = ServiceProvider.GetRequiredService<Services.Jobs.BackgroundTaskManager>();
+                backgroundJobs.Start();
+                
+                // 4. Show Login Window using DI
                 splash.UpdateMessage("جاري فتح واجهة الدخول...");
                 var loginWindow = ServiceProvider.GetRequiredService<Views.LoginWindow>();
                 loginWindow.Show();
@@ -107,9 +111,24 @@ namespace Enjaz
             // Services
             services.AddSingleton<Services.ILoggerService, Services.LoggerService>();
             services.AddSingleton<Services.DatabaseService>();
+            // Add Caching
+            services.AddMemoryCache();
+            services.AddSingleton<Services.Caching.ICacheService, Services.Caching.MemoryCacheService>();
+
+            // Statistics (Decorator Pattern)
+            services.AddSingleton<Services.Statistics.DashboardService>();
+            services.AddSingleton<Services.Statistics.IDashboardService>(provider => 
+                new Services.Statistics.CachedDashboardService(
+                    provider.GetRequiredService<Services.Statistics.DashboardService>(),
+                    provider.GetRequiredService<Services.Caching.ICacheService>()));
+
+            // Repositories
             services.AddSingleton<Services.Repositories.UserRepository>();
+            services.AddSingleton<Services.Repositories.ISampleRepository, Services.Repositories.SampleRepository>();
             services.AddSingleton<Services.Repositories.CertificateRepository>();
+            services.AddSingleton<Services.Repositories.ICertificateRepository>(provider => provider.GetRequiredService<Services.Repositories.CertificateRepository>());
             services.AddSingleton<Services.Repositories.SampleReceptionRepository>();
+            services.AddSingleton<Services.Repositories.IReceptionRepository>(provider => provider.GetRequiredService<Services.Repositories.SampleReceptionRepository>());
             services.AddSingleton<Services.INavigationService, Services.NavigationService>();
             services.AddSingleton<Services.IPdfService, Services.PdfService>();
             services.AddSingleton<Services.ThemeService>();
@@ -129,6 +148,9 @@ namespace Enjaz
             services.AddSingleton<Services.IDialogService, Services.WpfDialogService>();
             services.AddSingleton<Services.IReceptionSearchService, Services.WpfReceptionSearchService>();
             services.AddSingleton<Services.HelpDataService>();
+            
+            // Background Jobs
+            services.AddSingleton<Services.Jobs.BackgroundTaskManager>();
 
             // ViewModels
             services.AddTransient<ViewModels.LoginViewModel>();

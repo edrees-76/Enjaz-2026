@@ -13,10 +13,12 @@ namespace Enjaz.Services.Repositories
     /// مستودع الشهادات - إدارة عمليات الشهادات والعينات
     /// Certificate Repository - Manages Certificates and Samples operations
     /// </summary>
-    public partial class CertificateRepository
+    public partial class CertificateRepository : ICertificateRepository
     {
         private readonly DatabaseService _db;
         private readonly UserService _userService;
+        private readonly ISampleRepository _sampleRepository;
+        private readonly Services.Caching.ICacheService _cacheService;
 
         private static void ConvertToLocalTime(Certificate certificate)
         {
@@ -35,10 +37,12 @@ namespace Enjaz.Services.Repositories
             foreach (var c in certificates) ConvertToLocalTime(c);
         }
 
-        public CertificateRepository(DatabaseService db, UserService userService)
+        public CertificateRepository(DatabaseService db, UserService userService, ISampleRepository sampleRepository, Services.Caching.ICacheService cacheService)
         {
             _db = db;
             _userService = userService;
+            _sampleRepository = sampleRepository;
+            _cacheService = cacheService;
         }
 
         #region Mapping Helpers â€” DRY (Don't Repeat Yourself)
@@ -646,6 +650,8 @@ namespace Enjaz.Services.Repositories
                     await _db.LogActionAsync(_userService.CurrentUser?.Id, _userService.CurrentUser?.FullName ?? "غير معروف", "إنشاء", 
                         $"شهادة جديدة رقم {finalNumber} - رقم إخطار {certificate.NotificationNumber ?? "بدون"}", newId);
                     
+                    _cacheService.Clear(); // Cache invalidation
+                    
                     return newId;
                 }
                 catch (Exception ex)
@@ -764,6 +770,8 @@ namespace Enjaz.Services.Repositories
                     
                     await _db.LogActionAsync(_userService.CurrentUser?.Id, _userService.CurrentUser?.FullName ?? "غير معروف", "تعديل", 
                         $"{changes} (رقم الشهادة: {certificate.CertificateNumber})", certificate.Id);
+                    
+                    _cacheService.Clear(); // Cache invalidation
                     
                     return true;
                 }

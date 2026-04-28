@@ -7,8 +7,11 @@ using System.Windows.Input;
 using Enjaz.Helpers;
 using Enjaz.Models;
 using Enjaz.Services;
-using LiveCharts;
-using LiveCharts.Wpf;
+using System.Windows.Media;
+using LiveChartsCore;
+using LiveChartsCore.SkiaSharpView;
+using LiveChartsCore.SkiaSharpView.Painting;
+using SkiaSharp;
 
 namespace Enjaz.ViewModels
 {
@@ -90,15 +93,15 @@ namespace Enjaz.ViewModels
         }
 
         // Chart Data
-        private SeriesCollection _supplierSeries = new();
-        public SeriesCollection SupplierSeries
+        private ISeries[] _supplierSeries = Array.Empty<ISeries>();
+        public ISeries[] SupplierSeries
         {
             get => _supplierSeries;
             set => SetProperty(ref _supplierSeries, value);
         }
 
-        private SeriesCollection _senderSeries = new();
-        public SeriesCollection SenderSeries
+        private ISeries[] _senderSeries = Array.Empty<ISeries>();
+        public ISeries[] SenderSeries
         {
             get => _senderSeries;
             set => SetProperty(ref _senderSeries, value);
@@ -237,6 +240,18 @@ namespace Enjaz.ViewModels
             InitializeColumns();
             InitializeSenderReportColumns();
             _ = LoadSendersListAsync();
+            Enjaz.Services.ThemeService.ThemeChanged += UpdateChartThemeColors;
+        }
+
+        private void UpdateChartThemeColors(bool isDark)
+        {
+            // Native WPF controls use DynamicResource for theme colors,
+            // so they update automatically. Just regenerate the dashboard
+            // to pick up new colors if data is loaded.
+            if (DashboardWidgets != null && DashboardWidgets.Count > 0 && IsDataLoaded)
+            {
+                GenerateDashboard();
+            }
         }
 
         private void InitializeCommands()
@@ -406,28 +421,22 @@ namespace Enjaz.ViewModels
             // Supplier distribution
             _topSuppliers = await _reportingService.GetTopSuppliersAsync(StartDate, EndDate, 5);
             SupplierLabels = _topSuppliers.Select(s => s.Name).ToList();
-            SupplierSeries = new SeriesCollection
+            SupplierSeries = _topSuppliers.Select(s => new PieSeries<int>
             {
-                new PieSeries
-                {
-                    Title = "الموردين",
-                    Values = new ChartValues<int>(_topSuppliers.Select(s => s.Count)),
-                    DataLabels = true
-                }
-            };
+                Name = ArabicTextShaper.Shape(s.Name),
+                Values = new[] { s.Count },
+                DataLabelsFormatter = point => $"{point.Coordinate.PrimaryValue}"
+            }).ToArray();
 
             // Sender distribution
             _topSenders = await _reportingService.GetTopSendersAsync(StartDate, EndDate, 5);
             SenderLabels = _topSenders.Select(s => s.Name).ToList();
-            SenderSeries = new SeriesCollection
+            SenderSeries = _topSenders.Select(s => new PieSeries<int>
             {
-                new PieSeries
-                {
-                    Title = "الجهات المرسلة",
-                    Values = new ChartValues<int>(_topSenders.Select(s => s.Count)),
-                    DataLabels = true
-                }
-            };
+                Name = ArabicTextShaper.Shape(s.Name),
+                Values = new[] { s.Count },
+                DataLabelsFormatter = point => $"{point.Coordinate.PrimaryValue}"
+            }).ToArray();
         }
 
         private async Task ExportToPdfAsync()
@@ -619,7 +628,22 @@ namespace Enjaz.ViewModels
                 var certs = FilteredCertificates.ToList();
                 if (!certs.Any()) return;
 
-                // 1. Sample Count Trend
+                // Colors for pie charts
+                var pieColors = new System.Windows.Media.Brush[]
+                {
+                    new SolidColorBrush(System.Windows.Media.Color.FromRgb(78, 205, 196)),   // Teal
+                    new SolidColorBrush(System.Windows.Media.Color.FromRgb(255, 107, 107)),   // Coral
+                    new SolidColorBrush(System.Windows.Media.Color.FromRgb(244, 162, 97)),    // Orange
+                    new SolidColorBrush(System.Windows.Media.Color.FromRgb(100, 149, 237)),   // Blue
+                    new SolidColorBrush(System.Windows.Media.Color.FromRgb(155, 89, 182)),    // Purple
+                    new SolidColorBrush(System.Windows.Media.Color.FromRgb(46, 204, 113)),    // Green
+                    new SolidColorBrush(System.Windows.Media.Color.FromRgb(241, 196, 15)),    // Yellow
+                    new SolidColorBrush(System.Windows.Media.Color.FromRgb(231, 76, 60)),     // Red
+                };
+
+                var barColor = new SolidColorBrush(System.Windows.Media.Color.FromRgb(78, 205, 196));
+
+                // 1. Sample Count Trend (Column)
                 if (AvailableColumns.Any(c => c.IsSelected && (c.PropertyName == "SampleCount" || c.PropertyName == "IssueDate")))
                 {
                     var days = (EndDate - StartDate).TotalDays;
@@ -631,23 +655,21 @@ namespace Enjaz.ViewModels
                         .Select(g => new { Date = g.Key, Count = g.Sum(c => c.SampleCount) })
                         .ToList();
 
-                    var values = new ChartValues<int>(groupedInfo.Select(x => x.Count));
-                    var labels = groupedInfo.Select(x => isDaily ? x.Date.ToString("MM/dd") : x.Date.ToString("yyyy/MM")).ToArray();
+                    var maxVal = groupedInfo.Any() ? groupedInfo.Max(x => x.Count) : 1;
+                    if (maxVal == 0) maxVal = 1;
 
                     DashboardWidgets.Add(new ColumnWidgetViewModel
                     {
                         Title = "اتجاه عدد العينات",
-                        Series = new SeriesCollection
+                        ColumnSpan = 2,
+                        NativeMaxValue = maxVal,
+                        NativeBars = groupedInfo.Select(x => new SingleBarItem
                         {
-                            new ColumnSeries
-                            {
-                                Title = "العينات",
-                                Values = values,
-                                DataLabels = true
-                            }
-                        },
-                        Labels = labels,
-                        ColumnSpan = 2 
+                            Label = isDaily ? x.Date.ToString("MM/dd") : x.Date.ToString("yyyy/MM"),
+                            Value = x.Count,
+                            MaxValue = maxVal,
+                            Fill = barColor
+                        }).ToList()
                     });
                 }
 
@@ -655,23 +677,21 @@ namespace Enjaz.ViewModels
                 if (AvailableColumns.Any(c => c.IsSelected && c.PropertyName == "CertificateType"))
                 {
                     var types = certs.GroupBy(c => c.CertificateType ?? "غير محدد")
-                        .Select(g => new { Type = g.Key, Count = g.Count() });
+                        .Select(g => new { Type = g.Key, Count = g.Count() })
+                        .ToList();
 
-                    var series = new SeriesCollection();
-                    foreach (var t in types)
-                    {
-                        series.Add(new PieSeries
-                        {
-                            Title = t.Type,
-                            Values = new ChartValues<int> { t.Count },
-                            DataLabels = true
-                        });
-                    }
+                    var total = types.Sum(t => t.Count);
 
                     DashboardWidgets.Add(new PieWidgetViewModel
                     {
                         Title = "توزيع أنواع الشهادات",
-                        Series = series
+                        NativeSlices = types.Select((t, i) => new DonutSlice
+                        {
+                            Label = t.Type ?? "غير محدد",
+                            Value = t.Count,
+                            Percentage = total > 0 ? (double)t.Count / total * 100 : 0,
+                            Fill = pieColors[i % pieColors.Length]
+                        }).ToList()
                     });
                 }
 
@@ -685,25 +705,22 @@ namespace Enjaz.ViewModels
                         .Take(7)
                         .ToList();
 
-                    var series = new SeriesCollection
-                    {
-                        new RowSeries
-                        {
-                            Title = "الشهادات",
-                            Values = new ChartValues<int>(topSuppliers.Select(x => x.Count)),
-                            DataLabels = true
-                        }
-                    };
+                    var maxVal = topSuppliers.Any() ? topSuppliers.Max(x => x.Count) : 1;
 
                     DashboardWidgets.Add(new RowWidgetViewModel
                     {
-                        Title = "أعلى الموردين نشاطاً",
-                        Series = series,
-                        Labels = topSuppliers.Select(x => x.Name ?? "غير معروف").ToArray()
+                        Title = "أعلى الموردين نشاطاً (عينات)",
+                        NativeBars = topSuppliers.Select(x => new HorizontalBarItem
+                        {
+                            Label = x.Name ?? "غير معروف",
+                            Value = x.Count,
+                            MaxValue = maxVal,
+                            Fill = barColor
+                        }).ToList()
                     });
                 }
 
-                // 4. Senders (Bottom Left - Pie)
+                // 4. Senders (Pie)
                 if (AvailableColumns.Any(c => c.IsSelected && c.PropertyName == "Sender"))
                 {
                     var topSenders = certs.Where(c => !string.IsNullOrEmpty(c.Sender))
@@ -713,41 +730,49 @@ namespace Enjaz.ViewModels
                         .Take(5)
                         .ToList();
 
-                     var series = new SeriesCollection();
-                    foreach (var t in topSenders)
-                    {
-                        series.Add(new PieSeries
-                        {
-                            Title = t.Name,
-                            Values = new ChartValues<int> { t.Count },
-                            DataLabels = true
-                        });
-                    }
+                    var total = topSenders.Sum(t => t.Count);
 
                     DashboardWidgets.Add(new PieWidgetViewModel
                     {
                         Title = "أبرز الجهات المرسلة",
-                        Series = series
+                        NativeSlices = topSenders.Select((t, i) => new DonutSlice
+                        {
+                            Label = t.Name ?? "غير معروف",
+                            Value = t.Count,
+                            Percentage = total > 0 ? (double)t.Count / total * 100 : 0,
+                            Fill = pieColors[i % pieColors.Length]
+                        }).ToList()
                     });
                 }
 
-                // 5. Environmental vs Consumable (Comparison)
+                // 5. Environmental vs Consumable (Pie)
                 if (AvailableColumns.Any(c => c.IsSelected && (c.PropertyName == "EnvironmentalSampleCount" || c.PropertyName == "ConsumableSampleCount")))
                 {
                     var env = certs.Sum(c => c.EnvironmentalSampleCount);
                     var cons = certs.Sum(c => c.ConsumableSampleCount);
+                    var total = env + cons;
 
-                     var series = new SeriesCollection
-                     {
-                         new PieSeries { Title = "بيئية", Values = new ChartValues<int> { env }, DataLabels = true },
-                         new PieSeries { Title = "استهلاكية", Values = new ChartValues<int> { cons }, DataLabels = true }
-                     };
-
-                     DashboardWidgets.Add(new PieWidgetViewModel
-                     {
-                         Title = "مقارنة أنواع العينات",
-                         Series = series
-                     });
+                    DashboardWidgets.Add(new PieWidgetViewModel
+                    {
+                        Title = "مقارنة أنواع العينات",
+                        NativeSlices = new List<DonutSlice>
+                        {
+                            new DonutSlice
+                            {
+                                Label = "عينات بيئية",
+                                Value = env,
+                                Percentage = total > 0 ? (double)env / total * 100 : 0,
+                                Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(46, 204, 113))
+                            },
+                            new DonutSlice
+                            {
+                                Label = "عينات استهلاكية",
+                                Value = cons,
+                                Percentage = total > 0 ? (double)cons / total * 100 : 0,
+                                Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(100, 149, 237))
+                            }
+                        }
+                    });
                 }
 
                 // 6. Top Origins (Row)
@@ -760,25 +785,22 @@ namespace Enjaz.ViewModels
                         .Take(7)
                         .ToList();
 
-                    var series = new SeriesCollection
-                    {
-                        new RowSeries
-                        {
-                            Title = "الشهادات",
-                            Values = new ChartValues<int>(topOrigins.Select(x => x.Count)),
-                            DataLabels = true
-                        }
-                    };
+                    var maxVal = topOrigins.Any() ? topOrigins.Max(x => x.Count) : 1;
 
                     DashboardWidgets.Add(new RowWidgetViewModel
                     {
-                        Title = "أهم دول المنشأ",
-                        Series = series,
-                        Labels = topOrigins.Select(x => x.Name ?? "غير معروف").ToArray()
+                        Title = "أهم دول المنشأ (عينات)",
+                        NativeBars = topOrigins.Select(x => new HorizontalBarItem
+                        {
+                            Label = x.Name ?? "غير معروف",
+                            Value = x.Count,
+                            MaxValue = maxVal,
+                            Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(26, 83, 92))
+                        }).ToList()
                     });
                 }
 
-                // 7. Monthly Performance Comparison (Line Chart)
+                // 7. Monthly Performance Comparison (Line)
                 var monthlyData = certs
                     .GroupBy(c => new { c.IssueDate.Year, c.IssueDate.Month })
                     .OrderBy(g => g.Key.Year).ThenBy(g => g.Key.Month)
@@ -787,25 +809,23 @@ namespace Enjaz.ViewModels
 
                 if (monthlyData.Count > 1)
                 {
+                    var maxVal = monthlyData.Max(x => x.Count);
+                    if (maxVal == 0) maxVal = 1;
+
                     DashboardWidgets.Add(new LineWidgetViewModel
                     {
                         Title = "مقارنة الأداء الشهري",
-                        Series = new SeriesCollection
+                        ColumnSpan = 2,
+                        NativePoints = monthlyData.Select(x => new LineChartPoint
                         {
-                            new LineSeries
-                            {
-                                Title = "الشهادات",
-                                Values = new ChartValues<int>(monthlyData.Select(x => x.Count)),
-                                PointGeometry = DefaultGeometries.Circle,
-                                PointGeometrySize = 10
-                            }
-                        },
-                        Labels = monthlyData.Select(x => x.Name).ToArray(),
-                        ColumnSpan = 2
+                            Label = x.Name,
+                            Value = x.Count,
+                            MaxValue = maxVal
+                        }).ToList()
                     });
                 }
 
-                // 8. Top Analysis Types (Goods)
+                // 8. Top Analysis Types (Row)
                 if (AvailableColumns.Any(c => c.IsSelected && c.PropertyName == "AnalysisType"))
                 {
                     var topGoods = certs.Where(c => !string.IsNullOrEmpty(c.AnalysisType))
@@ -815,19 +835,18 @@ namespace Enjaz.ViewModels
                         .Take(7)
                         .ToList();
 
+                    var maxVal = topGoods.Any() ? topGoods.Max(x => x.Count) : 1;
+
                     DashboardWidgets.Add(new RowWidgetViewModel
                     {
                         Title = "تحليل السلع (حسب نوع التحليل)",
-                        Series = new SeriesCollection
+                        NativeBars = topGoods.Select(x => new HorizontalBarItem
                         {
-                            new RowSeries
-                            {
-                                Title = "الطلبات",
-                                Values = new ChartValues<int>(topGoods.Select(x => x.Count)),
-                                DataLabels = true
-                            }
-                        },
-                        Labels = topGoods.Select(x => x.Name ?? "غير معروف").ToArray()
+                            Label = x.Name ?? "غير معروف",
+                            Value = x.Count,
+                            MaxValue = maxVal,
+                            Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(244, 162, 97))
+                        }).ToList()
                     });
                 }
             }
@@ -895,30 +914,39 @@ namespace Enjaz.ViewModels
     public abstract class DashboardWidgetViewModel : BaseViewModel
     {
         public string Title { get; set; } = string.Empty;
-        public SeriesCollection Series { get; set; } = new();
+        public ISeries[] Series { get; set; } = Array.Empty<ISeries>();
         public int ColumnSpan { get; set; } = 1;
+        public SolidColorPaint? LegendTextPaint { get; set; }
     }
 
     public class PieWidgetViewModel : DashboardWidgetViewModel
     {
-        // No extra properties needed for now
+        /// <summary>Native donut chart data (used by NativeDonutChart)</summary>
+        public List<DonutSlice> NativeSlices { get; set; } = new();
     }
 
     public class ColumnWidgetViewModel : DashboardWidgetViewModel
     {
-        public string[] Labels { get; set; } = Array.Empty<string>();
-        public Func<double, string> Formatter { get; set; } = x => x.ToString("N0");
+        public Axis[] XAxes { get; set; } = Array.Empty<Axis>();
+        public Axis[] YAxes { get; set; } = { new Axis { Labeler = x => x.ToString("N0") } };
+        /// <summary>Native single bar chart data (used by NativeSingleBarChart)</summary>
+        public List<SingleBarItem> NativeBars { get; set; } = new();
+        public int NativeMaxValue { get; set; }
     }
 
     public class RowWidgetViewModel : DashboardWidgetViewModel
     {
-        public string[] Labels { get; set; } = Array.Empty<string>();
-        public Func<double, string> Formatter { get; set; } = x => x.ToString("N0");
+        public Axis[] XAxes { get; set; } = { new Axis { Labeler = x => x.ToString("N0") } };
+        public Axis[] YAxes { get; set; } = Array.Empty<Axis>();
+        /// <summary>Native horizontal bar chart data (used by NativeHorizontalBarChart)</summary>
+        public List<HorizontalBarItem> NativeBars { get; set; } = new();
     }
 
     public class LineWidgetViewModel : DashboardWidgetViewModel
     {
-        public string[] Labels { get; set; } = Array.Empty<string>();
-        public Func<double, string> Formatter { get; set; } = x => x.ToString("N0");
+        public Axis[] XAxes { get; set; } = Array.Empty<Axis>();
+        public Axis[] YAxes { get; set; } = { new Axis { Labeler = x => x.ToString("N0") } };
+        /// <summary>Native line chart data (used by NativeLineChart)</summary>
+        public List<LineChartPoint> NativePoints { get; set; } = new();
     }
 }

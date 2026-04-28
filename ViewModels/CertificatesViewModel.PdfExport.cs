@@ -23,7 +23,7 @@ namespace Enjaz.ViewModels
                 IsBusy = true;
                 BusyMessage = "جاري تحضير ملف PDF...";
                 // Always load fresh samples from database
-                var samples = await _certificateRepository.GetSamplesByCertificateIdAsync(SelectedCertificate.Id);
+                var samples = await _sampleRepository.GetSamplesByCertificateIdAsync(SelectedCertificate.Id);
                 
                 bool success = await System.Threading.Tasks.Task.Run(() => _pdfService.GenerateAndOpenCertificatePdf(SelectedCertificate, samples));
                 if (success)
@@ -66,7 +66,7 @@ namespace Enjaz.ViewModels
                     IsBusy = true;
                     BusyMessage = "جاري حفظ ملف PDF...";
                     // Always load fresh samples from database
-                    var samples = await _certificateRepository.GetSamplesByCertificateIdAsync(SelectedCertificate.Id);
+                    var samples = await _sampleRepository.GetSamplesByCertificateIdAsync(SelectedCertificate.Id);
                     
                     bool success = await System.Threading.Tasks.Task.Run(() => _pdfService.SaveCertificatePdf(SelectedCertificate, samples, saveDialog.FileName));
                     if (success)
@@ -111,7 +111,7 @@ namespace Enjaz.ViewModels
                 IsBusy = true;
                 BusyMessage = "جاري إرسال الشهادة للطباعة...";
                 // Always load fresh samples from database
-                var samples = await _certificateRepository.GetSamplesByCertificateIdAsync(SelectedCertificate.Id);
+                var samples = await _sampleRepository.GetSamplesByCertificateIdAsync(SelectedCertificate.Id);
                 
                 bool success = await System.Threading.Tasks.Task.Run(() => _pdfService.PrintCertificatePdf(SelectedCertificate, samples));
                 if (success)
@@ -149,7 +149,7 @@ namespace Enjaz.ViewModels
                 IsBusy = true;
                 BusyMessage = "جاري تحميل تفاصيل الشهادة...";
                 // Load samples for the selected certificate from database
-                var samples = await _certificateRepository.GetSamplesByCertificateIdAsync(SelectedCertificate.Id);
+                var samples = await _sampleRepository.GetSamplesByCertificateIdAsync(SelectedCertificate.Id);
                 Samples = new ObservableCollection<Sample>(samples);
 
                 // Load action history

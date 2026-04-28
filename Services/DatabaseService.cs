@@ -93,22 +93,45 @@ namespace Enjaz.Services
             {
                 using var connection = new SqliteConnection(_connectionString);
                 connection.Open();
-                var query = @"
-                    DELETE FROM Samples; 
-                    DELETE FROM Certificates; 
-                    DELETE FROM ReceptionSamples;
-                    DELETE FROM SampleReceptions;
-                    DELETE FROM ReferralLetters;
-                    DELETE FROM AuditLogs;
-                    DELETE FROM sqlite_sequence WHERE name IN ('Certificates', 'Samples', 'SampleReceptions', 'ReceptionSamples', 'ReferralLetters', 'AuditLogs');
-                    VACUUM;";
-                using var command = new SqliteCommand(query, connection);
-                command.ExecuteNonQuery();
-                LoggerService.LogInfo("Database Reset: All records have been cleared, except users.");
+                
+                // 1. Transactional Delete
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        var query = @"
+                            DELETE FROM Samples; 
+                            DELETE FROM Certificates; 
+                            DELETE FROM ReceptionSamples;
+                            DELETE FROM SampleReceptions;
+                            DELETE FROM ReferralLetters;
+                            DELETE FROM AuditLogs;
+                            DELETE FROM sqlite_sequence WHERE name IN ('Certificates', 'Samples', 'SampleReceptions', 'ReceptionSamples', 'ReferralLetters', 'AuditLogs');";
+                            
+                        using var command = new SqliteCommand(query, connection, transaction);
+                        command.ExecuteNonQuery();
+                        
+                        transaction.Commit();
+                    }
+                    catch
+                    {
+                        transaction.Rollback();
+                        throw; // Re-throw to be caught by outer block
+                    }
+                }
+
+                // 2. Vacuum must be run outside of a transaction
+                using (var vacuumCmd = new SqliteCommand("VACUUM;", connection))
+                {
+                    vacuumCmd.ExecuteNonQuery();
+                }
+
+                LoggerService.LogInfo("Database Reset: All records have been cleared (safely via transaction).");
             }
             catch (Exception ex)
             {
-                LoggerService.LogError("Database Reset Failed", ex);
+                LoggerService.LogError("Database Reset Failed - Data remained untouched", ex);
+                throw; // Rethrow to let the UI know it failed
             }
         }
 

@@ -1,17 +1,16 @@
 using System;
 using System.IO;
+using Serilog;
 
 namespace Enjaz.Services
 {
     /// <summary>
-    /// خدمة التسجيل — تدعم كلاً من الاستدعاء الثابت (Static) والحقن عبر DI
-    /// Logger service — supports both static calls (backward compat) and DI injection
+    /// خدمة التسجيل — تستخدم الآن Serilog لضمان أداء مؤسسي وسجلات مفصلة
+    /// Logger service — Enterprise-Grade Logging via Serilog (Backward compatible)
     /// </summary>
     public class LoggerService : ILoggerService
     {
         private static readonly string LogDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Logs");
-        private static readonly object LockObj = new object();
-        private const int MaxLogAgeDays = 30;
 
         static LoggerService()
         {
@@ -21,31 +20,40 @@ namespace Enjaz.Services
                 {
                     Directory.CreateDirectory(LogDirectory);
                 }
-                CleanupOldLogs();
+
+                // SF6: Enterprise Observability setup using Serilog
+                Log.Logger = new LoggerConfiguration()
+                    .MinimumLevel.Information()
+                    .Enrich.FromLogContext()
+                    .Enrich.WithMachineName()
+                    .WriteTo.File(
+                        path: Path.Combine(LogDirectory, "enjaz_log_.txt"),
+                        rollingInterval: RollingInterval.Day, // Daily rolling files
+                        retainedFileCountLimit: 30,           // Keep only last 30 days
+                        outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
+                    .CreateLogger();
             }
             catch { /* Fail silently */ }
         }
 
-        private static string GetCurrentLogPath()
-        {
-            return Path.Combine(LogDirectory, $"app_{DateTime.Now:yyyyMMdd}.log");
-        }
-
-        // ── Static methods (backward compatibility for 27+ files) ──
+        // ── Static methods (backward compatibility) ──
 
         public static void LogError(string message, Exception? ex = null)
         {
-            Log("ERROR", message, ex);
+            if (ex != null)
+                Log.Error(ex, message);
+            else
+                Log.Error(message);
         }
 
         public static void LogInfo(string message)
         {
-            Log("INFO", message);
+            Log.Information(message);
         }
 
         public static void LogWarning(string message)
         {
-            Log("WARNING", message);
+            Log.Warning(message);
         }
 
         // ── ILoggerService instance methods (for DI injection) ──
@@ -53,46 +61,6 @@ namespace Enjaz.Services
         void ILoggerService.LogInfo(string message) => LogInfo(message);
         void ILoggerService.LogError(string message, Exception? ex) => LogError(message, ex);
         void ILoggerService.LogWarning(string message) => LogWarning(message);
-
-        // ── Core logging ──
-
-        private static void Log(string level, string message, Exception? ex = null)
-        {
-            try
-            {
-                lock (LockObj)
-                {
-                    using (StreamWriter writer = File.AppendText(GetCurrentLogPath()))
-                    {
-                        writer.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss} [{level}] {message}");
-                        if (ex != null)
-                        {
-                            writer.WriteLine($"Exception: {ex.Message}");
-                            writer.WriteLine($"Stack Trace: {ex.StackTrace}");
-                        }
-                        writer.WriteLine(new string('-', 50));
-                    }
-                }
-            }
-            catch { /* Fail silently */ }
-        }
-
-        private static void CleanupOldLogs()
-        {
-            try
-            {
-                var files = Directory.GetFiles(LogDirectory, "app_*.log");
-                foreach (var file in files)
-                {
-                    var fileInfo = new FileInfo(file);
-                    if (fileInfo.CreationTime < DateTime.Now.AddDays(-MaxLogAgeDays))
-                    {
-                        fileInfo.Delete();
-                    }
-                }
-            }
-            catch { /* Fail silently */ }
-        }
     }
 }
 

@@ -138,5 +138,39 @@ namespace Enjaz.Models
             get => _isotopeCs137;
             set { _isotopeCs137 = value; OnPropertyChanged(); }
         }
+
+        // --- Domain Business Rules (DDD) ---
+        /// <summary>
+        /// التحقق من صحة بيانات العينة قبل الحفظ (قواعد الأعمال)
+        /// Domain Validation Rule
+        /// </summary>
+        /// <param name="isEnvironmental">إذا كانت الشهادة بيئية يتم تطبيق قواعد خاصة</param>
+        public void Validate(bool isEnvironmental = false)
+        {
+            if (string.IsNullOrWhiteSpace(SampleNumber))
+                throw new InvalidOperationException("رقم العينة مطلوب ولا يمكن أن يكون فارغاً.");
+
+            if (Root <= 0)
+                throw new InvalidOperationException("تسلسل العينة (Root) غير صالح.");
+
+            if (MeasurementDate > DateTime.Now.AddDays(1))
+                throw new InvalidOperationException("تاريخ القياس لا يمكن أن يكون في المستقبل البعيد.");
+
+            if (isEnvironmental)
+            {
+                // قواعد إضافية للبيئي
+                if (string.IsNullOrWhiteSpace(IsotopeK40) && string.IsNullOrWhiteSpace(IsotopeRa226))
+                {
+                    // مثال: على الأقل يجب إدخال نظير واحد
+                    // throw new InvalidOperationException("يجب إدخال قيم النظائر المشعة للعينات البيئية.");
+                }
+            }
+            else
+            {
+                // الاستهلاكي
+                if (string.IsNullOrWhiteSpace(Result))
+                    throw new InvalidOperationException("نتيجة القياس مطلوبة للعينات الاستهلاكية.");
+            }
+        }
     }
 }

@@ -451,83 +451,39 @@ namespace Enjaz.ViewModels
 
         private void InitializeCommands()
         {
-            ShowHomeCommand = new RelayCommand(_ => { if (CheckNavigationSafety()) _navigationService.NavigateTo(NavigationDestination.Home); });
-            ShowSettingsCommand = new RelayCommand(_ => { if (CheckNavigationSafety()) _navigationService.NavigateTo(NavigationDestination.Settings); });
-            ShowHelpCommand = new RelayCommand(_ => { if (CheckNavigationSafety()) _navigationService.NavigateTo(NavigationDestination.Help); });
-            ShowAboutCommand = new RelayCommand(_ => { if (CheckNavigationSafety()) _navigationService.NavigateTo(NavigationDestination.About); });
-            ShowAdminProceduresCommand = new RelayCommand(_ => 
-            {
-                if (!CheckNavigationSafety()) return;
-                _navigationService.NavigateTo(NavigationDestination.AdminProcedures);
-                AdminProceduresVM.CurrentStep = 1;
-                _ = AdminProceduresVM.RefreshSendersAsync();
-                _ = AdminProceduresVM.LoadReferralHistoryAsync();
-            });
+            var factory = new Enjaz.ViewModels.Factories.MainCommandFactory(this, _navigationService);
+
+            ShowHomeCommand = factory.CreateShowHomeCommand();
+            ShowSettingsCommand = factory.CreateShowSettingsCommand();
+            ShowHelpCommand = factory.CreateShowHelpCommand();
+            ShowAboutCommand = factory.CreateShowAboutCommand();
+            ShowAdminProceduresCommand = factory.CreateShowAdminProceduresCommand();
+            ShowSampleReceptionsCommand = factory.CreateShowSampleReceptionsCommand();
+            ShowCertificatesCommand = factory.CreateShowCertificatesCommand();
+            ShowUsersCommand = factory.CreateShowUsersCommand();
+            ShowReportsCommand = factory.CreateShowReportsCommand();
+            RefreshCommand = factory.CreateRefreshCommand();
             
-            ShowSampleReceptionsCommand = new AsyncRelayCommand(async _ => 
-            {
-                if (!CheckNavigationSafety()) return;
-                _navigationService.NavigateTo(NavigationDestination.SampleReceptions);
-                await SampleReceptionsVM.LoadReceptionsAsync();
-            });
-
-            ShowCertificatesCommand = new AsyncRelayCommand(async _ => 
-            {
-                if (!CheckNavigationSafety()) return;
-                _navigationService.NavigateTo(NavigationDestination.Certificates);
-                await CertificatesVM.LoadCertificatesAsync();
-            });
-
-            ShowUsersCommand = new AsyncRelayCommand(async _ => 
-            {
-                if (!CheckNavigationSafety()) return;
-                _navigationService.NavigateTo(NavigationDestination.Users);
-                await UsersVM.LoadUsersAsync();
-                await UsersVM.LoadActivitiesAsync();
-            }, _ => CurrentUser?.CanManageUsers ?? false);
-
-            ShowReportsCommand = new RelayCommand(_ => 
-            {
-                if (!CheckNavigationSafety()) return;
-                _navigationService.NavigateTo(NavigationDestination.Reports);
-                ReportingVM.CurrentStep = 1;
-            });
-
-            RefreshCommand = new AsyncRelayCommand(async _ => 
-            {
-                await DashboardVM.LoadDashboardDataAsync();
-                if (CurrentView == NavigationDestination.SampleReceptions) await SampleReceptionsVM.LoadReceptionsAsync();
-                if (CurrentView == NavigationDestination.Certificates) await CertificatesVM.LoadCertificatesAsync();
-                if (CurrentView == NavigationDestination.Users)
-                {
-                    await UsersVM.LoadUsersAsync();
-                    await UsersVM.LoadActivitiesAsync();
-                }
-                if (CurrentView == NavigationDestination.AdminProcedures) await AdminProceduresVM.RefreshSendersAsync();
-            });
-
-            LogoutCommand = new AsyncRelayCommand(ExecuteLogout);
+            LogoutCommand = factory.CreateLogoutCommand(ExecuteLogout);
+            CloseDetailsCommand = factory.CreateCloseDetailsCommand();
+            EscapeCommand = factory.CreateEscapeCommand(ExecuteEscape);
             
-            CloseDetailsCommand = new RelayCommand(_ => IsViewingDetails = false);
-            EscapeCommand = new RelayCommand(_ => ExecuteEscape());
-            
-            SubmitSecurityChallengeCommand = new RelayCommand(_ => ExecuteSubmitSecurityChallenge());
-            CancelSecurityChallengeCommand = new RelayCommand(_ => 
+            SubmitSecurityChallengeCommand = factory.CreateSubmitSecurityChallengeCommand(ExecuteSubmitSecurityChallengeAsync);
+            CancelSecurityChallengeCommand = factory.CreateCancelSecurityChallengeCommand(() => 
             {
                 IsSecurityChallengeOpen = false;
                 _challengeCallback?.Invoke(false);
             });
-            ToggleSidebarCommand = new RelayCommand(_ => IsSidebarVisible = !IsSidebarVisible);
-            ToggleThemeCommand = new RelayCommand(_ => AppIsDarkMode = !AppIsDarkMode);
-            ShowContextualHelpCommand = new RelayCommand(obj => ShowContextualHelp(obj?.ToString() ?? string.Empty));
+            ToggleSidebarCommand = factory.CreateToggleSidebarCommand();
+            ToggleThemeCommand = factory.CreateToggleThemeCommand();
+            ShowContextualHelpCommand = factory.CreateShowContextualHelpCommand(ShowContextualHelp);
             
-            ConfirmCommand = new RelayCommand(_ => 
+            ConfirmCommand = factory.CreateConfirmCommand(() => 
             {
                 IsNotificationDialogOpen = false;
                 _confirmCallback?.Invoke(true);
             });
-            
-            CancelCommand = new RelayCommand(_ => 
+            CancelCommand = factory.CreateCancelCommand(() => 
             {
                 IsNotificationDialogOpen = false;
                 _confirmCallback?.Invoke(false);
@@ -635,9 +591,9 @@ namespace Enjaz.ViewModels
                 // Start Logout Sequence
                 IsBusy = true;
                 
-                BusyMessage = "جاري حفظ الإعدادات والنسخ الاحتياطي...";
-                await _backupService.AutoBackupAsync();
-
+                BusyMessage = "جاري حفظ الإعدادات وتسجيل الخروج...";
+                // النسخ الاحتياطي أصبح يتم بصمت في الخلفية عبر BackgroundTaskManager
+                
                 _timer?.Stop();
                 _sessionTimeoutService.Stop();
                 
@@ -776,7 +732,7 @@ namespace Enjaz.ViewModels
             IsSecurityChallengeOpen = true;
         }
 
-        private void ExecuteSubmitSecurityChallenge()
+        private async System.Threading.Tasks.Task ExecuteSubmitSecurityChallengeAsync()
         {
             // 1. Verify Phrase if required
             if (IsPhraseRequired)
@@ -788,11 +744,18 @@ namespace Enjaz.ViewModels
                 }
             }
 
-            // 2. Verify Password if required
+            // 2. Verify Password if required — Security Fix: verify directly from DB
+            // instead of accessing in-memory PasswordHash (prevents memory dump attacks)
             if (IsPasswordRequired)
             {
-                // Note: We use PasswordHelper which is available in Enjaz.Helpers
-                if (CurrentUser == null || !PasswordHelper.VerifyPassword(SecurityChallengePasswordInput, CurrentUser.PasswordHash))
+                if (CurrentUser == null)
+                {
+                    _notificationService.ShowError("كلمة المرور غير صحيحة.");
+                    return;
+                }
+
+                bool isValid = await _userService.VerifyCurrentUserPasswordAsync(SecurityChallengePasswordInput);
+                if (!isValid)
                 {
                     _notificationService.ShowError("كلمة المرور غير صحيحة.");
                     return;
@@ -803,7 +766,7 @@ namespace Enjaz.ViewModels
             IsSecurityChallengeOpen = false;
             _challengeCallback?.Invoke(true);
         }
-        private bool CheckNavigationSafety()
+        public bool CheckNavigationSafety()
         {
             // Allow navigation if only the dashboard is open (it's non-modal now)
             if (IsAnyModalOpen)
