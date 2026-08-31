@@ -15,6 +15,11 @@ namespace Enjaz.Services
             _userRepository = userRepository;
         }
 
+        public UserService()
+        {
+            _userRepository = null!;
+        }
+
         public User? CurrentUser 
         { 
             get => _currentUser; 

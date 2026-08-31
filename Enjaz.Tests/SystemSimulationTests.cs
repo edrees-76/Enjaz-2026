@@ -1,6 +1,7 @@
 using NUnit.Framework;
 using Enjaz.Services;
 using Enjaz.Services.Repositories;
+using Enjaz.Services.Caching;
 using Enjaz.ViewModels;
 using Enjaz.Models;
 using Microsoft.Data.Sqlite;

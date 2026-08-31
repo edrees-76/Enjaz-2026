@@ -22,6 +22,11 @@ namespace Enjaz.Services.Repositories
             _cacheService = cacheService;
         }
 
+        public SampleRepository(DatabaseService db) 
+            : this(db, new Services.Caching.MemoryCacheService(new Microsoft.Extensions.Caching.Memory.MemoryCache(new Microsoft.Extensions.Caching.Memory.MemoryCacheOptions())))
+        {
+        }
+
         public Task<bool> AddSampleAsync(Sample sample)
         {
             // تطبيق التحقق (Business Rule Validation) قبل ملامسة قاعدة البيانات

@@ -1,6 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Enjaz.Helpers;
@@ -19,6 +22,11 @@ namespace Enjaz.ViewModels
         private readonly UserService _userService;
 
         public event Action<NavigationDestination>? RequestNavigation;
+
+        // --- Sample Uniqueness Validation Fields ---
+        private readonly HashSet<string> _notifiedDeletedSamples = new();
+        private CancellationTokenSource? _sampleValidationCts;
+        private bool _isLoadingReception = false;
 
         public SampleReceptionsViewModel(SampleReceptionRepository receptionRepository, 
                                        CertificateRepository certificateRepository,
@@ -50,7 +58,7 @@ namespace Enjaz.ViewModels
             ViewDetailsCommand = new AsyncRelayCommand(async _ => await ViewDetailsAsync(), _ => SelectedReception != null);
             CloseDetailsCommand = new RelayCommand(_ => CloseDetails());
             
-            AddSampleCommand = new RelayCommand(_ => AddSample());
+            AddSampleCommand = new AsyncRelayCommand(async _ => await AddSampleAsync());
             RemoveSampleCommand = new RelayCommand(RemoveSample);
 
             NextPageCommand = new RelayCommand(_ => { if (CurrentPage < TotalPages) CurrentPage++; });
@@ -252,15 +260,15 @@ namespace Enjaz.ViewModels
             }
         }
 
-        // قائمة الجهات المرسلة المعروفة (ثابتة)
+        // قائمة الجهات المرسلة المعروفة (ثابتة وموحدة)
         private static readonly List<string> DefaultSenders = new List<string>
         {
+            "مركز الرقابة على الأغذية والأدوية - طرابلس",
             "مركز الرقابة على الأغذية والأدوية - بنغازي",
-            "مركز الرقابة على الأغذية والأدوية - البطنان",
             "مركز الرقابة على الأغذية والأدوية - مصراتة",
             "مركز الرقابة على الأغذية والأدوية - الخمس",
-            "مركز الرقابة على الأغذية والأدوية - طرابلس",
-            "مركز الرقابة على الأغذية والأدوية - زوارة"
+            "مركز الرقابة على الأغذية والأدوية - زوارة",
+            "مركز الرقابة على الأغذية والأدوية - البطنان"
         };
 
         public async Task LoadSuggestionsAsync()
@@ -269,19 +277,23 @@ namespace Enjaz.ViewModels
             {
                 SendersList.Clear();
 
-                // 1. إضافة الجهات المرسلة الثابتة (المعروفة)
+                // 1. إضافة الجهات المرسلة الثابتة (الموحدة)
                 foreach (var s in DefaultSenders)
                 {
                     SendersList.Add(s);
                 }
 
-                // 2. دمج أي جهات إضافية من قاعدة البيانات (شهادات سابقة)
+                // 2. دمج أي جهات إضافية من قاعدة البيانات بعد التأكد من عدم تكرارها تطبيعياً
                 var dbSenders = await _reportingService.GetUniqueSendersAsync();
                 foreach (var s in dbSenders)
                 {
-                    if (!string.IsNullOrWhiteSpace(s) && !SendersList.Contains(s))
+                    if (!string.IsNullOrWhiteSpace(s))
                     {
-                        SendersList.Add(s);
+                        string norm = SampleValidationHelper.NormalizeSender(s);
+                        if (!SendersList.Any(existing => SampleValidationHelper.NormalizeSender(existing) == norm))
+                        {
+                            SendersList.Add(s.Trim());
+                        }
                     }
                 }
             }
@@ -306,13 +318,14 @@ namespace Enjaz.ViewModels
 
         private void ConfirmType()
         {
-            string certType = SelectedCertificateType; // Use the selected type directly ("عينات بيئية" or "عينات استهلاكية")
+            string certType = SelectedCertificateType;
             EditingReception = new SampleReception
             {
                 Date = DateTime.Now,
                 CertificateType = certType,
                 Status = "لم يتم إصدار شهادة"
             };
+            _notifiedDeletedSamples.Clear();
             IsSelectingType = false;
             IsEditing = true;
             RequestNavigation?.Invoke(NavigationDestination.SampleReceptionForm);
@@ -322,30 +335,44 @@ namespace Enjaz.ViewModels
         {
             if (SelectedReception == null) return;
             
-            EditingReception = new SampleReception
+            _isLoadingReception = true;
+            try
             {
-                Id = SelectedReception.Id,
-                AnalysisRequestNumber = SelectedReception.AnalysisRequestNumber,
-                NotificationNumber = SelectedReception.NotificationNumber,
-                DeclarationNumber = SelectedReception.DeclarationNumber,
-                Sender = SelectedReception.Sender,
-                Supplier = SelectedReception.Supplier,
-                Origin = SelectedReception.Origin,
-                PolicyNumber = SelectedReception.PolicyNumber,
-                FinancialReceiptNumber = SelectedReception.FinancialReceiptNumber,
-                CertificateType = SelectedReception.CertificateType,
-                Date = SelectedReception.Date,
-                Status = SelectedReception.Status,
-                CreatedAt = SelectedReception.CreatedAt,
-                Samples = new ObservableCollection<ReceptionSample>(SelectedReception.Samples.Select(s => new ReceptionSample
+                EditingReception = new SampleReception
                 {
-                    Id = s.Id,
-                    ReceptionId = s.ReceptionId,
-                    Root = s.Root,
-                    SampleNumber = s.SampleNumber,
-                    Description = s.Description
-                }))
-            };
+                    Id = SelectedReception.Id,
+                    AnalysisRequestNumber = SelectedReception.AnalysisRequestNumber,
+                    NotificationNumber = SelectedReception.NotificationNumber,
+                    DeclarationNumber = SelectedReception.DeclarationNumber,
+                    Sender = SelectedReception.Sender,
+                    Supplier = SelectedReception.Supplier,
+                    Origin = SelectedReception.Origin,
+                    PolicyNumber = SelectedReception.PolicyNumber,
+                    FinancialReceiptNumber = SelectedReception.FinancialReceiptNumber,
+                    CertificateType = SelectedReception.CertificateType,
+                    Date = SelectedReception.Date,
+                    Status = SelectedReception.Status,
+                    CreatedAt = SelectedReception.CreatedAt,
+                    Samples = new ObservableCollection<ReceptionSample>(SelectedReception.Samples.Select(s => new ReceptionSample
+                    {
+                        Id = s.Id,
+                        ReceptionId = s.ReceptionId,
+                        Root = s.Root,
+                        SampleNumber = s.SampleNumber,
+                        Description = s.Description
+                    }))
+                };
+
+                foreach (var s in EditingReception.Samples)
+                {
+                    s.PropertyChanged -= ReceptionSample_PropertyChanged;
+                    s.PropertyChanged += ReceptionSample_PropertyChanged;
+                }
+            }
+            finally
+            {
+                _isLoadingReception = false;
+            }
 
             IsEditing = true;
             RequestNavigation?.Invoke(NavigationDestination.SampleReceptionForm);
@@ -357,8 +384,62 @@ namespace Enjaz.ViewModels
 
             if (string.IsNullOrWhiteSpace(EditingReception.AnalysisRequestNumber))
             {
-                _alertService.ShowError("يجب إدخال رقم طلب التحليل.");
+                SetNotification("بيانات ناقصة", "يجب إدخال رقم طلب التحليل.", NotificationType.Error, "AlertCircleOutline");
                 return;
+            }
+
+            // التحقق النهائي من تكرار أرقام العينات قبل الحفظ (خط الدفاع الأخير)
+            if (EditingReception.Samples != null && EditingReception.Samples.Count > 0)
+            {
+                // أ. التحقق من التكرار الداخلي بين أسطر جدول الاستلام
+                var internalDuplicates = EditingReception.Samples
+                    .Where(s => !string.IsNullOrWhiteSpace(s.SampleNumber))
+                    .GroupBy(s => SampleValidationHelper.NormalizeSampleNumber(s.SampleNumber))
+                    .Where(g => g.Count() > 1)
+                    .Select(g => g.Key)
+                    .ToList();
+
+                if (internalDuplicates.Count > 0)
+                {
+                    SetNotification("تكرار داخلي لأرقام العينات",
+                        "لا يمكن الحفظ، يوجد تكرار في أرقام العينات داخل نفس قائمة الاستلام:\n• " +
+                        string.Join("\n• ", internalDuplicates) +
+                        "\n\nيرجى تعديل أرقام العينات المكررة قبل الحفظ.",
+                        NotificationType.Error, "AlertCircleOutline");
+                    return;
+                }
+
+                // ب. التحقق من التكرار في قاعدة البيانات لنفس الجهة وسنة الاستلام
+                if (!string.IsNullOrWhiteSpace(EditingReception.Sender))
+                {
+                    var sampleConflicts = new List<string>();
+                    foreach (var sample in EditingReception.Samples)
+                    {
+                        if (string.IsNullOrWhiteSpace(sample.SampleNumber)) continue;
+
+                        var check = await _receptionRepository.CheckSampleUniquenessAsync(
+                            sample.SampleNumber,
+                            EditingReception.Sender,
+                            EditingReception.Date.Year,
+                            EditingReception.Id > 0 ? EditingReception.Id : null);
+
+                        if (check.Status == SampleCheckResult.DuplicateActive)
+                        {
+                            string normNum = SampleValidationHelper.NormalizeSampleNumber(sample.SampleNumber);
+                            sampleConflicts.Add($"• العينة ({normNum}) مسجلة في {check.CertificateNumber} بتاريخ ({check.IssueDate:yyyy/MM/dd})");
+                        }
+                    }
+
+                    if (sampleConflicts.Count > 0)
+                    {
+                        SetNotification("تعارض في أرقام العينات",
+                            $"لا يمكن حفظ الاستلام. تم العثور على تعارض في أرقام العينات مع الجهة ({EditingReception.Sender}) لعام ({EditingReception.Date.Year}):\n\n" +
+                            string.Join("\n", sampleConflicts) +
+                            "\n\nيرجى تصحيح أرقام العينات والمحاولة مرة أخرى.",
+                            NotificationType.Error, "AlertCircleOutline");
+                        return;
+                    }
+                }
             }
 
             try
@@ -503,20 +584,155 @@ namespace Enjaz.ViewModels
             IsViewingDetails = false;
         }
         
-        private void AddSample()
+        private async Task AddSampleAsync()
         {
             if (EditingReception == null) return;
             
+            if (string.IsNullOrWhiteSpace(NewSampleNumber))
+            {
+                SetNotification("رقم العينة مطلوب", "يرجى إدخال رقم العينة قبل الإضافة.", NotificationType.Warning, "AlertCircleOutline");
+                return;
+            }
+
+            string norm = SampleValidationHelper.NormalizeSampleNumber(NewSampleNumber);
+            if (string.IsNullOrEmpty(norm)) return;
+
+            // 1. فحص التكرار الداخلي في جدول الاستلام الحالي
+            bool isInternalDuplicate = EditingReception.Samples.Any(s =>
+                !string.IsNullOrWhiteSpace(s.SampleNumber) &&
+                SampleValidationHelper.NormalizeSampleNumber(s.SampleNumber) == norm);
+
+            if (isInternalDuplicate)
+            {
+                SetNotification("تكرار رقم العينة",
+                    $"رقم العينة ({norm}) مكرر في نفس قائمة الاستلام الحالية.\nيرجى كتابة رقم عينة غير مكرر.",
+                    NotificationType.Error, "AlertCircleOutline");
+                return;
+            }
+
+            // 2. التحقق من توفر الجهة وتاريخ الاستلام للفحص في قاعدة البيانات
+            if (!string.IsNullOrWhiteSpace(EditingReception.Sender))
+            {
+                var result = await _receptionRepository.CheckSampleUniquenessAsync(
+                    NewSampleNumber,
+                    EditingReception.Sender,
+                    EditingReception.Date.Year,
+                    EditingReception.Id > 0 ? EditingReception.Id : null);
+
+                if (result.Status == SampleCheckResult.DuplicateActive)
+                {
+                    SetNotification("تكرار رقم العينة",
+                        $"إن رقم العينة ({norm}) مسجل مسبقاً للجهة ({result.Sender ?? EditingReception.Sender})\nفي ({result.CertificateNumber ?? "سجل سابق"})\nبتاريخ ({result.IssueDate:yyyy/MM/dd}).\n\nيرجى التأكد من الرقم والمحاولة مرة أخرى.",
+                        NotificationType.Error, "AlertCircleOutline");
+                    return;
+                }
+                else if (result.Status == SampleCheckResult.FoundInDeleted)
+                {
+                    string key = $"{norm}_{EditingReception.Date.Year}_{SampleValidationHelper.NormalizeSender(EditingReception.Sender)}";
+                    if (!_notifiedDeletedSamples.Contains(key))
+                    {
+                        _notifiedDeletedSamples.Add(key);
+                        SetNotification("تنبيه - عينة لسجل محذوف",
+                            $"تنبيه:\nرقم العينة ({norm}) كان مسجلاً سابقاً للجهة ({result.Sender ?? EditingReception.Sender})\nضمن ({result.CertificateNumber ?? "سجل محذوف"})\nبتاريخ ({result.IssueDate:yyyy/MM/dd})، ولكن هذا السجل محذوف حالياً.\n\nيمكن استخدام رقم العينة.",
+                            NotificationType.Information, "InformationOutline");
+                    }
+                }
+            }
+
             string newRoot = (EditingReception.Samples.Count + 1).ToString();
-            EditingReception.Samples.Add(new ReceptionSample
+            var newSample = new ReceptionSample
             {
                 Root = newRoot,
-                SampleNumber = NewSampleNumber,
-                Description = NewSampleDescription
-            });
+                SampleNumber = NewSampleNumber.Trim(),
+                Description = NewSampleDescription?.Trim() ?? string.Empty
+            };
+
+            newSample.PropertyChanged += ReceptionSample_PropertyChanged;
+
+            EditingReception.Samples.Add(newSample);
 
             NewSampleNumber = "";
             NewSampleDescription = "";
+        }
+
+        private async void ReceptionSample_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (_isLoadingReception) return;
+            if (sender is not ReceptionSample sample) return;
+
+            if (e.PropertyName == nameof(ReceptionSample.SampleNumber))
+            {
+                _sampleValidationCts?.Cancel();
+                var cts = new CancellationTokenSource();
+                _sampleValidationCts = cts;
+
+                try
+                {
+                    await ValidateSingleSampleAsync(sample, cts.Token);
+                }
+                catch (OperationCanceledException) { }
+            }
+        }
+
+        private async Task<bool> ValidateSingleSampleAsync(ReceptionSample sample, CancellationToken cancellationToken = default)
+        {
+            if (_isLoadingReception) return true;
+            if (string.IsNullOrWhiteSpace(sample.SampleNumber) || EditingReception == null) return true;
+
+            string capturedValue = sample.SampleNumber;
+            string norm = SampleValidationHelper.NormalizeSampleNumber(capturedValue);
+            if (string.IsNullOrEmpty(norm)) return true;
+
+            // 1. فحص التكرار الداخلي
+            int internalMatches = EditingReception.Samples.Count(s =>
+                !string.IsNullOrWhiteSpace(s.SampleNumber) &&
+                SampleValidationHelper.NormalizeSampleNumber(s.SampleNumber) == norm);
+
+            if (internalMatches > 1)
+            {
+                if (sample.SampleNumber != capturedValue) return true;
+                sample.SampleNumber = string.Empty;
+                SetNotification("تكرار رقم العينة",
+                    $"رقم العينة ({norm}) مكرر في نفس قائمة الاستلام الحالية.\nيرجى كتابة رقم عينة غير مكرر.",
+                    NotificationType.Error, "AlertCircleOutline");
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(EditingReception.Sender)) return true;
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var result = await _receptionRepository.CheckSampleUniquenessAsync(
+                capturedValue,
+                EditingReception.Sender,
+                EditingReception.Date.Year,
+                EditingReception.Id > 0 ? EditingReception.Id : null);
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            if (sample.SampleNumber != capturedValue) return true;
+
+            if (result.Status == SampleCheckResult.DuplicateActive)
+            {
+                sample.SampleNumber = string.Empty;
+                SetNotification("تكرار رقم العينة",
+                    $"إن رقم العينة ({norm}) مسجل مسبقاً للجهة ({result.Sender ?? EditingReception.Sender})\nفي ({result.CertificateNumber ?? "سجل سابق"})\nبتاريخ ({result.IssueDate:yyyy/MM/dd}).\n\nيرجى التأكد من الرقم والمحاولة مرة أخرى.",
+                    NotificationType.Error, "AlertCircleOutline");
+                return false;
+            }
+            else if (result.Status == SampleCheckResult.FoundInDeleted)
+            {
+                string key = $"{norm}_{EditingReception.Date.Year}_{SampleValidationHelper.NormalizeSender(EditingReception.Sender)}";
+                if (!_notifiedDeletedSamples.Contains(key))
+                {
+                    _notifiedDeletedSamples.Add(key);
+                    SetNotification("تنبيه - عينة لسجل محذوف",
+                        $"تنبيه:\nرقم العينة ({norm}) كان مسجلاً سابقاً للجهة ({result.Sender ?? EditingReception.Sender})\nضمن ({result.CertificateNumber ?? "سجل محذوف"})\nبتاريخ ({result.IssueDate:yyyy/MM/dd})، ولكن هذا السجل محذوف حالياً.\n\nيمكن استخدام رقم العينة.",
+                        NotificationType.Information, "InformationOutline");
+                }
+            }
+
+            return true;
         }
         
         private void RemoveSample(object? obj)

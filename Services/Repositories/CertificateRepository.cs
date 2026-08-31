@@ -45,6 +45,11 @@ namespace Enjaz.Services.Repositories
             _cacheService = cacheService;
         }
 
+        public CertificateRepository(DatabaseService db, UserService userService)
+            : this(db, userService, new SampleRepository(db), new Services.Caching.MemoryCacheService(new Microsoft.Extensions.Caching.Memory.MemoryCache(new Microsoft.Extensions.Caching.Memory.MemoryCacheOptions())))
+        {
+        }
+
         #region Mapping Helpers â€” DRY (Don't Repeat Yourself)
 
         /// <summary>
@@ -793,6 +798,117 @@ namespace Enjaz.Services.Repositories
         {
             return _db.GetLogsByReferenceIdAsync(certificateId);
         }
+
+        #region Sample Uniqueness Validation — فحص تفرد رقم العينة
+
+        /// <summary>
+        /// فحص تفرد رقم العينة بالنسبة للجهة المرسلة وسنة الإصدار (IssueDate.Year)
+        /// Check sample uniqueness for sender and fiscal year
+        /// </summary>
+        public System.Threading.Tasks.Task<SampleUniquenessResult> CheckSampleUniquenessAsync(
+            string sampleNumber,
+            string sender,
+            int year,
+            int? excludeCertificateId = null)
+        {
+            return _db.ExecuteWithRetryAsync(async () =>
+            {
+                string normSampleNumber = SampleValidationHelper.NormalizeSampleNumber(sampleNumber);
+                string normSender = SampleValidationHelper.NormalizeSender(sender);
+
+                if (string.IsNullOrEmpty(normSampleNumber) || string.IsNullOrEmpty(normSender))
+                {
+                    return new SampleUniquenessResult { Status = SampleCheckResult.Unique };
+                }
+
+                using var connection = new SqliteConnection(_db.ConnectionString);
+                await connection.OpenAsync();
+
+                // 1. فحص الشهادات النشطة لنفس السنة
+                var query = @"SELECT c.Id, c.CertificateNumber, c.IssueDate, c.Sender, s.SampleNumber
+                              FROM Samples s
+                              INNER JOIN Certificates c ON s.CertificateId = c.Id
+                              WHERE strftime('%Y', c.IssueDate) = @Year";
+
+                if (excludeCertificateId.HasValue)
+                {
+                    query += " AND c.Id != @ExcludeId";
+                }
+
+                using (var command = new SqliteCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@Year", year.ToString());
+                    if (excludeCertificateId.HasValue)
+                    {
+                        command.Parameters.AddWithValue("@ExcludeId", excludeCertificateId.Value);
+                    }
+
+                    using var reader = await command.ExecuteReaderAsync();
+                    while (await reader.ReadAsync())
+                    {
+                        int certId = reader.GetInt32(0);
+                        string certNumber = reader.IsDBNull(1) ? "" : reader.GetString(1);
+                        string issueDateStr = reader.GetString(2);
+                        string rowSender = reader.IsDBNull(3) ? "" : reader.GetString(3);
+                        string rowSampleNumber = reader.IsDBNull(4) ? "" : reader.GetString(4);
+
+                        if (SampleValidationHelper.NormalizeSender(rowSender) == normSender &&
+                            SampleValidationHelper.NormalizeSampleNumber(rowSampleNumber) == normSampleNumber)
+                        {
+                            DateTime issueDate = DateTime.TryParse(issueDateStr, out var parsedDate) ? parsedDate : DateTime.MinValue;
+                            return new SampleUniquenessResult
+                            {
+                                Status = SampleCheckResult.DuplicateActive,
+                                CertificateId = certId,
+                                CertificateNumber = certNumber,
+                                IssueDate = issueDate,
+                                Sender = rowSender,
+                                SampleNumber = rowSampleNumber
+                            };
+                        }
+                    }
+                }
+
+                // 2. فحص السجلات المحذوفة (من جدول AuditLogs)
+                try
+                {
+                    var auditQuery = @"SELECT Timestamp, Details FROM AuditLogs 
+                                       WHERE (Action = 'حذف' OR Action LIKE '%حذف%' OR Action = 'Delete')
+                                       AND strftime('%Y', Timestamp) = @Year";
+                    using var auditCmd = new SqliteCommand(auditQuery, connection);
+                    auditCmd.Parameters.AddWithValue("@Year", year.ToString());
+                    using var auditReader = await auditCmd.ExecuteReaderAsync();
+                    while (await auditReader.ReadAsync())
+                    {
+                        string timestampStr = auditReader.GetString(0);
+                        string details = auditReader.IsDBNull(1) ? "" : auditReader.GetString(1);
+
+                        if (!string.IsNullOrEmpty(details) &&
+                            details.Contains(sampleNumber) &&
+                            SampleValidationHelper.NormalizeSender(details).Contains(normSender))
+                        {
+                            DateTime delDate = DateTime.TryParse(timestampStr, out var pDate) ? pDate : DateTime.MinValue;
+                            return new SampleUniquenessResult
+                            {
+                                Status = SampleCheckResult.FoundInDeleted,
+                                CertificateNumber = "محذوفة",
+                                IssueDate = delDate,
+                                Sender = sender,
+                                SampleNumber = sampleNumber
+                            };
+                        }
+                    }
+                }
+                catch
+                {
+                    // Ignore audit log search error if non-critical
+                }
+
+                return new SampleUniquenessResult { Status = SampleCheckResult.Unique };
+            }, "CheckSampleUniquenessAsync");
+        }
+
+        #endregion
 
         /// <summary>
         /// إنشاء رقم شهادة فريد

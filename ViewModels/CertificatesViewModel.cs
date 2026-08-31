@@ -1,6 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using Enjaz.Helpers;
@@ -22,6 +27,11 @@ namespace Enjaz.ViewModels
         private readonly IReceptionSearchService _receptionSearchService;
         
         private System.Threading.CancellationTokenSource? _searchCancellationTokenSource;
+
+        // --- Sample Uniqueness Validation Fields ---
+        private bool _isLoadingCertificate = false;
+        private readonly HashSet<string> _notifiedDeletedSamples = new();
+        private CancellationTokenSource? _sampleValidationCts;
 
         public event Action<NavigationDestination>? RequestNavigation;
         public event Action? CertificateSaved;
@@ -243,7 +253,21 @@ namespace Enjaz.ViewModels
         }
 
         public string Description { get => _description; set => SetProperty(ref _description, value); }
-        public DateTime IssueDate { get => _issueDate; set => SetProperty(ref _issueDate, value); }
+        public DateTime IssueDate
+        {
+            get => _issueDate;
+            set
+            {
+                int oldYear = _issueDate.Year;
+                if (SetProperty(ref _issueDate, value))
+                {
+                    if (!_isLoadingCertificate && oldYear != _issueDate.Year)
+                    {
+                        _ = RevalidateAllSamplesAsync();
+                    }
+                }
+            }
+        }
         public DateTime? ExpiryDate { get => _expiryDate; set => SetProperty(ref _expiryDate, value); }
         public string IssuingAuthority 
         { 
@@ -256,7 +280,20 @@ namespace Enjaz.ViewModels
         }
 
         public string AnalysisType { get => _analysisType; set => SetProperty(ref _analysisType, value); }
-        public string Sender { get => _sender; set => SetProperty(ref _sender, value); }
+        public string Sender
+        {
+            get => _sender;
+            set
+            {
+                if (SetProperty(ref _sender, value))
+                {
+                    if (!_isLoadingCertificate)
+                    {
+                        _ = RevalidateAllSamplesAsync();
+                    }
+                }
+            }
+        }
         public string Supplier { get => _supplier; set => SetProperty(ref _supplier, value); }
         public string Origin { get => _origin; set => SetProperty(ref _origin, value); }
         public string DeclarationNumber { get => _declarationNumber; set => SetProperty(ref _declarationNumber, value); }
@@ -277,12 +314,12 @@ namespace Enjaz.ViewModels
         
         public ObservableCollection<string> AvailableSenders { get; } = new ObservableCollection<string>
         {
-            "مركز الرقابة على الاغذية و الادوية - طرابلس",
-            "مركز الرقابة على الاغذية و الادوية - ازوارة",
-            "مركز الرقابة على الاغذية و الادوية - الخمس",
-            "مركز الرقابة على الاغذية و الادوية - مصراتة",
-            "مركز الرقابة على الاغذية والأدوية - بنغازي",
-            "مركز الرقابة على الاغذية و الادوية - البطنان"
+            "مركز الرقابة على الأغذية والأدوية - طرابلس",
+            "مركز الرقابة على الأغذية والأدوية - بنغازي",
+            "مركز الرقابة على الأغذية والأدوية - مصراتة",
+            "مركز الرقابة على الأغذية والأدوية - الخمس",
+            "مركز الرقابة على الأغذية والأدوية - زوارة",
+            "مركز الرقابة على الأغذية والأدوية - البطنان"
         };
         public ObservableCollection<string> AvailableResults { get; } = new ObservableCollection<string>
         {
@@ -508,6 +545,159 @@ namespace Enjaz.ViewModels
             {
                 StatusMessage = $"خطأ: {ex.Message}";
                 _notificationService.ShowError("خطأ في التصدير");
+            }
+        }
+
+        #endregion
+
+        #region Sample Uniqueness Validation — فحص تفرد رقم العينة
+
+        private void Samples_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.NewItems != null)
+            {
+                foreach (Sample s in e.NewItems)
+                {
+                    s.PropertyChanged -= Sample_PropertyChanged;
+                    s.PropertyChanged += Sample_PropertyChanged;
+                }
+            }
+            if (e.OldItems != null)
+            {
+                foreach (Sample s in e.OldItems)
+                {
+                    s.PropertyChanged -= Sample_PropertyChanged;
+                }
+            }
+        }
+
+        private async void Sample_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (_isLoadingCertificate) return;
+            if (sender is not Sample sample) return;
+
+            if (e.PropertyName == nameof(Sample.SampleNumber))
+            {
+                // إلغاء أي فحص سابق لمنع Race Condition
+                _sampleValidationCts?.Cancel();
+                var cts = new CancellationTokenSource();
+                _sampleValidationCts = cts;
+
+                try
+                {
+                    await ValidateSingleSampleAsync(sample, cts.Token);
+                }
+                catch (OperationCanceledException)
+                {
+                    // تم إلغاء الفحص — فحص أحدث بدأ
+                }
+            }
+        }
+
+        private async Task<bool> ValidateSingleSampleAsync(Sample sample, CancellationToken cancellationToken = default)
+        {
+            if (_isLoadingCertificate) return true;
+            if (string.IsNullOrWhiteSpace(sample.SampleNumber)) return true;
+
+            // حفظ القيمة قبل أي await لمنع مسح قيمة تغيرت أثناء الفحص
+            string capturedValue = sample.SampleNumber;
+            string norm = SampleValidationHelper.NormalizeSampleNumber(capturedValue);
+            if (string.IsNullOrEmpty(norm)) return true;
+
+            // 1. فحص التكرار الداخلي (ضمن جدول الشهادة الحالية) — بالرقم المطبّع
+            int internalMatches = Samples.Count(s =>
+                !string.IsNullOrWhiteSpace(s.SampleNumber) &&
+                SampleValidationHelper.NormalizeSampleNumber(s.SampleNumber) == norm);
+
+            if (internalMatches > 1)
+            {
+                // التحقق أن القيمة لم تتغير بعد الفحص
+                if (sample.SampleNumber != capturedValue) return true;
+
+                sample.SampleNumber = string.Empty;
+                SetNotification("تكرار رقم العينة",
+                    $"رقم العينة ({norm}) مكرر في نفس جدول الشهادة الحالية.\nيرجى كتابة رقم عينة غير مكرر.",
+                    NotificationType.Error, "AlertCircleOutline");
+                return false;
+            }
+
+            // 2. التحقق من توفر الجهة وتاريخ الإصدار للفحص في قاعدة البيانات
+            if (string.IsNullOrWhiteSpace(Sender) || IssueDate == default)
+            {
+                return true; // سيتم الفحص لاحقاً عند اختيار الجهة أو عند الحفظ
+            }
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var result = await _certificateRepository.CheckSampleUniquenessAsync(
+                capturedValue,
+                Sender,
+                IssueDate.Year,
+                SelectedCertificate?.Id);
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            // التحقق أن القيمة لم تتغير أثناء await
+            if (sample.SampleNumber != capturedValue) return true;
+
+            if (result.Status == SampleCheckResult.DuplicateActive)
+            {
+                sample.SampleNumber = string.Empty;
+                SetNotification("تكرار رقم العينة",
+                    $"إن رقم العينة ({norm}) مسجل مسبقاً للجهة ({result.Sender ?? Sender})\nفي الشهادة رقم ({result.CertificateNumber ?? "غير محدد"})\nبتاريخ ({result.IssueDate:yyyy/MM/dd}).\n\nيرجى التأكد من الرقم والمحاولة مرة أخرى.",
+                    NotificationType.Error, "AlertCircleOutline");
+                return false;
+            }
+            else if (result.Status == SampleCheckResult.FoundInDeleted)
+            {
+                // مفتاح مركب: رقم مطبّع + سنة + جهة مطبّعة
+                string key = $"{norm}_{IssueDate.Year}_{SampleValidationHelper.NormalizeSender(Sender)}";
+                if (!_notifiedDeletedSamples.Contains(key))
+                {
+                    _notifiedDeletedSamples.Add(key);
+                    SetNotification("تنبيه - عينة لشهادة محذوفة",
+                        $"تنبيه:\nرقم العينة ({norm}) كان مسجلاً سابقاً للجهة ({result.Sender ?? Sender})\nضمن الشهادة رقم ({result.CertificateNumber ?? "محذوفة"})\nبتاريخ ({result.IssueDate:yyyy/MM/dd})، ولكن هذه الشهادة محذوفة حالياً.\n\nيمكن استخدام رقم العينة في الشهادة الحالية.",
+                        NotificationType.Information, "InformationOutline");
+                }
+            }
+
+            return true;
+        }
+
+        private async Task RevalidateAllSamplesAsync()
+        {
+            if (_isLoadingCertificate || Samples == null || Samples.Count == 0 || string.IsNullOrWhiteSpace(Sender))
+                return;
+
+            var conflicts = new List<string>();
+
+            foreach (var sample in Samples)
+            {
+                if (string.IsNullOrWhiteSpace(sample.SampleNumber)) continue;
+
+                string norm = SampleValidationHelper.NormalizeSampleNumber(sample.SampleNumber);
+                if (string.IsNullOrEmpty(norm)) continue;
+
+                var result = await _certificateRepository.CheckSampleUniquenessAsync(
+                    sample.SampleNumber,
+                    Sender,
+                    IssueDate.Year,
+                    SelectedCertificate?.Id);
+
+                if (result.Status == SampleCheckResult.DuplicateActive)
+                {
+                    conflicts.Add($"• العينة ({norm}) مسجلة في الشهادة ({result.CertificateNumber}) بتاريخ ({result.IssueDate:yyyy/MM/dd})");
+                    sample.SampleNumber = string.Empty;
+                }
+            }
+
+            if (conflicts.Count > 0)
+            {
+                SetNotification("تعارض في أرقام العينات",
+                    $"تم العثور على تعارضات في أرقام العينات مع الجهة المحددة ({Sender}) لعام ({IssueDate.Year}):\n\n" +
+                    string.Join("\n", conflicts) +
+                    "\n\nتم تفريغ أرقام العينات المتعارضة، يرجى تصحيحها.",
+                    NotificationType.Error, "AlertCircleOutline");
             }
         }
 

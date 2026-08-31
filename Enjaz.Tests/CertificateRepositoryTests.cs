@@ -101,6 +101,7 @@ namespace Enjaz.Tests
 
             var sample = new Sample
             {
+                Root = 1,
                 CertificateId = certId,
                 SampleNumber = "S-001",
                 Description = "Test Sample",

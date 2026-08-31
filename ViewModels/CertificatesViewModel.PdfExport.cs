@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Windows.Input;
+using Enjaz.Helpers;
 using Enjaz.Models;
 using Enjaz.Services;
 
@@ -184,8 +186,14 @@ namespace Enjaz.ViewModels
                 var senders = await _certificateRepository.GetDistinctFieldValuesAsync("Sender");
                 foreach (var s in senders)
                 {
-                    if (!AvailableSenders.Contains(s))
-                        AvailableSenders.Add(s);
+                    if (!string.IsNullOrWhiteSpace(s))
+                    {
+                        string norm = SampleValidationHelper.NormalizeSender(s);
+                        if (!AvailableSenders.Any(existing => SampleValidationHelper.NormalizeSender(existing) == norm))
+                        {
+                            AvailableSenders.Add(s.Trim());
+                        }
+                    }
                 }
 
                 var analysisTypes = await _certificateRepository.GetDistinctFieldValuesAsync("AnalysisType");

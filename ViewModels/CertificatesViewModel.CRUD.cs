@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Input;
@@ -186,6 +187,8 @@ namespace Enjaz.ViewModels
             ManagerName = string.Empty;
             Notes = string.Empty;
             Samples = new ObservableCollection<Sample>();
+            Samples.CollectionChanged += Samples_CollectionChanged;
+            _notifiedDeletedSamples.Clear();
             SelectedPendingReception = null;
             _linkedReceptionId = null;
         }
@@ -209,63 +212,80 @@ namespace Enjaz.ViewModels
 
         private void LoadFromReception(SampleReception rec)
         {
-            CertificateType = rec.CertificateType;
-            Sender = rec.Sender ?? string.Empty;
-            Supplier = rec.Supplier ?? string.Empty;
-            Origin = rec.Origin ?? string.Empty;
-            DeclarationNumber = rec.DeclarationNumber ?? string.Empty;
-            NotificationNumber = rec.NotificationNumber ?? string.Empty;
-            PolicyNumber = rec.PolicyNumber ?? string.Empty;
-            FinancialReceiptNumber = rec.FinancialReceiptNumber ?? string.Empty;
-            
-            Samples.Clear();
-            if (rec.Samples != null)
+            _isLoadingCertificate = true;
+            try
             {
-                foreach(var s in rec.Samples)
+                CertificateType = rec.CertificateType;
+                Sender = rec.Sender ?? string.Empty;
+                Supplier = rec.Supplier ?? string.Empty;
+                Origin = rec.Origin ?? string.Empty;
+                DeclarationNumber = rec.DeclarationNumber ?? string.Empty;
+                NotificationNumber = rec.NotificationNumber ?? string.Empty;
+                PolicyNumber = rec.PolicyNumber ?? string.Empty;
+                FinancialReceiptNumber = rec.FinancialReceiptNumber ?? string.Empty;
+                
+                Samples.Clear();
+                if (rec.Samples != null)
                 {
-                    Samples.Add(new Sample
+                    foreach(var s in rec.Samples)
                     {
-                        Root = int.TryParse(s.Root, out int r) ? r : 0,
-                        SampleNumber = s.SampleNumber ?? string.Empty,
-                        Description = s.Description ?? string.Empty,
-                        MeasurementDate = DateTime.Now
-                    });
+                        Samples.Add(new Sample
+                        {
+                            Root = int.TryParse(s.Root, out int r) ? r : 0,
+                            SampleNumber = s.SampleNumber ?? string.Empty,
+                            Description = s.Description ?? string.Empty,
+                            MeasurementDate = DateTime.Now
+                        });
+                    }
                 }
+            }
+            finally
+            {
+                _isLoadingCertificate = false;
             }
         }
 
         private async System.Threading.Tasks.Task LoadCertificateForEditAsync(Certificate certificate)
         {
-            RecipientName = certificate.RecipientName;
-            CertificateType = certificate.CertificateType;
-            Description = certificate.Description;
-            IssueDate = certificate.IssueDate;
-            ExpiryDate = certificate.ExpiryDate;
-            IssuingAuthority = certificate.IssuingAuthority;
-
-            AnalysisType = certificate.AnalysisType ?? string.Empty;
-            Sender = certificate.Sender ?? string.Empty;
-            Supplier = certificate.Supplier ?? string.Empty;
-            Origin = certificate.Origin ?? string.Empty;
-            DeclarationNumber = certificate.DeclarationNumber ?? string.Empty;
-            PolicyNumber = certificate.PolicyNumber ?? string.Empty;
-            NotificationNumber = certificate.NotificationNumber ?? string.Empty;
-            FinancialReceiptNumber = certificate.FinancialReceiptNumber ?? string.Empty;
-            SpecialistName = certificate.SpecialistName ?? string.Empty;
-            SectionHeadName = certificate.SectionHeadName ?? string.Empty;
-            ManagerName = certificate.ManagerName ?? string.Empty;
-            Notes = certificate.Notes ?? string.Empty;
-            
-            // Load samples from database
+            _isLoadingCertificate = true;
             IsBusy = true;
             BusyMessage = "جاري تحميل بيانات العينات...";
             try
             {
+                RecipientName = certificate.RecipientName;
+                CertificateType = certificate.CertificateType;
+                Description = certificate.Description;
+                IssueDate = certificate.IssueDate;
+                ExpiryDate = certificate.ExpiryDate;
+                IssuingAuthority = certificate.IssuingAuthority;
+
+                AnalysisType = certificate.AnalysisType ?? string.Empty;
+                Sender = certificate.Sender ?? string.Empty;
+                Supplier = certificate.Supplier ?? string.Empty;
+                Origin = certificate.Origin ?? string.Empty;
+                DeclarationNumber = certificate.DeclarationNumber ?? string.Empty;
+                PolicyNumber = certificate.PolicyNumber ?? string.Empty;
+                NotificationNumber = certificate.NotificationNumber ?? string.Empty;
+                FinancialReceiptNumber = certificate.FinancialReceiptNumber ?? string.Empty;
+                SpecialistName = certificate.SpecialistName ?? string.Empty;
+                SectionHeadName = certificate.SectionHeadName ?? string.Empty;
+                ManagerName = certificate.ManagerName ?? string.Empty;
+                Notes = certificate.Notes ?? string.Empty;
+                
+                // Load samples from database
                 var samples = await _sampleRepository.GetSamplesByCertificateIdAsync(certificate.Id);
                 Samples = new ObservableCollection<Sample>(samples);
+                Samples.CollectionChanged += Samples_CollectionChanged;
+                // ربط PropertyChanged لكل عينة محملة
+                foreach (var s in Samples)
+                {
+                    s.PropertyChanged -= Sample_PropertyChanged;
+                    s.PropertyChanged += Sample_PropertyChanged;
+                }
             }
             finally
             {
+                _isLoadingCertificate = false;
                 IsBusy = false;
             }
         }
@@ -405,6 +425,68 @@ namespace Enjaz.ViewModels
                         
                         StatusMessage = "⚠️ رقم إيصال مكرر - يرجى مراجعة التنبيه";
                         return false;
+                    }
+                }
+
+                // 3. التحقق النهائي من تكرار أرقام العينات (خط الدفاع الأخير)
+                if (Samples != null && Samples.Count > 0)
+                {
+                    // أ. التحقق من التكرار الداخلي بين أسطر جدول الشهادة (بالرقم المطبّع)
+                    var internalDuplicates = Samples
+                        .Where(s => !string.IsNullOrWhiteSpace(s.SampleNumber))
+                        .GroupBy(s => SampleValidationHelper.NormalizeSampleNumber(s.SampleNumber))
+                        .Where(g => g.Count() > 1)
+                        .Select(g => g.Key)
+                        .ToList();
+
+                    if (internalDuplicates.Count > 0)
+                    {
+                        IsBusy = false;
+                        SetNotification("تكرار داخلي لأرقام العينات",
+                            "لا يمكن الحفظ، يوجد تكرار في أرقام العينات داخل نفس جدول الشهادة:\n• " +
+                            string.Join("\n• ", internalDuplicates) +
+                            "\n\nيرجى تعديل أرقام العينات المكررة قبل الحفظ.",
+                            NotificationType.Error, "AlertCircleOutline");
+                        StatusMessage = "⚠️ تكرار في أرقام العينات داخل الشهادة";
+                        return false;
+                    }
+
+                    // ب. التحقق من التكرار في قاعدة البيانات لنفس الجهة وسنة الإصدار
+                    if (!string.IsNullOrWhiteSpace(Sender))
+                    {
+                        IsBusy = true;
+                        StatusMessage = "جاري التحقق من أرقام العينات...";
+
+                        var sampleConflicts = new List<string>();
+                        foreach (var sample in Samples)
+                        {
+                            if (string.IsNullOrWhiteSpace(sample.SampleNumber)) continue;
+
+                            var check = await _certificateRepository.CheckSampleUniquenessAsync(
+                                sample.SampleNumber,
+                                Sender,
+                                IssueDate.Year,
+                                SelectedCertificate?.Id);
+
+                            if (check.Status == SampleCheckResult.DuplicateActive)
+                            {
+                                string normNum = SampleValidationHelper.NormalizeSampleNumber(sample.SampleNumber);
+                                sampleConflicts.Add($"• العينة ({normNum}) مسجلة في الشهادة ({check.CertificateNumber}) بتاريخ ({check.IssueDate:yyyy/MM/dd})");
+                            }
+                        }
+
+                        IsBusy = false;
+
+                        if (sampleConflicts.Count > 0)
+                        {
+                            SetNotification("تعارض في أرقام العينات",
+                                $"لا يمكن حفظ الشهادة. تم العثور على تعارض في أرقام العينات مع الجهة ({Sender}) لعام ({IssueDate.Year}):\n\n" +
+                                string.Join("\n", sampleConflicts) +
+                                "\n\nيرجى تصحيح أرقام العينات والمحاولة مرة أخرى.",
+                                NotificationType.Error, "AlertCircleOutline");
+                            StatusMessage = "⚠️ تعارض في أرقام العينات مع قاعدة البيانات";
+                            return false;
+                        }
                     }
                 }
 

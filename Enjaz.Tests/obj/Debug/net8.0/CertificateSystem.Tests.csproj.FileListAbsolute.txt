@@ -1,5 +1,0 @@
-D:\منظومة شهادات جديدة 2026 جديدة\CertificateSystem.Tests\obj\Debug\net8.0\CertificateSystem.Tests.csproj.AssemblyReference.cache
-D:\منظومة شهادات جديدة 2026 جديدة\CertificateSystem.Tests\obj\Debug\net8.0\CertificateSystem.Tests.GeneratedMSBuildEditorConfig.editorconfig
-D:\منظومة شهادات جديدة 2026 جديدة\CertificateSystem.Tests\obj\Debug\net8.0\CertificateSystem.Tests.AssemblyInfoInputs.cache
-D:\منظومة شهادات جديدة 2026 جديدة\CertificateSystem.Tests\obj\Debug\net8.0\CertificateSystem.Tests.AssemblyInfo.cs
-D:\منظومة شهادات جديدة 2026 جديدة\CertificateSystem.Tests\obj\Debug\net8.0\CertificateSystem.Tests.csproj.CoreCompileInputs.cache

@@ -425,5 +425,151 @@ namespace Enjaz.Services.Repositories
                 }
             }
         }
+
+        #region Sample Uniqueness Validation — فحص تفرد رقم العينة
+
+        /// <summary>
+        /// فحص تفرد رقم العينة في مرحلة الاستلام بالنسبة للجهة المرسلة وسنة الاستلام (Date.Year)
+        /// يفحص في كل من الشهادات المعتمدة والاستلامات السابقة
+        /// </summary>
+        public Task<SampleUniquenessResult> CheckSampleUniquenessAsync(
+            string sampleNumber,
+            string sender,
+            int year,
+            int? excludeReceptionId = null)
+        {
+            return _db.ExecuteWithRetryAsync(async () =>
+            {
+                string normSampleNumber = SampleValidationHelper.NormalizeSampleNumber(sampleNumber);
+                string normSender = SampleValidationHelper.NormalizeSender(sender);
+
+                if (string.IsNullOrEmpty(normSampleNumber) || string.IsNullOrEmpty(normSender))
+                {
+                    return new SampleUniquenessResult { Status = SampleCheckResult.Unique };
+                }
+
+                using var connection = new SqliteConnection(_db.ConnectionString);
+                await connection.OpenAsync();
+
+                // 1. فحص الشهادات النشطة لنفس السنة والجهة
+                var certQuery = @"SELECT c.Id, c.CertificateNumber, c.IssueDate, c.Sender, s.SampleNumber
+                                  FROM Samples s
+                                  INNER JOIN Certificates c ON s.CertificateId = c.Id
+                                  WHERE strftime('%Y', c.IssueDate) = @Year";
+
+                using (var certCommand = new SqliteCommand(certQuery, connection))
+                {
+                    certCommand.Parameters.AddWithValue("@Year", year.ToString());
+                    using var reader = await certCommand.ExecuteReaderAsync();
+                    while (await reader.ReadAsync())
+                    {
+                        int certId = reader.GetInt32(0);
+                        string certNumber = reader.IsDBNull(1) ? "" : reader.GetString(1);
+                        string issueDateStr = reader.GetString(2);
+                        string rowSender = reader.IsDBNull(3) ? "" : reader.GetString(3);
+                        string rowSampleNumber = reader.IsDBNull(4) ? "" : reader.GetString(4);
+
+                        if (SampleValidationHelper.NormalizeSender(rowSender) == normSender &&
+                            SampleValidationHelper.NormalizeSampleNumber(rowSampleNumber) == normSampleNumber)
+                        {
+                            DateTime issueDate = DateTime.TryParse(issueDateStr, out var parsedDate) ? parsedDate : DateTime.MinValue;
+                            return new SampleUniquenessResult
+                            {
+                                Status = SampleCheckResult.DuplicateActive,
+                                CertificateId = certId,
+                                CertificateNumber = $"شهادة رقم ({certNumber})",
+                                IssueDate = issueDate,
+                                Sender = rowSender,
+                                SampleNumber = rowSampleNumber
+                            };
+                        }
+                    }
+                }
+
+                // 2. فحص استلامات العينات السابقة لنفس السنة والجهة
+                var recQuery = @"SELECT r.Id, r.AnalysisRequestNumber, r.Date, r.Sender, rs.SampleNumber
+                                 FROM ReceptionSamples rs
+                                 INNER JOIN SampleReceptions r ON rs.ReceptionId = r.Id
+                                 WHERE strftime('%Y', r.Date) = @Year";
+
+                if (excludeReceptionId.HasValue)
+                {
+                    recQuery += " AND r.Id != @ExcludeId";
+                }
+
+                using (var recCommand = new SqliteCommand(recQuery, connection))
+                {
+                    recCommand.Parameters.AddWithValue("@Year", year.ToString());
+                    if (excludeReceptionId.HasValue)
+                    {
+                        recCommand.Parameters.AddWithValue("@ExcludeId", excludeReceptionId.Value);
+                    }
+
+                    using var reader = await recCommand.ExecuteReaderAsync();
+                    while (await reader.ReadAsync())
+                    {
+                        int recId = reader.GetInt32(0);
+                        string reqNumber = reader.IsDBNull(1) ? "" : reader.GetString(1);
+                        string recDateStr = reader.GetString(2);
+                        string rowSender = reader.IsDBNull(3) ? "" : reader.GetString(3);
+                        string rowSampleNumber = reader.IsDBNull(4) ? "" : reader.GetString(4);
+
+                        if (SampleValidationHelper.NormalizeSender(rowSender) == normSender &&
+                            SampleValidationHelper.NormalizeSampleNumber(rowSampleNumber) == normSampleNumber)
+                        {
+                            DateTime recDate = DateTime.TryParse(recDateStr, out var parsedDate) ? parsedDate : DateTime.MinValue;
+                            return new SampleUniquenessResult
+                            {
+                                Status = SampleCheckResult.DuplicateActive,
+                                CertificateId = recId,
+                                CertificateNumber = $"استلام طلب تحليل ({reqNumber})",
+                                IssueDate = recDate,
+                                Sender = rowSender,
+                                SampleNumber = rowSampleNumber
+                            };
+                        }
+                    }
+                }
+
+                // 3. فحص السجلات المحذوفة (AuditLogs)
+                try
+                {
+                    var auditQuery = @"SELECT Timestamp, Details FROM AuditLogs 
+                                       WHERE (Action = 'حذف' OR Action LIKE '%حذف%' OR Action = 'Delete')
+                                       AND strftime('%Y', Timestamp) = @Year";
+                    using var auditCmd = new SqliteCommand(auditQuery, connection);
+                    auditCmd.Parameters.AddWithValue("@Year", year.ToString());
+                    using var auditReader = await auditCmd.ExecuteReaderAsync();
+                    while (await auditReader.ReadAsync())
+                    {
+                        string timestampStr = auditReader.GetString(0);
+                        string details = auditReader.IsDBNull(1) ? "" : auditReader.GetString(1);
+
+                        if (!string.IsNullOrEmpty(details) &&
+                            details.Contains(sampleNumber) &&
+                            SampleValidationHelper.NormalizeSender(details).Contains(normSender))
+                        {
+                            DateTime delDate = DateTime.TryParse(timestampStr, out var pDate) ? pDate : DateTime.MinValue;
+                            return new SampleUniquenessResult
+                            {
+                                Status = SampleCheckResult.FoundInDeleted,
+                                CertificateNumber = "سجل محذوف",
+                                IssueDate = delDate,
+                                Sender = sender,
+                                SampleNumber = sampleNumber
+                            };
+                        }
+                    }
+                }
+                catch
+                {
+                    // Ignore audit log search error if non-critical
+                }
+
+                return new SampleUniquenessResult { Status = SampleCheckResult.Unique };
+            }, "CheckReceptionSampleUniquenessAsync");
+        }
+
+        #endregion
     }
 }

@@ -1,0 +1,30 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  build-and-test:
+    name: Build and Test
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore Dependencies
+        run: dotnet restore Enjaz.csproj
+
+      - name: Build Solution
+        run: dotnet build Enjaz.csproj --configuration Release
+
+      - name: Run Unit Tests
+        run: dotnet test Enjaz.Tests/Enjaz.Tests.csproj --configuration Release --logger "console;verbosity=detailed"

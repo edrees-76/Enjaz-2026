@@ -175,6 +175,16 @@ namespace Enjaz.ViewModels
                 }
             };
             
+            SampleReceptionsVM.PropertyChanged += (s, e) =>
+            {
+                if (e.PropertyName == nameof(StatusMessage)) StatusMessage = SampleReceptionsVM.StatusMessage;
+                if (e.PropertyName == nameof(IsNotificationDialogOpen) && SampleReceptionsVM.IsNotificationDialogOpen)
+                {
+                    ShowGlobalNotification(SampleReceptionsVM.NotificationTitle, SampleReceptionsVM.NotificationMessage, SampleReceptionsVM.NotificationIcon, null, SampleReceptionsVM.NotificationType);
+                    SampleReceptionsVM.IsNotificationDialogOpen = false; // Reset to allow repeated triggers
+                }
+            };
+            
             CertificatesVM.PropertyChanged += (s, e) =>
             {
                 if (e.PropertyName == nameof(IsNotificationDialogOpen) && CertificatesVM.IsNotificationDialogOpen)

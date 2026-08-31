@@ -29,7 +29,7 @@ namespace Enjaz.Tests
         public void CertificatesViewModel_Initialization_SetsDefaultValues()
         {
             // We use null! for concrete services here just to assert constructor logic without deep DB initialization
-            var viewModel = new CertificatesViewModel(null!, _mockPdfService.Object, _mockNotificationService.Object, null!, null!, null!, _mockReceptionSearchService.Object);
+            var viewModel = new CertificatesViewModel(null!, null!, _mockPdfService.Object, _mockNotificationService.Object, null!, null!, null!, _mockReceptionSearchService.Object);
 
             Assert.IsNotNull(viewModel.Certificates);
             Assert.IsFalse(viewModel.IsEditing);
@@ -43,7 +43,7 @@ namespace Enjaz.Tests
             // Setup the mock to return a reception so that the flow continues
             _mockReceptionSearchService.Setup(s => s.ShowSearchDialog()).Returns(new SampleReception { Id = 1, CertificateType = "اختبار" });
 
-            var viewModel = new CertificatesViewModel(null!, _mockPdfService.Object, _mockNotificationService.Object, null!, null!, null!, _mockReceptionSearchService.Object);
+            var viewModel = new CertificatesViewModel(null!, null!, _mockPdfService.Object, _mockNotificationService.Object, null!, null!, null!, _mockReceptionSearchService.Object);
 
             viewModel.AddCertificateCommand.Execute(null);
 
