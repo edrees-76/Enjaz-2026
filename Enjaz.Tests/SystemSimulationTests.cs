@@ -27,6 +27,11 @@ namespace Enjaz.Tests
         public void Setup()
         {
             string appData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Enjaz");
+            if (!Directory.Exists(appData))
+            {
+                Directory.CreateDirectory(appData);
+            }
+
             _originalDbPath = Path.Combine(appData, "certificates.db");
             _testDbPath = Path.Combine(appData, "advanced_simulation_test.db");
 
