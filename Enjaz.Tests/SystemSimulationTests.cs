@@ -44,6 +44,14 @@ namespace Enjaz.Tests
 
             // DatabaseService constructor handles initialization (Sync)
             _dbService = new DatabaseService($"Data Source={_testDbPath}");
+
+            // Ensure User with Id=1 exists for foreign key constraints
+            using (var connection = new SqliteConnection(_dbService.ConnectionString))
+            {
+                connection.Open();
+                using var cmd = new SqliteCommand("INSERT OR IGNORE INTO Users (Id, Username, PasswordHash, FullName, Role, IsActive) VALUES (1, 'admin_sim', 'hash', 'Simulation Admin', 2, 1)", connection);
+                cmd.ExecuteNonQuery();
+            }
             
             _userService = new UserService();
             _userService.Login(new User 
