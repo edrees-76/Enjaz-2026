@@ -5,7 +5,7 @@
 ; =========================================================================
 
 #define AppName "منظومة إنجاز"
-#define AppVersion "1.0.6"
+#define AppVersion "1.0.7"
 #define AppPublisher "م. ادريس فتح الله الهرى"
 #define AppURL "edreeselhery@gmail.com"
 #define AppExeName "Enjaz.exe"
