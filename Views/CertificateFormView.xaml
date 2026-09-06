@@ -226,7 +226,7 @@
                                     </DataGrid.RowStyle>
                                     <DataGrid.Columns>
                                         <DataGridTextColumn Header="م" Binding="{Binding Root}" Width="40" IsReadOnly="True" ElementStyle="{DynamicResource CenterAlignmentStyle}"/>
-                                        <DataGridTextColumn Header="رقم العينة" Binding="{Binding SampleNumber, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="100" ElementStyle="{DynamicResource CenterAlignmentStyle}"/>
+                                        <DataGridTextColumn Header="رقم العينة" Binding="{Binding SampleNumber, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" Width="100" ElementStyle="{DynamicResource CenterAlignmentStyle}"/>
                                         <DataGridTextColumn Header="نوع/وصف العينة" Binding="{Binding Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="*" ElementStyle="{DynamicResource CenterAlignmentStyle}"/>
                                         <DataGridTemplateColumn Header="تاريخ القياس" Width="120">
                                             <DataGridTemplateColumn.CellTemplate>
@@ -335,7 +335,7 @@
                                     </DataGrid.RowStyle>
                                     <DataGrid.Columns>
                                         <DataGridTextColumn Header="م" Binding="{Binding Root}" Width="40" IsReadOnly="True" ElementStyle="{DynamicResource CenterAlignmentStyle}"/>
-                                        <DataGridTextColumn Header="رقم العينة" Binding="{Binding SampleNumber, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="100" ElementStyle="{DynamicResource CenterAlignmentStyle}"/>
+                                        <DataGridTextColumn Header="رقم العينة" Binding="{Binding SampleNumber, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" Width="100" ElementStyle="{DynamicResource CenterAlignmentStyle}"/>
                                         <DataGridTextColumn Header="وصف العينة" Binding="{Binding Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="150" ElementStyle="{DynamicResource CenterAlignmentStyle}"/>
                                         <DataGridTemplateColumn Header="تاريخ القياس" Width="120">
                                             <DataGridTemplateColumn.CellTemplate>
